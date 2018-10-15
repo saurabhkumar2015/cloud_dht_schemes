@@ -1,5 +1,7 @@
 package models;
 
+import java.util.List;
+
 public class CephNode {
 
     public int weight;
@@ -7,6 +9,8 @@ public class CephNode {
     public int clusterId;
     public CephNode leftNode;
     public CephNode rightNode;
+    public List<CephLeafNode> nodes;
+
 
     @Override
     public String toString() {
@@ -16,6 +20,7 @@ public class CephNode {
                 ", clusterId=" + clusterId +
                 ", leftNode=" + leftNode +
                 ", rightNode=" + rightNode +
+                ", nodes=" + nodes +
                 '}';
     }
 }
