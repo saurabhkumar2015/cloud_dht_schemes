@@ -6,6 +6,4 @@ public class RegularClient {
 
     private IDHTScheme scheme;
 
-
-
 }
