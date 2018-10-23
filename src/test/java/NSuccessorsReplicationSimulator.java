@@ -11,7 +11,7 @@ public class NSuccessorsReplicationSimulator extends ReplicationSimulator{
 
         //Simulate Add Files
         Scanner sc = new Scanner(System.in);
-        List<DataNode> datanodes = getDataNodeList(15);
+        List<DataNode> datanodes = getDataNodeList(12);
 
         Map<Integer, List<Integer>> inputMap = new HashMap<Integer, List<Integer>>();
         inputMap.put(4, Arrays.asList(90,91,92,93));
@@ -66,9 +66,6 @@ public class NSuccessorsReplicationSimulator extends ReplicationSimulator{
         }
         DataNode predecessor = datanodes.get(pos-1);
         DataNode successor = datanodes.get(pos-1);
-
-
-
     }
 
     /**
