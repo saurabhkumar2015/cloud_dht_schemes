@@ -9,7 +9,7 @@ public class OsdMap {
 	
 	public OsdNode root;
 	
-	public int maxclusterInlevel = 5;   // This value will come from Configuration file
+	public int maxclusterInlevel = 2;   // This value will come from Configuration file
 	
 	public Queue<OsdNode> Parentqueue = new LinkedList<>();
 	
@@ -124,40 +124,7 @@ public class OsdMap {
    }
    
    // Private member function
-   private OsdNode findTheClusterNodetoAdd(OsdNode currentnode, Node parentnode, int level)
-   {
-	   if(level > 3)
-		   return null;
-	   
-	   if(currentnode == null)
-	   {
-		   if(parentnode.leftNode == null) {	
-			   OsdNode newlyAddedNode = new OsdNode();
-			   parentnode.leftNode = newlyAddedNode;
-			   
-			   // Add this head node to next level parent queue
-			   Parentqueue.add(newlyAddedNode);
-			   
-		   }
-		   return currentnode;
-		}
-	   
-	   if(currentnode.clusterCountInLevel < 5)
-		   return currentnode;
-	   
-	   // Push Parent list to queue to do bfs traversal
-	   OsdNode leftNode = null;
-	  //if(parentnode.nextNode == null)
-	   {
-		   
-  		   //parentnode = queue.remove().headNode;
-		   leftNode = findTheClusterNodetoAdd(parentnode.nextNode.leftNode,parentnode.nextNode, level);
-	   }
-	   return leftNode;
-	   
-   }
-   
-   private OsdNode findTheClusterNodetoAddIterative(OsdNode currentnode, Node parentnode, int level)
+  private OsdNode findTheClusterNodetoAddIterative(OsdNode currentnode, Node parentnode, int level)
    {
    
 	   if(currentnode == null)
@@ -205,6 +172,7 @@ public class OsdMap {
 	     {
 	    	   OsdNode newlyAddedNode = new OsdNode();
 	    	   nextlevelParent.headNode.leftNode = newlyAddedNode;
+	    	   Parentqueue.add(newlyAddedNode);
 	    	   return newlyAddedNode;
 	     }
 	     else if(nextlevelParent.headNode.leftNode.clusterCountInLevel < maxclusterInlevel)
@@ -219,6 +187,7 @@ public class OsdMap {
 	    	     {
 	    	    	   OsdNode newlyAddedNode = new OsdNode();
 	    	    	   nextNodeInLevel.leftNode = newlyAddedNode;
+	    	    	   Parentqueue.add(newlyAddedNode);
 	    	    	   return newlyAddedNode;
 	    	     }
 	    	     else if(nextNodeInLevel.leftNode.clusterCountInLevel < maxclusterInlevel)
