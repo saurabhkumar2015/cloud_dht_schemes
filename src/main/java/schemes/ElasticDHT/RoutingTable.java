@@ -4,11 +4,11 @@ import java.util.Random;
 
 public class RoutingTable {
 
-	private static   ElasticRoutingTableInstance[] elasticTable  = new ElasticRoutingTableInstance[100];
+	public static   ElasticRoutingTableInstance[] elasticTable  = new ElasticRoutingTableInstance[100];
 	
-	private static RoutingTable single_instance = null; 
+	public static RoutingTable single_instance = null; 
 	
-	private RoutingTable()
+	public RoutingTable()
 	{
 	
 		
@@ -26,7 +26,8 @@ public class RoutingTable {
 	public ElasticRoutingTableInstance[] getRoutingTable()
 	{
 		ElasticRoutingTable elasticTable1 = new ElasticRoutingTable();
-		return elasticTable = elasticTable1.populateRoutingTable();
+		 elasticTable = elasticTable1.populateRoutingTable();
+		 return elasticTable;
 	}
 	
 	public   ElasticRoutingTableInstance[] AddNode(int nodeId)
