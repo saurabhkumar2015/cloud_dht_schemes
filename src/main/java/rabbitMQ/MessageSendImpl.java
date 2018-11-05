@@ -63,8 +63,11 @@ public class MessageSendImpl implements IMessageSend {
 		        e.printStackTrace();
 		    }
 		    
+		    long start =  System.nanoTime();
 		    channel.basicPublish("", requestQueueName, props, stream);
-
+		    
+		    
+		    
 		    final BlockingQueue<String> response = new ArrayBlockingQueue<String>(1);
 
 		    String ctag = channel.basicConsume(replyQueueName, true, new DefaultConsumer(channel) {
@@ -72,10 +75,13 @@ public class MessageSendImpl implements IMessageSend {
 		      public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 		        if (properties.getCorrelationId().equals(corrId)) {
 		          response.offer(new String(body, "UTF-8"));
+		          
 		        }
 		      }
 		    });
 
+		    long end =  System.nanoTime();
+		    System.out.println("Time taken inside: " + (end-start));
 		    String result = response.take();
 		    channel.basicCancel(ctag);
 		    return result;
@@ -92,6 +98,7 @@ public class MessageSendImpl implements IMessageSend {
 		String response = null;
 		try {
 			response = call(request,NodeId);
+			System.out.println(" [.] Got '" + response + "' ");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -105,7 +112,7 @@ public class MessageSendImpl implements IMessageSend {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	     System.out.println(" [.] Got '" + response + "'");
+	     
 		
 	}
 
