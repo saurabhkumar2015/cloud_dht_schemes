@@ -7,7 +7,7 @@ public class OsdNode {
 	public int clusterCountInLevel = 0;
 	
 	// Add node to that level of OSD Map
-	public void AddNode(double weight, int clusterId, int nodeid)
+	public Node AddNode(double weight, int clusterId, int nodeid, int level)
 	{
 		// Increment the no of cluster after every addition
 		this.clusterCountInLevel++;
@@ -15,18 +15,22 @@ public class OsdNode {
 		// check if the node level have any node added or not
 		if(headNode == null)
 		{
-			Node node = new Node(weight,clusterId, nodeid);
+			Node node = new Node(weight,clusterId, nodeid, level);
 			
 			headNode = node;
+			return node;
 		}
 		else
 		{
 		 Node tempNode = headNode;
 		 while(tempNode.nextNode != null)
 			 tempNode = tempNode.nextNode;
-		 Node newNode = new Node(weight,clusterId, nodeid);
+		 Node newNode = new Node(weight,clusterId, nodeid, level);
 		 tempNode.nextNode = newNode;
+		 
+		 return newNode;
 		}
+		
 	}
 	
 	public void IterateToFindOsdLocation()
@@ -39,11 +43,12 @@ public class OsdNode {
 		return this.clusterCountInLevel;
 	}
 	
-	public void ShowCurrentNode(OsdNode currentNode, int level)
+	public void ShowCurrentNode(OsdNode currentNode)
 	{
 		if(currentNode == null || currentNode.headNode == null)
 			return;
-		currentNode.headNode.iterateNodeList(currentNode.headNode, level);
+		currentNode.headNode.iterateNodeList(currentNode.headNode);
 	}
 	
 }
+
