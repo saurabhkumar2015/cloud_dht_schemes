@@ -14,9 +14,11 @@ public class Node {
     
     public boolean isActive;
     
+    public int level;
+    
   //  public OsdNode rightNode;
     
-    public Node(double weight, int clusterId, int nodeid)
+    public Node(double weight, int clusterId, int nodeid, int level)
     {
     	this.weight = weight;
     	this.nodeId = nodeid;
@@ -24,9 +26,10 @@ public class Node {
     	this.nextNode = null;
     	this.leftNode = null;
         this.isActive = true;
+        this.level = level;
     }
     
-    public void iterateNodeList(Node headNode, int level)
+    public void iterateNodeList(Node headNode)
     {
     	if(headNode == null)
     	{
@@ -36,7 +39,7 @@ public class Node {
     	Node temp = headNode;
     	while(temp != null)
     	{
-    		System.out.println(String.format("weight= %f ClusterId= %d nodeId = %d IsActive = %s at level = %d", temp.weight,temp.clusterId, temp.nodeId,temp.isActive,level));
+    		System.out.println(String.format("weight= %f ClusterId= %d nodeId = %d IsActive = %s at level = %d", temp.weight,temp.clusterId, temp.nodeId,temp.isActive,temp.level));
     		temp = temp.nextNode;
     	}
     }
