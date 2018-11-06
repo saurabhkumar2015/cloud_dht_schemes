@@ -14,11 +14,20 @@ private static HashGenerator single_instance = null;
     } 
 	
 	
-	public double generateHashValue(String filename, int replicationId, int clusterId)
+	public double generateHashValue(int clusterId, int PlacementGroupId, int replicaId, double weight)
 	{
 		// logic to write hashing strategy using input parameters
-		return 0.4;
-		
-		//return 0;
+		// get the hash code using ClusterId, PGId, ReplicaId
+		StringBuilder sb = new StringBuilder();
+		sb.append(clusterId); sb.append(PlacementGroupId); sb.append(replicaId);
+		String str = sb.toString();
+		int hashval = str.hashCode();
+		double resultHash = (hashval % weight) / weight;
+		return resultHash;
+	}
+	
+	public int getPlacementGroupIdFromFileName(String fileName, int PlacementGroupLimit)
+	{
+		return fileName.hashCode() % PlacementGroupLimit;
 	}
 }
