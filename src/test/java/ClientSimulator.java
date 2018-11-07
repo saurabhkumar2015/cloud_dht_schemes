@@ -5,8 +5,8 @@ import org.json.simple.JSONObject;
 
 import clients.RegularClient;
 import models.RingRoutingTable;
-import rabbitMQ.IMessageSend;
-import rabbitMQ.MessageSendImpl;
+import socket.IMessageSend;
+import socket.MessageSendImpl;
 
 
 public class ClientSimulator {
@@ -20,9 +20,12 @@ public class ClientSimulator {
 		 obj.put("name", "tulika");
 		 
 		 IMessageSend msgSend = new MessageSendImpl();
-		 msgSend.sendMessage("localhost", "read", obj);
+		 msgSend.sendMessage("localhost:5000", "read", obj);
 		 
-		
+		 JSONObject obj1 =new JSONObject();
+		 obj1.put("name", "tulika2");
+		 
+		 msgSend.sendMessage("localhost:5000", "read", obj1);
     }
 	
 	
