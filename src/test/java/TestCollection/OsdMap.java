@@ -117,8 +117,9 @@ public class OsdMap {
     		{
     			for(DataObject obj : filesForNode)
     			{
-    				double hashvalue = HashGenerator.getInstance().generateHashValue(newlyAddedNode.clusterId, obj.placementGroup,obj.replicaId, weightofSubCluster);
-    				if(hashvalue < (newlyAddedNode.weight / weightofSubCluster))
+    				double hashvalue = hashGenerator.generateHashValue(newlyAddedNode.clusterId, obj.placementGroup,obj.replicaId);
+    				double weightFactor = hashGenerator.GetWeightFactor(tempNode.weight, weightofSubCluster);
+    				if(hashvalue < weightFactor)
     				{
     					// file will move from temp node to newly added node
     					System.out.println("file with fileName " + obj.fileName + " with replication " + obj.replicaId + " moves from node " + tempNode.nodeId + " to node " + newlyAddedNode.nodeId);
@@ -208,8 +209,9 @@ public class OsdMap {
 	   double subClusterSum = totalclusterSum;
 	   while(tempNode != null)
 	   {
-		   double hashval = hashGenerator.generateHashValue(tempNode.clusterId, placementGroupId, replicaId, subClusterSum);
-		   if(hashval < (tempNode.weight / subClusterSum))
+		   double hashval = hashGenerator.generateHashValue(tempNode.clusterId, placementGroupId, replicaId);
+		   double weightFactor = hashGenerator.GetWeightFactor(tempNode.weight, subClusterSum);
+		   if(hashval < weightFactor)
 			   break;
 		   subClusterSum = subClusterSum - tempNode.weight;
 		   tempNode = tempNode.nextNode;
