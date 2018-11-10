@@ -13,18 +13,21 @@ public class CephRoutingTable {
 	
 	private static CephRoutingTable single_instance = null;
 	
+	public int VersionNo;
+	
     private CephRoutingTable()
     {
     	this.config = new DHTConfig();
         this.depth = FindDepthOfOsdMap(config.nodeIdEnd - config.nodeIdStart, config.cephMaxClusterSize);
         this.mapInstance = OsdMap.getInstance(config.cephMaxClusterSize, depth);
+	this.VersionNo = 1
         // BootStrap the table here or not need to think
         
         
     }
     
     
-    public static CephRoutingTable getInstance(int maxclusterInaNode, int depth) 
+    public static CephRoutingTable getInstance() 
     { 
         if (single_instance == null) 
             single_instance = new CephRoutingTable(); 
@@ -41,6 +44,7 @@ public class CephRoutingTable {
 	{
 		int clusterId = randomClusterNoGenerator();
 		mapInstance.AddExtraNodeToOsdMap(clusterId, nodeId);
+		this.VersionNo++;
 	}
 	
 	public int getNodeId(String fileName, int replicaId)
