@@ -1,6 +1,7 @@
 package ceph;
 
 import config.DHTConfig;
+import java.util.Random;
 
 public class CephRoutingTable {
 	
@@ -36,8 +37,9 @@ public class CephRoutingTable {
 		return mapInstance;
 	}
 	
-	public void addNode(int clusterId, int nodeId)
+	public void addNode(int nodeId)
 	{
+		int clusterId = randomClusterNoGenerator();
 		mapInstance.AddExtraNodeToOsdMap(clusterId, nodeId);
 	}
 	
@@ -52,5 +54,14 @@ public class CephRoutingTable {
 	{
 		// depth should be log base nodeperCluster (countOfNodes) ceiling value
 		return (int) Math.ceil((Math.log(countOfNodes) / Math.log(nodePerCluster)));
+	}
+	
+	private int randomClusterNoGenerator()
+	{
+		Random r = new Random();
+		int low = 1;
+		int high = 21;
+		int result = r.nextInt(high-low) + low;
+		return result;
 	}
 }
