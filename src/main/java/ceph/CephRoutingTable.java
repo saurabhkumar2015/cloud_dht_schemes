@@ -1,4 +1,4 @@
-package TestCollection;
+package ceph;
 
 import config.DHTConfig;
 
@@ -15,7 +15,7 @@ public class CephRoutingTable {
     private CephRoutingTable()
     {
     	this.config = new DHTConfig();
-        this.depth = FindDepthOfOsdMap(config.numNodeIds, config.cephMaxClusterSize);
+        this.depth = FindDepthOfOsdMap(config.nodeIdEnd - config.nodeIdStart, config.cephMaxClusterSize);
         this.mapInstance = OsdMap.getInstance(config.cephMaxClusterSize, depth);
         // BootStrap the table here or not need to think
         

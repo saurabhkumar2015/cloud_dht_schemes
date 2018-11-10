@@ -1,4 +1,4 @@
-package TestCollection;
+package ceph;
 
 import java.util.Random;
 

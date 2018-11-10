@@ -1,4 +1,4 @@
-package TestCollection;
+package ceph;
 
 public class DataObject {
 

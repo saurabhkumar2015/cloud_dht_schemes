@@ -1,4 +1,4 @@
-package TestCollection;
+package ceph;
 
 public class Node {
   // each cell in the OsdNode is a node
