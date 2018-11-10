@@ -10,6 +10,8 @@ public class CephRoutingTable {
 	
 	private OsdMap mapInstance;
 	
+	private static CephRoutingTable single_instance = null;
+	
     private CephRoutingTable()
     {
     	this.config = new DHTConfig();
@@ -18,6 +20,15 @@ public class CephRoutingTable {
         // BootStrap the table here or not need to think
         
         
+    }
+    
+    
+    public static CephRoutingTable getInstance(int maxclusterInaNode, int depth) 
+    { 
+        if (single_instance == null) 
+            single_instance = new CephRoutingTable(); 
+  
+        return single_instance; 
     }
     
 	public OsdMap GetCephRoutingTable()
