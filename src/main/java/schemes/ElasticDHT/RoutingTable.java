@@ -1,5 +1,7 @@
 package schemes.ElasticDHT;
 
+import common.IRoutingTable;
+
 import java.util.BitSet;
 import java.util.Random;
 
@@ -33,7 +35,7 @@ public class RoutingTable {
 		 return elasticTable;
 	}
 	
-	public   ElasticRoutingTableInstance[] AddNode(int nodeId)
+	public IRoutingTable addNode(int clusterId, int nodeId)
 	{
 		Random rno =  new Random();
 		int noOfHashIndices = rno.nextInt(7)+0;
@@ -62,11 +64,11 @@ public class RoutingTable {
 		System.out.print( elasticTable[mainIndex].nodeId3);
 		
 		// Implement this
-		return elasticTable;
+		return null;
 }
 
 	
-	public boolean DeleteNode(int nodeId, int replaceNodeId)
+	public void deleteNode(int nodeId, int replaceNodeId)
 	{
 		for(int i = 0;i<100;i++) {
 			if(elasticTable[i].nodeId1==nodeId) {
@@ -80,7 +82,7 @@ public class RoutingTable {
 				elasticTable[i].nodeId3 = replaceNodeId;
 			}
 		}
-		return false;
+//		return false;
 	}
 	
 	public boolean Resize()
@@ -106,7 +108,7 @@ public class RoutingTable {
 		 }
 		 return nodeId;
 	}
-	public boolean LoadBalance(int nodeId, int factor, int replaceNodeId) {
+	public boolean loadBalance(int nodeId, int factor, int replaceNodeId) {
 		InvertedIndexTable i = InvertedIndexTable.GetInstance();
 		i.CreateInvertedIndexTable();
 		int currentStrength = 0;
@@ -152,7 +154,7 @@ public class RoutingTable {
 	public static void main(String arg[]) {
 		RoutingTable r =  new RoutingTable();
 		elasticTable = r.getRoutingTable();
-		elasticTable = r.AddNode(5);
+//		r.addNode(5);
 		
 		
 	}

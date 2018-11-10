@@ -36,12 +36,12 @@ public class CephRoutingTable {
 		return mapInstance;
 	}
 	
-	public void AddNode(int clusterId, int nodeId)
+	public void addNode(int clusterId, int nodeId)
 	{
 		mapInstance.AddExtraNodeToOsdMap(clusterId, nodeId);
 	}
 	
-	public int GetNodeId(String fileName,int replicaId)
+	public int getNodeId(String fileName, int replicaId)
 	{
 		return mapInstance.findNodeWithRequestedReplica(replicaId,
 				HashGenerator.getInstance().getPlacementGroupIdFromFileName(fileName, config.PlacementGroupMaxLimit));

@@ -1,7 +1,10 @@
 package clients;
 
+import common.IRoutingTable;
 import config.ConfigLoader;
 import config.DHTConfig;
+
+import java.io.BufferedReader;
 import java.io.FileReader;
 
 public class RegularClient {
@@ -9,6 +12,7 @@ public class RegularClient {
 
     private static String scheme;
     private static String dhtType;
+    private static IRoutingTable routingTable;
 
     public static void main(String[] args) throws Exception {
 
@@ -17,7 +21,18 @@ public class RegularClient {
         ConfigLoader.init(args[0]);
         DHTConfig config = ConfigLoader.config;
         initRegularClient(config);
-        FileReader fileList = new FileReader(args[1]);
+        FileReader f = new FileReader(args[1]);
+        BufferedReader bf = new BufferedReader(f);
+        String line = bf.readLine();
+
+        while(line != null && line.length() != 0) {
+            String [] splits = line.split("]");
+            if(splits.length > 1 && splits[1].trim().length() > 0) {
+                String fileName = splits[1].trim();
+
+            }
+            line = bf.readLine();
+        }
 
     }
 

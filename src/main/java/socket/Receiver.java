@@ -29,16 +29,12 @@ public class Receiver {
 		         // takes input from the client socket 
 		        in = socket.getInputStream(); 
 		        byte[] bytes = IOUtils.readFully(in, -1, true);
-		        
 		    	Request message = SerializationUtils.deserialize(bytes);
-		    	
 		    	System.out.println(message.getType()+" "+message.getPayload().getClass());
 	    	}
 		} catch (IOException e) { 
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
-
+		}
      }
-
 }

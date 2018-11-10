@@ -8,8 +8,6 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class MessageSendImpl implements IMessageSend {
-
-	
 	 
 	@Override
 	public void sendMessage(String NodeId, String type, Object payload) {
@@ -56,8 +54,6 @@ public class MessageSendImpl implements IMessageSend {
         catch(IOException i) 
         { 
             System.out.println(i); 
-        } 
-		
+        }
 	}
-
 }
