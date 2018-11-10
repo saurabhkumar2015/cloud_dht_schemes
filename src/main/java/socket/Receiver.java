@@ -1,7 +1,5 @@
 package socket;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
@@ -9,18 +7,15 @@ import java.net.Socket;
 
 import org.apache.commons.lang3.SerializationUtils;
 
-import socket.Request;
 import sun.misc.IOUtils;
 
 public class Receiver {
-	
 
 	public static void main(String[] argv) {
 		
 		 Socket socket = null; 
 	     ServerSocket server  = null; 
-	     InputStream in =  null; 
-	     
+	     InputStream in =  null;
 	     try {
 	    	 
 	    	while(true) {

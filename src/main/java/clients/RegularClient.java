@@ -1,5 +1,7 @@
 package clients;
 
+import ceph.CephRoutingTable;
+import ceph.EntryPoint;
 import common.IRoutingTable;
 import config.ConfigLoader;
 import config.DHTConfig;
@@ -29,16 +31,34 @@ public class RegularClient {
             String [] splits = line.split("]");
             if(splits.length > 1 && splits[1].trim().length() > 0) {
                 String fileName = splits[1].trim();
-
+                System.out.println(fileName);
             }
             line = bf.readLine();
         }
 
     }
 
-    private static void initRegularClient(DHTConfig config) {
+    private static void initRegularClient(DHTConfig config) throws Exception {
         scheme = config.scheme;
         dhtType = config.dhtType;
+
+        switch (scheme) {
+            case "RING":
+            case "ring":
+                break;
+            case "ELASTIC":
+            case "elastic":
+                break;
+            case "CEPH":
+            case "ceph":
+                EntryPoint entryPoint = new EntryPoint();
+                entryPoint.BootStrapCeph();
+                CephRoutingTable.getInstance(config.cephMaxClusterSize, -1);
+                break;
+            default:
+                throw new Exception("Incompatible DHT schema found!");
+
+        }
 
     }
 }
