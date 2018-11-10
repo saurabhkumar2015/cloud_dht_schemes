@@ -1,12 +1,15 @@
 package schemes.ElasticDHT;
 
+import java.util.BitSet;
 import java.util.Random;
 
 public class RoutingTable {
 
 	public static   ElasticRoutingTableInstance[] elasticTable  = new ElasticRoutingTableInstance[100];
 	
-	public static RoutingTable single_instance = null; 
+	public static RoutingTable single_instance = null;
+
+	private int changes[]; 
 	
 	public RoutingTable()
 	{
@@ -63,18 +66,18 @@ public class RoutingTable {
 }
 
 	
-	public boolean DeleteNode(int nodeId)
+	public boolean DeleteNode(int nodeId, int replaceNodeId)
 	{
 		for(int i = 0;i<100;i++) {
 			if(elasticTable[i].nodeId1==nodeId) {
-				elasticTable[i].nodeId1 = nodeId-1;
+				elasticTable[i].nodeId1 = replaceNodeId;
 				
 			}
 			if(elasticTable[i].nodeId2==nodeId) {
-				elasticTable[i].nodeId2 = nodeId-1;
+				elasticTable[i].nodeId2 = replaceNodeId;
 			}
 			if(elasticTable[i].nodeId3==nodeId) {
-				elasticTable[i].nodeId3 = nodeId-1;
+				elasticTable[i].nodeId3 = replaceNodeId;
 			}
 		}
 		return false;
@@ -85,7 +88,45 @@ public class RoutingTable {
 		// Implement this
 		return false;
 	}
-	public boolean LoadBalance(int nodeId) {
+	public boolean LoadBalance(int nodeId, int factor, int replaceNodeId) {
+		InvertedIndexTable i = InvertedIndexTable.GetInstance();
+		i.CreateInvertedIndexTable();
+		int currentStrength = 0;
+		BitSet b = null;
+		// Get nodeId and the bitset value.
+		for(int k = 0; k<7;k++) {
+			if(i.indexInstance.get(k).nodeId==nodeId) {
+				b = i.indexInstance.get(k).usedHashedIndex;
+				break;
+			}
+		}
+		changes = null;
+		int count = 0;
+		// find strength
+		for(int j = 0;j <b.length();j++) {
+			if(b.get(j)) {
+				changes[count] = j;
+				currentStrength++;
+			}
+			count++;
+		}
+		int newStrength = currentStrength*factor;
+		for(int k = 0;k<currentStrength-newStrength;k++) {
+			if(elasticTable[changes[k]].nodeId1==nodeId) {
+				elasticTable[changes[k]].nodeId1 = replaceNodeId;
+				
+			}
+			if(elasticTable[changes[k]].nodeId2==nodeId) {
+				elasticTable[changes[k]].nodeId2 = replaceNodeId;
+			}
+			if(elasticTable[changes[k]].nodeId3==nodeId) {
+				elasticTable[changes[k]].nodeId3 = replaceNodeId;
+			}
+			
+		}
+		// Call the new Delete to change value;
+		
+		
 		// Change routing table appropriately across all primary and replicas 
 		return false;
 		

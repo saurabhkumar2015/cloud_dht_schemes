@@ -2,8 +2,8 @@ package schemes.ElasticDHT;
 import java.util.*;
 
 public class InvertedIndexTableInstance {
-	int nodeId;
-	BitSet usedHashedIndex = new BitSet(7);
+	public int nodeId;
+	public BitSet usedHashedIndex = new BitSet(7);
 	
 	
 	// Constructor which could be parameterized later
