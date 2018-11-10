@@ -41,6 +41,12 @@ public class CephRoutingTable {
 		mapInstance.AddExtraNodeToOsdMap(clusterId, nodeId);
 	}
 	
+	public int GetNodeId(String fileName,int replicaId)
+	{
+		return mapInstance.findNodeWithRequestedReplica(replicaId,
+				HashGenerator.getInstance().getPlacementGroupIdFromFileName(fileName, config.PlacementGroupMaxLimit));
+	}
+	
 	
 	private int FindDepthOfOsdMap(int countOfNodes, int nodePerCluster)
 	{
