@@ -88,6 +88,24 @@ public class RoutingTable {
 		// Implement this
 		return false;
 	}
+	public int getNodeId(String filename, int replicaId) {
+		 int code = filename.hashCode(); // May not be the temporary hash code I have
+		 int nodeId = 0;
+		 for(int k = 0;k<elasticTable.length;k++) {
+			 if(elasticTable[k].hashIndex==code) {
+				 if(replicaId==1) {
+					nodeId = elasticTable[k].nodeId1; 
+				 }
+				 else if(replicaId==2) {
+					 nodeId = elasticTable[k].nodeId2;
+				 }
+				 else {
+					 nodeId = elasticTable[k].nodeId3;
+				 }
+			 }
+		 }
+		 return nodeId;
+	}
 	public boolean LoadBalance(int nodeId, int factor, int replaceNodeId) {
 		InvertedIndexTable i = InvertedIndexTable.GetInstance();
 		i.CreateInvertedIndexTable();
