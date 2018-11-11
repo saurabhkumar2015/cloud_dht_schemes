@@ -49,8 +49,8 @@ public class Commons {
         // Message Sender
     public static IMessageSend messageSender;
     
-    public static Payload GeneratePayload(String fileName, int pgGroup, int replica)
+    public static Payload GeneratePayload(String fileName, int replica)
     {
-    	return new Payload(fileName, pgGroup, replica);
+    	return new Payload(fileName, replica);
     }
 }
