@@ -35,7 +35,7 @@ public class RingRoutingTable implements IRoutingTable {
     	System.out.print("This is the initial NodeId-Physical Machine mapping table\n");
     	this.printPhysicalTable();
     }
-    
+
     @Override
     public String toString() {
         return "RingRoutingTable{" +
@@ -60,43 +60,29 @@ public class RingRoutingTable implements IRoutingTable {
     		this.routingMap.put(hashVal, s);
     		totalNodesInRT++;
     	}
-    	/*
-        try {
-        	
-            for ( Map.Entry<Integer, String> e : this.conf.nodesMap.entrySet())
-            {
-                //this.physicalTable.put(e.getKey(), e.getValue());
-                //Generate random hash for every IP:Port
-                int hashVal = this.getHasValueFromIpPort(e.getValue());
-                this.routingMap.put(hashVal, e.getKey());
-            }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        //this.numNodeIds = nodeId;
-        //System.out.println(this.getNodeId("asddfr3rgerg",3));
-         * 
-         */
     }
-    
+
+    /*Find nodeId corresponding to given hashval
+    Binary search done on routing table (Tree map)
+    */
     public void printRoutingTable() {
-    	System.out.println("HashVal\tNodeId");
-    	for (Map.Entry<Integer, Integer> e : this.routingMap.entrySet()) {
-    		System.out.print(e.getKey());
-    		System.out.print("\t");
-    		System.out.println(e.getValue());
-    	}
+        System.out.println("HashVal\tNodeId");
+        for (Map.Entry<Integer, Integer> e : this.routingMap.entrySet()) {
+            System.out.print(e.getKey());
+            System.out.print("\t");
+            System.out.println(e.getValue());
+        }
     }
-    
+
     public void printPhysicalTable() {
-    	System.out.println("NodeId\tNodeIp_Port");
-    	for (Map.Entry<Integer, String> e : this.physicalTable.entrySet()) {
-    		System.out.print(e.getKey());
-    		System.out.print("\t");
-    		System.out.println(e.getValue());
-    	}
-    }    
+        System.out.println("NodeId\tNodeIp_Port");
+        for (Map.Entry<Integer, String> e : this.physicalTable.entrySet()) {
+            System.out.print(e.getKey());
+            System.out.print("\t");
+            System.out.println(e.getValue());
+        }
+    }
+
 
     /*Find nodeId corresponding to given hashval
     Binary search done on routing table (Tree map)
@@ -170,13 +156,15 @@ public class RingRoutingTable implements IRoutingTable {
     	
     	//return listOfNodesForGivenHash;
     	return listOfHashesForGivenHash;
+
     }
 
     //Find Node corresponding to given filename
-    public int getNodeId(String fileName, int replicaId) {
-    	int hashVal = this.getHasValueFromIpPort(fileName);
-    	LinkedList<Integer> listOfNodesForGivenHash = modifiedBinarySearch(hashVal);
-    	return listOfNodesForGivenHash.get(replicaId-1);
+    public int getNodeId(String fileName, int replicationId) {
+        int hashVal = this.getHasValueFromIpPort(fileName);
+        LinkedList<Integer> listOfNodesForGivenHash = modifiedBinarySearch(hashVal);
+        return listOfNodesForGivenHash.get(replicationId-1);
+
     }
     
     //nodeId = ip:port
@@ -242,5 +230,4 @@ public class RingRoutingTable implements IRoutingTable {
 			System.out.println("No change in the load");
 		}
 	}
-
 }

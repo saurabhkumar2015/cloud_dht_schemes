@@ -1,6 +1,7 @@
 package ring;
 
 import schemes.IDHTScheme;
+
 import java.util.Map;
 import java.io.IOException;
 import java.util.*;
@@ -18,8 +19,9 @@ public class RingDHTScheme implements IDHTScheme {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
     }
-     
+
     //Bootstrap
     public static void main(String[] args) {
     	Scanner scan = new Scanner(System.in);
@@ -70,4 +72,3 @@ public class RingDHTScheme implements IDHTScheme {
     	scan.close();
     }
 }
-
