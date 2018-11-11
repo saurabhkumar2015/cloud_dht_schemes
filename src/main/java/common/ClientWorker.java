@@ -45,7 +45,7 @@ public class ClientWorker extends Thread {
                 Request request = mapper.readValue(line, Request.class);
                 switch(request.getType()) {
                     case WRITE_FILE:
-
+                        dataNode.writeFile();
 
                     default:
                         throw new Exception("Unsupported message type");
