@@ -41,10 +41,11 @@ public class CephRoutingTable implements IRoutingTable {
         return mapInstance;
     }
 
-    public void addNode(int nodeId)  {
+    public IRoutingTable addNode(int nodeId) {
         int clusterId = randomClusterNoGenerator();
         mapInstance.AddExtraNodeToOsdMap(clusterId, nodeId);
         this.VersionNo++;
+        return CephRoutingTable.getInstance();
     }
 
 
@@ -67,12 +68,14 @@ public class CephRoutingTable implements IRoutingTable {
     }
 
 
-	public void deleteNode(int nodeId) {
+	public IRoutingTable deleteNode(int nodeId) {
 		// TODO Auto-generated method stub
+		return null;
 	}
 
 
-	public void loadBalance(int nodeId, double loadFactor) {
-        // TODO Auto-generated method stub
-    }
+	public IRoutingTable loadBalance(int nodeId, double loadFactor) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
