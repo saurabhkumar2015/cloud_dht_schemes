@@ -136,7 +136,7 @@ public class OsdMap {
     			for(DataObject obj : filesForNode)
     			{
     				double hashvalue = HashGenerator.getInstance().generateHashValue(newlyAddedNode.clusterId, obj.placementGroup,obj.replicaId);
-    				double weightFactor = HashGenerator.getInstance().GetWeightFactor(tempNode.weight, weightofSubCluster);
+    				double weightFactor = HashGenerator.getInstance().GetWeightFactor(newlyAddedNode.weight, weightofSubCluster);
     				if(hashvalue < weightFactor)
     				{
     					// file will move from temp node to newly added node
