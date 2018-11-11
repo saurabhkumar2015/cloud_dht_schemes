@@ -70,17 +70,10 @@ public class RoutingTable implements IRoutingTable{
 	public IRoutingTable deleteNode(int nodeId)
 	{
 		int replaceNodeId = 0;
-<<<<<<< HEAD
 		Random rn = new Random(config.seed);
 		replaceNodeId = rn.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
 		while(replaceNodeId==nodeId) {
 			replaceNodeId = rn.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
-=======
-		Random rn = new Random();
-		replaceNodeId = rn.nextInt(7)+0;
-		while(replaceNodeId==nodeId) {
-			replaceNodeId = rn.nextInt(7)+0;
->>>>>>> 9ea91f7b4664a91606a9ccc25089430887a940d1
 		}
 		for(int i = 0;i<size;i++) {
 			int  k  = check(i,nodeId);
@@ -120,13 +113,10 @@ public class RoutingTable implements IRoutingTable{
 	@SuppressWarnings("unchecked")
 	public IRoutingTable loadBalance(int nodeId, int factor) {
 		int replaceNodeId = 0;
-<<<<<<< HEAD
 		Random rn = new Random(config.seed);
 		replaceNodeId = rn.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
-=======
 		Random rn = new Random();
 		replaceNodeId = rn.nextInt(7)+0;
->>>>>>> 9ea91f7b4664a91606a9ccc25089430887a940d1
 		while(replaceNodeId==nodeId) {
 			replaceNodeId = rn.nextInt(7)+0;
 		}
