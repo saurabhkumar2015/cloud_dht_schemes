@@ -30,14 +30,27 @@ public class DataNode implements IDataNode {
     	System.out.println("\n");
     	System.out.println("New NodeId - PhysicalNode mapping after new node added");
     	routingTableObj.printPhysicalTable();
-}
+    }
 	
 	public void deleteNode(String nodeId) {
-		
+		int deleteHash = routingTableObj.getHasValueFromIpPort(nodeId);
+    	LinkedList<Integer> listOfAssociatedHashes = routingTableObj.modifiedBinarySearch(deleteHash);
+    	LinkedList<Integer> predecessors = routingTableObj.modifiedBinarySearch(deleteHash-1);
+    	System.out.println("\n");
+    	System.out.println("Deleting node: "+nodeId);
+    	System.out.println("Hash range "+ predecessors.get(0)+" - "+ (deleteHash-1) +"added to "+routingTableObj.routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
 	}
 	
 	public void loadBalance(String nodeId, float loadFraction) {
-		
+		if(loadFraction>1.0) {
+			System.out.println("Move node's start hash range to left side - increase the load");
+		}
+		else if(loadFraction<1.0) {
+			System.out.println("Move node's start hash range to right side - decrease the load");
+		}
+		else {
+			System.out.println("No change in the load");
+		}
 	}
 	
 }
