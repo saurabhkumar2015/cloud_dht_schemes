@@ -144,7 +144,7 @@ public class OsdMap {
     					// Add the file to local system of datanode and remove from source node
     					Commons.messageSender.sendMessage(newlyAddedNode.nodeId, Constants.ADD_FILE,Commons.GeneratePayload(obj.fileName,obj.placementGroup, obj.replicaId));
     					// Now delete from Source Data Node					
-    					Commons.messageSender.sendMessage(newlyAddedNode.nodeId, Constants.DELETE_FILE,Commons.GeneratePayload(obj.fileName,obj.placementGroup, obj.replicaId));
+    					Commons.messageSender.sendMessage(tempNode.nodeId, Constants.DELETE_FILE,Commons.GeneratePayload(obj.fileName,obj.placementGroup, obj.replicaId));
     				}
     			}
     			
