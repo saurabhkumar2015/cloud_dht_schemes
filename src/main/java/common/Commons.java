@@ -21,7 +21,7 @@ public class Commons {
                 return new RoutingTable();
             case "CEPH":
             case "ceph":
-                CephRoutingTable cephRoutingTable = new CephRoutingTable();
+                return new CephRoutingTable();
             default:
                 throw new Exception("Unsupported DHT scheme found " + config.scheme);
         }

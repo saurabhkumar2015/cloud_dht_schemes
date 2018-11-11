@@ -36,6 +36,7 @@ public class MessageSendImpl implements IMessageSend {
         try {
             socket = new Socket(address, port);
             out = new DataOutputStream(socket.getOutputStream());
+            input = new DataInputStream(socket.getInputStream());
 
             byte[] stream = null;
             // ObjectOutputStream is used to convert a Java object into OutputStream
@@ -44,6 +45,8 @@ public class MessageSendImpl implements IMessageSend {
             oos.writeObject(request);
             stream = baos.toByteArray();
             out.write(stream);
+            byte[] ack = new byte[32];
+            input.readFully(ack);
             oos.close();
         } catch (IOException e) {
             e.printStackTrace();

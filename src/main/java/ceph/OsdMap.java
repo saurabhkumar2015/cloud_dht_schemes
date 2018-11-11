@@ -1,6 +1,5 @@
 package ceph;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
@@ -127,27 +126,7 @@ public class OsdMap {
     	while(tempNode != null)
     	{
     		// Get all files of this node 
-    		ArrayList<DataObject> filesForNode = CephDataNode.getInstance().map.get(tempNode.nodeId);
-    		
     		// Iterate over files to check wheather to move or not
-    		if(filesForNode != null)
-    		{
-    			for(DataObject obj : filesForNode)
-    			{
-    				double hashvalue = HashGenerator.getInstance().generateHashValue(newlyAddedNode.clusterId, obj.placementGroup,obj.replicaId);
-    				double weightFactor = HashGenerator.getInstance().GetWeightFactor(newlyAddedNode.weight, weightofSubCluster);
-    				if(hashvalue < weightFactor)
-    				{
-    					// file will move from temp node to newly added node
-    					System.out.println("fileName " + obj.fileName + " pGroup " + obj.placementGroup + " replication " + obj.replicaId + " moves from node " + tempNode.nodeId + " to node " + newlyAddedNode.nodeId);
-                        // TODO : Add the file to local system of datanode and remove from source node
-    					CephDataNode.getInstance().addDataToNode(newlyAddedNode.nodeId, obj.fileName, obj.placementGroup, obj.replicaId);
-    					// remove the file from the source 
-    					// TODO: Not required to write code here.
-    				}
-    			}
-    			
-    		}
     		tempNode = tempNode.nextNode;
     		if(tempNode != null)
     		weightofSubCluster = weightofSubCluster - tempNode.weight;

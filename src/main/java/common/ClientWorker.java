@@ -39,10 +39,11 @@ public class ClientWorker extends Thread {
                 System.out.println("Thread running with name:"+Thread.currentThread().getName());
                 //Send data back to client
                 out.println("OK");
-                InputStream in = client.getInputStream();
+                DataInputStream in = new DataInputStream(client.getInputStream());
                 System.out.println("File Write Step1 ");
-                byte[] bytes = IOUtils.readFully(in, -1, true);
-                Request request = SerializationUtils.deserialize(bytes);
+                byte[] read = new byte[512];
+                in.readFully(read);
+                Request request = SerializationUtils.deserialize(read);
                 System.out.println("File Write Step2 "+ request.getType());
                 switch(request.getType()) {
                     case WRITE_FILE:
