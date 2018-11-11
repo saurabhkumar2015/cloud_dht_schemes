@@ -66,11 +66,11 @@ public class RingDHTScheme implements IDHTScheme {
         
         RingDHTScheme ring = new RingDHTScheme();
     	DataNode dNode = new DataNode(ring);
-    	//dNode.writeFile("sampleTextFile.txt", config.replicationFactor);
-    	//dNode.deleteFile("sampleTextFile.txt");
-    	//dNode.addNode(21);
-    	//dNode.deleteNode(5);
-    	//dNode.loadBalance(5,1.2);
+    	dNode.writeFile("sampleTextFile.txt", config.replicationFactor);
+    	dNode.deleteFile("sampleTextFile.txt");
+    	dNode.addNode(21);
+    	dNode.deleteNode(21);
+    	dNode.loadBalance(5,1.2);
     	dNode.loadBalance(5,0.8);
     	scan.close();
     }
