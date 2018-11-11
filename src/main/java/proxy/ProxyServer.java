@@ -29,6 +29,9 @@ public class ProxyServer {
 	private static RingRoutingTable ring_routing_table;
 	private static ElasticRoutingTable elastic_routing_table;
     
+	
+	/* Bootstrapping the DHT table according to scheme */
+	
     public static void initProxy(DHTConfig config) {
     	
     	//get initial Instances of routing tables or osdMap 
@@ -54,6 +57,9 @@ public class ProxyServer {
 
     
     }
+    
+    
+    /* Sending updated DHT to datanodes */
     
     public static void sendUpdatedDhtToDatanodes(DHTConfig config) {
     	
@@ -88,7 +94,8 @@ public class ProxyServer {
 		
     	
     	if(argv.length != 1) throw new Exception("Please specify Two arguments. \n 1) Config file absolute path \n");
-
+    	
+    	/*loading config file*/
         ConfigLoader.init(argv[0]);
         DHTConfig config = ConfigLoader.config;
         initProxy(config);
@@ -102,6 +109,7 @@ public class ProxyServer {
 	    	 
 	    	while(true) {
 	    		
+	    		// listening on port 5000
 				server = new ServerSocket(5000);
 				socket = server.accept(); 
 		         // takes input from the client socket 
@@ -109,8 +117,6 @@ public class ProxyServer {
 		        byte[] bytes = IOUtils.readFully(in, -1, true);
 		        
 		    	Request message = SerializationUtils.deserialize(bytes);
-		    	
-		    	System.out.println(message.getType()+" "+message.getPayload());
 		    	
 		    	if(message.getType() == "DHT_Update") {
 		    		
@@ -120,7 +126,6 @@ public class ProxyServer {
 		    			
 		    			if(ceph_routing_table.VersionNo < updated_ceph_routing_table.VersionNo) {
 		    				ceph_routing_table = updated_ceph_routing_table;
-		    				
 		    				sendUpdatedDhtToDatanodes(config);
 		    			}
 		    			
