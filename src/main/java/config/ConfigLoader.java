@@ -61,4 +61,10 @@ public class ConfigLoader {
         }
         return  map;
     }
+    
+    public static String GetNodeAddressFromNodeId(int nodeId)
+    {
+    	Map<Integer,String> nodeIdToAddress = config.nodesMap;
+    	return nodeIdToAddress.get(nodeId);
+    }
 }
