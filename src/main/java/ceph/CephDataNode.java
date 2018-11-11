@@ -68,12 +68,12 @@ public class CephDataNode  implements IDataNode{
 		}
 	}
 
-	public void deleteNode(String nodeId) {
+	public void deleteNode(int nodeId) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void loadBalance(String nodeId, float loadFraction) {
+	public void loadBalance(int nodeId, double loadFraction) {
 		// TODO Auto-generated method stub
 		
 	}
