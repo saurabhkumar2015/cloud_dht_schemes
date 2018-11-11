@@ -18,18 +18,22 @@ public class DataNode implements IDataNode {
     	System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " removed from Node :"+ routingTableObj.routingMap.get(listOfHashesForNewHash.get(0)));
     	System.out.println("Hash range "+ listOfHashesForNewHash.get(0)+" - "+(newHash-1)+ " removed from Node :"+ routingTableObj.routingMap.get(listOfHashesForNewHash.get(listOfHashesForNewHash.size()-1)));
     	int newNodeId = ++this.routingTableObj.numNodeIds;
+    	System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " added to Node :"+ newNodeId);
+    	
+    	//update physical table
+    	//this.routingTableObj.physicalTable.put(newNodeId, nodeId);
+    	
     	//update routing map
     	this.routingTableObj.routingMap.put(newHash, newNodeId);
-    	System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " added to Node :"+ newNodeId);
-    	//update physical table
-    	this.routingTableObj.physicalTable.put(newNodeId, nodeId);
-    	System.out.println("\n");
+    	
     	//Print updated Routing Table
+    	System.out.println("\n");
     	System.out.println("New Routing Map after new node added");
     	routingTableObj.printRoutingTable();
-    	System.out.println("\n");
-    	System.out.println("New NodeId - PhysicalNode mapping after new node added");
-    	routingTableObj.printPhysicalTable();
+    	
+    	//System.out.println("\n");
+    	//System.out.println("New NodeId - PhysicalNode mapping after new node added");
+    	//routingTableObj.printPhysicalTable();
     }
 	
 	public void deleteNode(String nodeId) {
@@ -39,6 +43,18 @@ public class DataNode implements IDataNode {
     	System.out.println("\n");
     	System.out.println("Deleting node: "+nodeId);
     	System.out.println("Hash range "+ predecessors.get(0)+" - "+ (deleteHash-1) +"added to "+routingTableObj.routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
+    	
+    	//update routing map
+    	this.routingTableObj.routingMap.remove(deleteHash);
+    	
+    	System.out.println("\n");
+    	//Print updated Routing Table
+    	System.out.println("New Routing Map after new node added");
+    	routingTableObj.printRoutingTable();
+    	
+    	//System.out.println("\n");
+    	//System.out.println("New NodeId - PhysicalNode mapping after new node added");
+    	//routingTableObj.printPhysicalTable();
 	}
 	
 	public void loadBalance(String nodeId, float loadFraction) {
