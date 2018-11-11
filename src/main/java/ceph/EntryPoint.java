@@ -55,7 +55,7 @@ public class EntryPoint {
 			}
 		}
 		// Insert regular data node
-		for(int k = 2; k<= nodeIds; k++)
+		for(int k = 1; k<= nodeIds; k++)
 		{
 			mapInstance.AddNodeToOsdMap(randomClusterNoGenerator(), k);
 		}
