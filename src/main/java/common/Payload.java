@@ -4,14 +4,19 @@ public class Payload {
 
 	public String fileName;
 	
-	public int placementGroup;
-	
 	public int replicaId;
 	
-	public Payload(String fileName, int pgGroup, int replicaId)
+	public Payload(String fileName, int replicaId)
 	{
 		this.fileName = fileName;
-		this.placementGroup = pgGroup;
 		this.replicaId = replicaId;
+	}
+
+	@Override
+	public String toString() {
+		return "Payload{" +
+				"fileName='" + fileName + '\'' +
+				", replicaId=" + replicaId +
+				'}';
 	}
 }

@@ -2,6 +2,7 @@ package ceph;
 
 import java.util.Random;
 
+import config.ConfigLoader;
 import config.DHTConfig;
 
 public class HashGenerator {
@@ -15,7 +16,7 @@ public class HashGenerator {
     
     private HashGenerator()
     {
-    	this.config = new DHTConfig();
+    	this.config = ConfigLoader.config;
     }
     
 	// we can pass the configuration here

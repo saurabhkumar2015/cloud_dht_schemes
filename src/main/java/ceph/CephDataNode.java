@@ -7,6 +7,7 @@ import java.util.Map;
 
 import common.IDataNode;
 import common.IRoutingTable;
+import config.ConfigLoader;
 import config.DHTConfig;
 import socket.IMessageSend;
 
@@ -26,7 +27,7 @@ public class CephDataNode  implements IDataNode{
     public CephDataNode(int nodeId)
     {
     	this.hashGenerator = HashGenerator.getInstance();
-    	this.config = new DHTConfig();
+    	this.config = ConfigLoader.config;
     	this.NodeId = nodeId;
     	cephRtTable = CephRoutingTable.getInstance();
     }

@@ -6,13 +6,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
 import java.util.Map.Entry;
+import common.Constants;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.json.simple.JSONObject;
 
 import ceph.CephRoutingTable;
 import ceph.EntryPoint;
-import common.IStrategy;
 import config.ConfigLoader;
 import config.DHTConfig;
 import socket.MessageSendImpl;
@@ -28,6 +27,9 @@ public class ProxyServer {
 	private static CephRoutingTable ceph_routing_table;
 	private static RingRoutingTable ring_routing_table;
 	private static ElasticRoutingTable elastic_routing_table;
+	private static IMessageSend sendMsg = new MessageSendImpl();
+	
+	
     
 	
 	/* Bootstrapping the DHT table according to scheme */
@@ -63,27 +65,25 @@ public class ProxyServer {
     
     public static void sendUpdatedDhtToDatanodes(DHTConfig config) {
     	
-    	IMessageSend sendMsg = new MessageSendImpl();
-    	
     	Map<Integer,String> dataNodes = config.nodesMap;
     	
     	if(scheme.equals("CEPH") || scheme.equals("ceph")) {
     		
     		 for (Entry<Integer, String> entry : dataNodes.entrySet())  {
-    			 sendMsg.sendMessage(entry.getValue(), "DHT_Update", ceph_routing_table);
+    			 sendMsg.sendMessage(entry.getValue(), Constants.NEW_VERSION, ceph_routing_table);
     		 }
     	          
     	}
     	
     	else if(scheme.equals("RING") || scheme.equals("ring")) {
     		for (Entry<Integer, String> entry : dataNodes.entrySet())  {
-   			 sendMsg.sendMessage(entry.getValue(), "DHT_Update", ring_routing_table);
+   			 sendMsg.sendMessage(entry.getValue(),Constants.NEW_VERSION, ring_routing_table);
    		 	}
     	}
     	
     	else{
     		for (Entry<Integer, String> entry : dataNodes.entrySet())  {
-   			 sendMsg.sendMessage(entry.getValue(), "DHT_Update", elastic_routing_table);
+   			 sendMsg.sendMessage(entry.getValue(), Constants.NEW_VERSION, elastic_routing_table);
    		 	}
     	}
     	
@@ -118,7 +118,7 @@ public class ProxyServer {
 		        
 		    	Request message = SerializationUtils.deserialize(bytes);
 		    	
-		    	if(message.getType() == "DHT_Update") {
+		    	if(message.getType() == Constants.NEW_VERSION) {
 		    		
 		    		if(scheme.equals("CEPH") || scheme.equals("ceph")) {
 		    			
