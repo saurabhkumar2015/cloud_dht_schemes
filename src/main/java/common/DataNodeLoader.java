@@ -1,13 +1,14 @@
 package common;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import config.ConfigLoader;
+
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class DataNodeLoader {
 
     private static IRoutingTable routingTable;
+    private static IDataNode dataNode;
 
     public static void main(String[] args) throws Exception {
 
@@ -21,7 +22,7 @@ public class DataNodeLoader {
         ServerSocket server = new ServerSocket(port);
         while(true) {
             Socket clientSocket = server.accept();
-            Thread th = new ClientWorker(clientSocket);
+            Thread th = new ClientWorker(clientSocket, dataNode);
             th.start();
         }
     }

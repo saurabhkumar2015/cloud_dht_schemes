@@ -1,4 +1,4 @@
-package ring;
+package common;
 
 public interface IDataNode {
 

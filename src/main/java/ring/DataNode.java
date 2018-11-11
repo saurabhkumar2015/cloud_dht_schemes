@@ -1,5 +1,7 @@
 package ring;
 
+import common.IDataNode;
+
 import java.util.*;
 
 public class DataNode implements IDataNode {

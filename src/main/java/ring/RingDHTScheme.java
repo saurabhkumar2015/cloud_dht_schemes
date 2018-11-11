@@ -21,8 +21,8 @@ public class RingDHTScheme implements IDHTScheme {
         //this.replicationFactor = replicationFactor;
         this.configFile = configFile;
         try {
-            this.routingTable = new RingRoutingTable(configFile);
-        } catch (IOException e) {
+            this.routingTable = new RingRoutingTable();
+        } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

@@ -1,7 +1,6 @@
 package common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import datanode.IDataNode;
 import socket.Request;
 
 import java.io.BufferedReader;
@@ -16,9 +15,11 @@ public class ClientWorker extends Thread {
 
     private final Socket client;
     private static ObjectMapper mapper = new ObjectMapper();
+    private static IDataNode dataNode;
 
     public ClientWorker(Socket client, IDataNode node) {
         this.client = client;
+        this.dataNode = node;
     }
 
     @Override

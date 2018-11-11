@@ -2,10 +2,11 @@ package schemes.ElasticDHT;
 
 import common.IRoutingTable;
 
+import java.io.IOException;
 import java.util.BitSet;
 import java.util.Random;
 
-public class RoutingTable {
+public class RoutingTable implements IRoutingTable{
 
 	public static   ElasticRoutingTableInstance[] elasticTable  = new ElasticRoutingTableInstance[100];
 	
@@ -15,7 +16,6 @@ public class RoutingTable {
 	
 	public RoutingTable()
 	{
-	
 		
 	}
 	
@@ -68,13 +68,13 @@ public class RoutingTable {
 }
 
 	
-	public void deleteNode(int nodeId)
+	public IRoutingTable deleteNode(int nodeId)
 	{
 		int replaceNodeId = 0;
 		Random rn = new Random();
-		replaceNodeId = rn.nextInt(7)+0;
+		replaceNodeId = rn.nextInt(7);
 		while(replaceNodeId==nodeId) {
-			replaceNodeId = rn.nextInt(7)+0;
+			replaceNodeId = rn.nextInt(7);
 		}
 		for(int i = 0;i<100;i++) {
 			if(elasticTable[i].nodeId1==nodeId) {
@@ -88,9 +88,14 @@ public class RoutingTable {
 				elasticTable[i].nodeId3 = replaceNodeId;
 			}
 		}
-//		return false;
+		return null;
 	}
-	
+
+	@Override
+	public IRoutingTable loadBalance(int nodeId, double loadFactor) {
+		return null;
+	}
+
 	public boolean Resize()
 	{
 		// Implement this
@@ -114,12 +119,18 @@ public class RoutingTable {
 		 }
 		 return nodeId;
 	}
-	public boolean loadBalance(int nodeId, int factor) {
+
+	@Override
+	public IRoutingTable addNode(int nodeId) throws IOException {
+		return null;
+	}
+
+	public IRoutingTable loadBalance(int nodeId, int factor) {
 		int replaceNodeId = 0;
 		Random rn = new Random();
-		replaceNodeId = rn.nextInt(7)+0;
+		replaceNodeId = rn.nextInt(7);
 		while(replaceNodeId==nodeId) {
-			replaceNodeId = rn.nextInt(7)+0;
+			replaceNodeId = rn.nextInt(7);
 		}
 		InvertedIndexTable i = InvertedIndexTable.GetInstance();
 		i.CreateInvertedIndexTable();
@@ -160,15 +171,13 @@ public class RoutingTable {
 		
 		
 		// Change routing table appropriately across all primary and replicas 
-		return false;
+		return null;
 		
 	}
 	public static void main(String arg[]) {
 		RoutingTable r =  new RoutingTable();
 		elasticTable = r.getRoutingTable();
 //		r.addNode(5);
-		
-		
 	}
 }
 
