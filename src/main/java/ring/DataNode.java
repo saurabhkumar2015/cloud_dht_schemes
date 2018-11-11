@@ -1,5 +1,7 @@
 package ring;
 
+import java.util.LinkedList;
+
 public class DataNode implements IDataNode {
 
     RingRoutingTable routingTableObj;
@@ -22,12 +24,26 @@ public class DataNode implements IDataNode {
 	}
 
 	public void writeFile(String fileName, int replicaId) {
-		// TODO Auto-generated method stub
-		
+		System.out.println("\n");
+		System.out.println("FileName: "+fileName);
+		int hashVal = fileName.hashCode();
+		System.out.println("FileHash Value:"+hashVal);
+		LinkedList<Integer> listOfAssociatedHashes =  routingTableObj.modifiedBinarySearch(hashVal);
+		for(int start=0; start<routingTableObj.replicationFactor;start++) {
+			System.out.println("File written into node id: "+routingTableObj.routingMap.get(listOfAssociatedHashes.get(start))+" Replication Id:"+(start+1));
+		}
 	}
 
 	public void deleteFile(String fileName) {
-		// TODO Auto-generated method stub
+
+		System.out.println("\n");
+		System.out.println("FileName: "+fileName);
+		int hashVal = fileName.hashCode();
+		System.out.println("FileHash Value:"+hashVal);
+		LinkedList<Integer> listOfAssociatedHashes =  routingTableObj.modifiedBinarySearch(hashVal);
+		for(int start=0; start<routingTableObj.replicationFactor;start++) {
+			System.out.println("File deleted from node id: "+routingTableObj.routingMap.get(listOfAssociatedHashes.get(start))+" Replication Id:"+(start+1));
+		}
 		
 	}
 	
