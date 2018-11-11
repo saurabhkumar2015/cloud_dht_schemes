@@ -2,10 +2,10 @@ package ring;
 
 public interface IDataNode {
 	
-	public void addNode(String nodeId);
+	public void addNode(int nodeId);
 	
-	public void deleteNode(String nodeId);
+	public void deleteNode(int nodeId);
 	
-	public void loadBalance(String nodeId, float loadFraction);
+	public void loadBalance(int nodeId, double loadFraction);
 	
 }
