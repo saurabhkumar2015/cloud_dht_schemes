@@ -1,6 +1,8 @@
 package ceph;
 
 import java.util.Random;
+
+import config.ConfigLoader;
 import config.DHTConfig;
 
 public class EntryPoint {
@@ -8,7 +10,7 @@ public class EntryPoint {
 	public void BootStrapCeph() {
      // BootStrapping
      // Step 1 : using no of nodes and cluster size from configuration find the depth of Osd Map
-     DHTConfig config = new DHTConfig();
+     DHTConfig config = ConfigLoader.config;
      int depth = FindDepthOfOsdMap(config.nodeIdEnd - config.nodeIdStart, config.cephMaxClusterSize);
      System.out.println("Osd Depth is :" + depth);
      // Step 2 : create the Osd Map with Leaf node with weight 

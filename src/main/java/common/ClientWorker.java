@@ -1,18 +1,11 @@
 package common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import common.IDataNode;
-import org.apache.commons.lang3.SerializationUtils;
 import socket.Request;
-import sun.misc.IOUtils;
-
 import java.io.*;
 import java.net.Socket;
-import java.util.Map;
 
-import static common.Constants.FILE_NAME;
-import static common.Constants.REPLICA_ID;
-import static common.Constants.WRITE_FILE;
+import static common.Constants.*;
 
 public class ClientWorker extends Thread {
 
@@ -39,17 +32,21 @@ public class ClientWorker extends Thread {
                 System.out.println("Thread running with name:"+Thread.currentThread().getName());
                 //Send data back to client
                 out.println("OK");
-                DataInputStream in = new DataInputStream(client.getInputStream());
+                ObjectInputStream in = new ObjectInputStream(client.getInputStream());
                 System.out.println("File Write Step1 ");
-                byte[] read = new byte[512];
-                in.readFully(read);
-                Request request = SerializationUtils.deserialize(read);
+                Request request = (Request)in.readObject();
                 System.out.println("File Write Step2 "+ request.getType());
                 switch(request.getType()) {
                     case WRITE_FILE:
-                        Map<String,Object> map = (Map<String,Object>)request.getPayload();
-                        System.out.println("File Write"+ map.get(FILE_NAME).toString());
-                        dataNode.writeFile(map.get(FILE_NAME).toString(), Integer.parseInt(map.get(REPLICA_ID).toString()));
+                        Payload p = (Payload)request.getPayload();
+                        System.out.println("File Write"+ p.fileName);
+                        dataNode.writeFile(p.fileName, p.replicaId);
+                        break;
+                    case DELETE_FILE:
+                        Payload p1 = (Payload)request.getPayload();
+                        System.out.println("File Write"+ p1.fileName);
+                        dataNode.writeFile(p1.fileName, p1.replicaId);
+                        break;
                     default:
                         throw new Exception("Unsupported message type");
                 }

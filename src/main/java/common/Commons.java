@@ -3,9 +3,8 @@ package common;
 import ceph.CephDataNode;
 import ceph.CephRoutingTable;
 import config.DHTConfig;
-import common.IDataNode;
 import ring.RingRoutingTable;
-import schemes.ElasticDHT.RoutingTable;
+import socket.IMessageSend;
 
 public class Commons {
 
@@ -18,7 +17,7 @@ public class Commons {
                 return new RingRoutingTable();
             case "ELASTIC":
             case "elastic":
-                return new RoutingTable();
+
             case "CEPH":
             case "ceph":
                 return new CephRoutingTable();
@@ -44,5 +43,13 @@ public class Commons {
                 throw new Exception("Unsupported DHT scheme found " + config.scheme);
 
         }
+    }
+    
+        // Message Sender
+    public static IMessageSend messageSender;
+    
+    public static Payload GeneratePayload(String fileName, int pgGroup, int replica)
+    {
+    	return new Payload(fileName, pgGroup, replica);
     }
 }
