@@ -1,9 +1,8 @@
 package ring;
 
 import schemes.IDHTScheme;
-
+import java.io.*;
 import java.util.Map;
-import java.io.IOException;
 import java.util.*;
 import config.ConfigLoader;
 import config.DHTConfig;
@@ -38,6 +37,24 @@ public class RingDHTScheme implements IDHTScheme {
         
         //Populate physical node table from csv file
         Map<Integer, String> map = new HashMap<Integer, String>();
+        BufferedReader br;
+		try {
+			br = new BufferedReader(new FileReader(config.nodeMapLocation));
+			String line; 
+	        try {
+				while ((line = br.readLine()) != null) { 
+				  String[] splitedLine = line.split(",");
+				  map.put(Integer.parseInt(splitedLine[0]), splitedLine[1]);
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		/*
         map.put(1,"192.168.0.1:2000");
         map.put(2,"192.168.0.1:2010");
         map.put(3,"192.168.0.2:2020");
@@ -60,8 +77,9 @@ public class RingDHTScheme implements IDHTScheme {
         map.put(20,"192.168.0.11:2040");
         map.put(21,"192.168.0.101:2050");
         map.put(22,"192.168.0.101:2050");
+        */
+		
         config.nodesMap = map;
-        
         ConfigLoader.config = config;
         
         RingDHTScheme ring = new RingDHTScheme();
