@@ -17,6 +17,11 @@ public class DataNode implements IDataNode {
         System.out.println("File Written "+ fileName + " replica: " + replicaId);
     }
 
+    @Override
+    public void deleteFile(String fileName) {
+        System.out.println("File Deleted "+ fileName );
+    }
+
     //nodeId = ip:port
     public void addNode(String nodeId) {
         int newHash = routingTableObj.getHasValueFromIpPort(nodeId);
