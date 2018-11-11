@@ -38,7 +38,6 @@ public class DataNodeProcess {
 	  		    
 	    		  command.add("java");
 	    		  command.add("-cp");
-	  		      command.add("-jar");
 	  		      command.add(args[1]);
 	  		      command.add("common.DataNodeLoader");
 	  		      command.add(args[0]);
