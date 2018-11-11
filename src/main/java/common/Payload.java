@@ -1,6 +1,8 @@
 package common;
 
-public class Payload {
+import java.io.Serializable;
+
+public class Payload implements Serializable {
 
 	public String fileName;
 	

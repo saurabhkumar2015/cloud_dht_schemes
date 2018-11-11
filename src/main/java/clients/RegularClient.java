@@ -3,6 +3,7 @@ package clients;
 import ceph.CephRoutingTable;
 import ceph.EntryPoint;
 import common.IRoutingTable;
+import common.Payload;
 import config.ConfigLoader;
 import config.DHTConfig;
 import ring.RingRoutingTable;
@@ -53,11 +54,8 @@ public class RegularClient {
                     if(config.verbose.equalsIgnoreCase("debug")) {
                         System.out.println("Write "+ fileName + "to "+ nodeId);
                     }
-                    System.out.println();
-                    Map<String, Object> content = new HashMap<>();
-                    content.put(FILE_NAME, fileName);
-                    content.put(REPLICA_ID, i);
-                    messageSender.sendMessage(config.nodesMap.get(nodeId), WRITE_FILE,content);
+                    Payload payload = new Payload(fileName, i);
+                    messageSender.sendMessage(config.nodesMap.get(nodeId), WRITE_FILE, payload);
                 }
             }
             line = bf.readLine();

@@ -45,9 +45,6 @@ public class MessageSendImpl implements IMessageSend {
             oos.writeObject(request);
             stream = baos.toByteArray();
             out.write(stream);
-            byte[] ack = new byte[32];
-            input.readFully(ack);
-            oos.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
