@@ -53,7 +53,7 @@ public class RegularClient {
             case "ceph":
                 EntryPoint entryPoint = new EntryPoint();
                 entryPoint.BootStrapCeph();
-                CephRoutingTable.getInstance(config.cephMaxClusterSize, -1);
+                CephRoutingTable.getInstance()
                 break;
             default:
                 throw new Exception("Incompatible DHT schema found!");

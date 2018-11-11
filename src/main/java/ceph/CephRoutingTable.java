@@ -1,9 +1,10 @@
 package ceph;
 
+import common.IRoutingTable;
 import config.DHTConfig;
 import java.util.Random;
 
-public class CephRoutingTable {
+public class CephRoutingTable implements IRoutingTable {
 	
 	private DHTConfig config;
 	
@@ -20,7 +21,7 @@ public class CephRoutingTable {
     	this.config = new DHTConfig();
         this.depth = FindDepthOfOsdMap(config.nodeIdEnd - config.nodeIdStart, config.cephMaxClusterSize);
         this.mapInstance = OsdMap.getInstance(config.cephMaxClusterSize, depth);
-	this.VersionNo = 1
+		this.VersionNo = 1;
         // BootStrap the table here or not need to think
         
         
@@ -40,13 +41,24 @@ public class CephRoutingTable {
 		return mapInstance;
 	}
 	
-	public void addNode(int nodeId)
+	public IRoutingTable addNode(int nodeId)
 	{
 		int clusterId = randomClusterNoGenerator();
 		mapInstance.AddExtraNodeToOsdMap(clusterId, nodeId);
 		this.VersionNo++;
+		return CephRoutingTable.getInstance();
 	}
-	
+
+	@Override
+	public IRoutingTable deleteNode(int nodeId) {
+		return null;
+	}
+
+	@Override
+	public IRoutingTable loadBalance(int nodeId, double loadFactor) {
+		return null;
+	}
+
 	public int getNodeId(String fileName, int replicaId)
 	{
 		return mapInstance.findNodeWithRequestedReplica(replicaId,
@@ -65,7 +77,6 @@ public class CephRoutingTable {
 		Random r = new Random();
 		int low = 1;
 		int high = 21;
-		int result = r.nextInt(high-low) + low;
-		return result;
+		return r.nextInt(high-low) + low;
 	}
 }
