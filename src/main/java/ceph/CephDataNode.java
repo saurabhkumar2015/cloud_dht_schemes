@@ -1,61 +1,84 @@
 package ceph;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CephDataNode {
-    public Map<Integer, ArrayList<DataObject>> map = new HashMap<Integer, ArrayList<DataObject>>();
+import common.IDataNode;
+import common.IRoutingTable;
+import config.DHTConfig;
+
+public class CephDataNode  implements IDataNode{
+    public ArrayList<DataObject> dataList = new ArrayList<DataObject>();
+
+    private HashGenerator hashGenerator;
+    
+    private DHTConfig config;
     
     private static CephDataNode single_instance = null;
-   // we can pass the configuration here
- 	public static CephDataNode getInstance() 
-     { 
-         if (single_instance == null) 
-             single_instance = new CephDataNode(); 
-   
-         return single_instance; 
-     } 
- 	
     
-    public void addDataToNode(int nodeId, String fileName, int placementGroup, int replicaId)
+    public int NodeId;
+    
+    public IRoutingTable cephRtTable;
+    
+    private CephDataNode(int nodeId)
     {
-    	// Create the Data Node 
-    	DataObject newlyAddedfile = new DataObject(fileName, placementGroup, replicaId);
-    	// If node is already there then append the Data object to the Node List
-    	ArrayList<DataObject> value = map.get(nodeId);
-    	if (value != null) {
-    	    value.add(newlyAddedfile);	
-    	} else {
-    	    // No such key exists
-    		map.put(nodeId, new ArrayList<DataObject>() {{add(newlyAddedfile);}});
-    	}
+    	this.hashGenerator = HashGenerator.getInstance();
+    	this.config = new DHTConfig();
+    	this.NodeId = nodeId;
+    	cephRtTable = CephRoutingTable.getInstance();
     }
     
-    public void ShowNodeContainer()
-    {
-    	for (Map.Entry<Integer,ArrayList<DataObject>> entry : map.entrySet())
-    	{
-    		System.out.println("Node : -> " + entry.getKey());
-    		ArrayList<DataObject> fileObject = entry.getValue();
-    		for( DataObject dobj : fileObject)
-    		{
-    			System.out.println("fileName : " + dobj.fileName + " PlacementGroup : " + dobj.placementGroup + " ReplicaId : " + dobj.replicaId);
-    		}
-    	}
-    }
+    public static CephDataNode getInstance(int nodeId) 
+    { 
+        if (single_instance == null) 
+            single_instance = new CephDataNode(nodeId); 
+  
+        return single_instance; 
+    } 
     
-    public void ShowNodeContainer(int nodeId)
-    {
-    	ArrayList<DataObject> fileObject = map.get(nodeId);
-    	if(fileObject != null)
-    	{
-    	for( DataObject dobj : fileObject)
-    	{
-    		System.out.println("fileName : " + dobj.fileName + " PlacementGroup : " + dobj.placementGroup + " ReplicaId : " + dobj.replicaId);
-    	}
-    	}    	
-    }
+	public void writeFile(String fileName, int replicaId) {
+		//step 1. find the placementGroupId for file
+		int placementGroupId = this.hashGenerator.getPlacementGroupIdFromFileName(fileName, config.PlacementGroupMaxLimit);
+		
+		// Step 2: push the Data to the DataNode
+		DataObject obj = new DataObject(placementGroupId, replicaId,fileName);
+		dataList.add(obj);
+		
+	}
+
+	public void deleteFile(String fileName) {
+		// TODO Auto-generated method stub				
+				// Step 1: Remove the Data from the DataNode
+				for(DataObject obj : dataList)
+				{
+					if(obj.fileName == fileName)
+						dataList.remove(obj);
+				}
+	}
+
+	public void addNode(int nodeId) {
+		// TODO Auto-generated method stub
+		try {
+			this.cephRtTable = this.cephRtTable.addNode(nodeId);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void deleteNode(String nodeId) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void loadBalance(String nodeId, float loadFraction) {
+		// TODO Auto-generated method stub
+		
+	}
+    
+    
     
 }
 
