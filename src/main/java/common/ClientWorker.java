@@ -8,7 +8,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Map;
 
+import static common.Constants.FILE_NAME;
+import static common.Constants.REPLICA_ID;
 import static common.Constants.WRITE_FILE;
 
 public class ClientWorker extends Thread {
@@ -45,12 +48,11 @@ public class ClientWorker extends Thread {
                 Request request = mapper.readValue(line, Request.class);
                 switch(request.getType()) {
                     case WRITE_FILE:
-                        dataNode.writeFile();
-
+                        Map<String,Object> map = (Map<String,Object>)request.getPayload();
+                        dataNode.writeFile(map.get(FILE_NAME).toString(), Integer.parseInt(map.get(REPLICA_ID).toString()));
                     default:
                         throw new Exception("Unsupported message type");
                 }
-
                 //Append data to text area
             } catch (Exception e) {
                 System.out.println("Read failed");

@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class DataNode implements IDataNode {
+public class DataNode  {
 
     private Logger log = Logger.getLogger(DataNode.class);
     public ConcurrentMap<Integer, Set<Integer>> storeMap; // HashIndex --> Set(replica ID Set)

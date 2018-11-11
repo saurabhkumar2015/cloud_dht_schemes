@@ -9,7 +9,7 @@ public interface IDataNode {
 	 * @param fileName
 	 * @param replicaId
 	 */
-	public void writeFile(String fileName, String replicaId);
+	public void writeFile(String fileName, int replicaId);
 
 
 	public void deleteFile(String fileName);
