@@ -68,8 +68,14 @@ public class RoutingTable {
 }
 
 	
-	public void deleteNode(int nodeId, int replaceNodeId)
+	public void deleteNode(int nodeId)
 	{
+		int replaceNodeId = 0;
+		Random rn = new Random();
+		replaceNodeId = rn.nextInt(7)+0;
+		while(replaceNodeId==nodeId) {
+			replaceNodeId = rn.nextInt(7)+0;
+		}
 		for(int i = 0;i<100;i++) {
 			if(elasticTable[i].nodeId1==nodeId) {
 				elasticTable[i].nodeId1 = replaceNodeId;
@@ -108,7 +114,13 @@ public class RoutingTable {
 		 }
 		 return nodeId;
 	}
-	public boolean loadBalance(int nodeId, int factor, int replaceNodeId) {
+	public boolean loadBalance(int nodeId, int factor) {
+		int replaceNodeId = 0;
+		Random rn = new Random();
+		replaceNodeId = rn.nextInt(7)+0;
+		while(replaceNodeId==nodeId) {
+			replaceNodeId = rn.nextInt(7)+0;
+		}
 		InvertedIndexTable i = InvertedIndexTable.GetInstance();
 		i.CreateInvertedIndexTable();
 		int currentStrength = 0;
