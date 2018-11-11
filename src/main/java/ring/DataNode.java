@@ -13,7 +13,7 @@ public class DataNode implements IDataNode {
     }
 
     @Override
-    public void writeFile(String fileName, String replicaId) {
+    public void writeFile(String fileName, int replicaId) {
         System.out.println("File Written "+ fileName + " replica: " + replicaId);
     }
 
@@ -23,8 +23,8 @@ public class DataNode implements IDataNode {
     }
 
     //nodeId = ip:port
-    public void addNode(String nodeId) {
-        int newHash = routingTableObj.getHasValueFromIpPort(nodeId);
+    public void addNode(int nodeId) {
+        int newHash = routingTableObj.getHasValueFromIpPort(Integer.toString(nodeId));
         LinkedList<Integer> listOfHashesForNewHash = routingTableObj.modifiedBinarySearch(newHash);
         System.out.println("\n");
         System.out.println("Adding new node: " + nodeId);
@@ -49,8 +49,8 @@ public class DataNode implements IDataNode {
         //routingTableObj.printPhysicalTable();
     }
 
-    public void deleteNode(String nodeId) {
-        int deleteHash = routingTableObj.getHasValueFromIpPort(nodeId);
+    public void deleteNode(int nodeId) {
+        int deleteHash = routingTableObj.getHasValueFromIpPort(Integer.toString(nodeId));
         LinkedList<Integer> listOfAssociatedHashes = routingTableObj.modifiedBinarySearch(deleteHash);
         LinkedList<Integer> predecessors = routingTableObj.modifiedBinarySearch(deleteHash - 1);
         System.out.println("\n");
@@ -70,7 +70,7 @@ public class DataNode implements IDataNode {
         //routingTableObj.printPhysicalTable();
     }
 
-    public void loadBalance(String nodeId, float loadFraction) {
+    public void loadBalance(int nodeId, double loadFraction) {
         if (loadFraction > 1.0) {
             System.out.println("Move node's start hash range to left side - increase the load");
         } else if (loadFraction < 1.0) {

@@ -14,11 +14,13 @@ public class DataNodeLoader {
 
         validate(args);
         ConfigLoader.init(args[0]);
-        String nodeInfo = ConfigLoader.config.nodesMap.get(Integer.parseInt(args[1]));
+        int nodeId = Integer.parseInt(args[1]);
+        String nodeInfo = ConfigLoader.config.nodesMap.get(nodeId);
         String[] ipPort = nodeInfo.split(":");
         String ip = ipPort[0];
         int port = Integer.parseInt(ipPort[1]);
-        routingTable = Commons.loadScheme(ConfigLoader.config);
+        dataNode = Commons.loadDataNode(ConfigLoader.config, nodeId);
+        routingTable = Commons.loadScheme(ConfigLoader.config, dataNode);
         ServerSocket server = new ServerSocket(port);
         while(true) {
             Socket clientSocket = server.accept();

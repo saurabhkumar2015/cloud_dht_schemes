@@ -1,5 +1,7 @@
 package ring;
 
+import config.ConfigLoader;
+import config.DHTConfig;
 import schemes.IDHTScheme;
 
 import java.util.Map;
@@ -15,11 +17,10 @@ public class RingDHTScheme implements IDHTScheme {
     public String configFile;
 
     //Constructor
-    public RingDHTScheme(String configFile) {
+    public RingDHTScheme() {
 
         //this.physicalTable = routingTable.physicalTable; // Node Id --> Ip:port for a datanode
         //this.replicationFactor = replicationFactor;
-        this.configFile = configFile;
         try {
             this.routingTable = new RingRoutingTable();
         } catch (Exception e) {
@@ -33,16 +34,22 @@ public class RingDHTScheme implements IDHTScheme {
         Scanner scan = new Scanner(System.in);
         //System.out.println("Enter DHT Type: Centralized or Distributed");
         //String dhtType = scan.nextLine();
-        String dhtType = "Centralized";
+        DHTConfig config = new DHTConfig();
+        config.scheme = "RING";
+        Map<Integer, String> map = new HashMap<>();
+        map.put(1, "127.0.0.1:4000");
+        map.put(2, "127.0.0.1:4001");
+        config.nodesMap = map;
+        ConfigLoader.config = config;
         //System.out.println("Enter the replication factor");
         //byte replicationFactor = scan.nextByte();
         byte replicationFactor = 4;
         //Initialize the ring with the existing node details
         String configFile = "";
-        RingDHTScheme ring = new RingDHTScheme(configFile);
+        RingDHTScheme ring = new RingDHTScheme();
 
         DataNode dNode = new DataNode(ring);
-        dNode.addNode("192.168.0.101:2050");
+        dNode.addNode(1);
         scan.close();
     }
 }

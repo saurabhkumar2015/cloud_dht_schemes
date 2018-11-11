@@ -14,5 +14,14 @@ public class DataObject {
 		this.replicaId = replicaId;
 		this.fileName = fileName;
 	}
+
+	@Override
+	public String toString() {
+		return "DataObject{" +
+				"placementGroup=" + placementGroup +
+				", replicaId=" + replicaId +
+				", fileName='" + fileName + '\'' +
+				'}';
+	}
 }
 

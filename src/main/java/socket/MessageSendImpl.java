@@ -1,5 +1,7 @@
 package socket;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -11,7 +13,7 @@ import java.util.Map;
 
 public class MessageSendImpl implements IMessageSend {
 
-    Map<String, Socket> socketMap = new HashMap<>();
+    private static ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public void sendMessage(String nodeAddress, String type, Object payload) {
@@ -32,11 +34,7 @@ public class MessageSendImpl implements IMessageSend {
         int port = Integer.parseInt(arr[1]);
 
         try {
-            socket = socketMap.get(nodeAddress);
-            if (socket == null) {
-                socket = new Socket(address, port);
-                socketMap.put(nodeAddress, socket);
-            }
+            socket = new Socket(address, port);
             out = new DataOutputStream(socket.getOutputStream());
 
             byte[] stream = null;
