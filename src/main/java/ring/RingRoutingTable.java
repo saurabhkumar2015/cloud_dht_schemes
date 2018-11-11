@@ -9,13 +9,12 @@ public class RingRoutingTable {
     public DHTConfig conf;
     public Map<Integer, String> physicalTable;
     private static final int MAX_HASH = 2013265907;
-    
-    //Constructor
+    int numNodeIds;
     public RingRoutingTable(String dhtType, byte replicationFactor){
     	this.conf = new DHTConfig();
     	this.conf.scheme = "RING";
     	this.conf.dhtType = dhtType;
-
+    	this.numNodeIds = this.conf.nodeIdEnd-this.conf.nodeIdStart+1;
     	this.version = conf.version;
     	this.routingMap = new TreeMap<Integer,Integer>();
     	this.physicalTable = this.conf.nodesMap;
@@ -55,7 +54,7 @@ public class RingRoutingTable {
     	    System.err.format("Exception occurred trying to read '%s'.", this.conf.nodeMapLocation);
     	    e.printStackTrace();
     	  }
-    	this.conf.numNodeIds = nodeId;
+    	this.numNodeIds = nodeId;
     	System.out.println(this.getNodeId("asddfr3rgerg",3));
     }
     
@@ -84,10 +83,10 @@ public class RingRoutingTable {
     			listOfNodesForGivenHash.add(this.routingMap.get(midVal));
     			listOfHashesForGivenHash.add(midVal);
     			//add successors
-    			listOfNodesForGivenHash.add(this.routingMap.get(listOfHash.get((mid+1)%this.conf.numNodeIds)));
-    			listOfHashesForGivenHash.add(listOfHash.get((mid+1)%this.conf.numNodeIds));
-    			listOfNodesForGivenHash.add(this.routingMap.get(listOfHash.get((mid+2)%this.conf.numNodeIds)));
-    			listOfHashesForGivenHash.add(listOfHash.get((mid+2)%this.conf.numNodeIds));
+    			listOfNodesForGivenHash.add(this.routingMap.get(listOfHash.get((mid+1)%this.numNodeIds)));
+    			listOfHashesForGivenHash.add(listOfHash.get((mid+1)%this.numNodeIds));
+    			listOfNodesForGivenHash.add(this.routingMap.get(listOfHash.get((mid+2)%this.numNodeIds)));
+    			listOfHashesForGivenHash.add(listOfHash.get((mid+2)%this.numNodeIds));
     			break;
     		}
     		else if(midVal>findHashVal) {
@@ -101,8 +100,8 @@ public class RingRoutingTable {
         			//add successors
         			listOfNodesForGivenHash.add(this.routingMap.get(listOfHash.get(mid)));
         			listOfHashesForGivenHash.add(listOfHash.get(mid));
-        			listOfNodesForGivenHash.add(this.routingMap.get(listOfHash.get((mid+1)%this.conf.numNodeIds)));
-        			listOfHashesForGivenHash.add(listOfHash.get((mid+1)%this.conf.numNodeIds));
+        			listOfNodesForGivenHash.add(this.routingMap.get(listOfHash.get((mid+1)%this.numNodeIds)));
+        			listOfHashesForGivenHash.add(listOfHash.get((mid+1)%this.numNodeIds));
         			break;
         		}
     		}
@@ -117,8 +116,8 @@ public class RingRoutingTable {
         			//add successors
         			listOfNodesForGivenHash.add(this.routingMap.get(listOfHash.get(mid)));
         			listOfHashesForGivenHash.add(listOfHash.get(mid));
-        			listOfNodesForGivenHash.add(this.routingMap.get(listOfHash.get((mid+1)%this.conf.numNodeIds)));
-        			listOfHashesForGivenHash.add(listOfHash.get((mid+1)%this.conf.numNodeIds));
+        			listOfNodesForGivenHash.add(this.routingMap.get(listOfHash.get((mid+1)%this.numNodeIds)));
+        			listOfHashesForGivenHash.add(listOfHash.get((mid+1)%this.numNodeIds));
         			break;
         		}
     		}

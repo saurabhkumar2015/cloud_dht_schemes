@@ -2,8 +2,8 @@ package ring;
 
 import java.util.*;
 
-import Ring.IDataNode;
-import Ring.RingDHTScheme;
+import ring.IDataNode;
+import ring.RingDHTScheme;
 
 public class DataNode implements IDataNode {
 	
@@ -16,8 +16,6 @@ public class DataNode implements IDataNode {
     public void addNode(String nodeId) {
     	int newHash = routingTableObj.getHasValueFromIpPort(nodeId);
     	LinkedList<Integer> listOfHashesForNewHash = routingTableObj.modifiedBinarySearch(newHash);
-    	
-    	
     }
 	
 	public void deleteNode(String nodeId) {
