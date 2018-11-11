@@ -2,6 +2,7 @@ package ceph;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.Random;
 import javafx.util.Pair;
@@ -67,17 +68,29 @@ public class OsdMap {
 	}
 	else
 	{
-			Pair<OsdNode, Integer> leftNodePair = findTheClusterNodetoAddIterative(root.headNode.leftNode, root.headNode, 1);
+			Pair<Pair<OsdNode,Node>, Integer> leftNodePair = findTheClusterNodetoAddIterative(root.headNode.leftNode, root.headNode, 1);
 			if(leftNodePair != null)
 			{
 				Integer value = leftNodePair.getValue();
-				OsdNode key = leftNodePair.getKey();
+				Pair<OsdNode,Node> key = leftNodePair.getKey();
 				if(value == depthofOsdMap)
 				{
-					key.AddNode(randomWeightGenerator(), clusterId, nodeId,value);
+					if(key != null)
+					{
+						OsdNode internalKey = key.getKey();
+						if(internalKey != null)
+						internalKey.AddNode(randomWeightGenerator(), clusterId, nodeId,value);
+					}
 				}
 				else
-					key.AddNode(0, clusterId, -1,value);				
+				{
+					if(key != null)
+					{
+						OsdNode internalKey = key.getKey();
+						if(internalKey != null)
+						internalKey.AddNode(0, clusterId, -1,value);
+					}
+				}
 			}
 	}
 	}
@@ -85,28 +98,34 @@ public class OsdMap {
     // Add extra node after OSD Map Creation
     public void AddExtraNodeToOsdMap(int clusterId, int nodeId)
     {
-    	Pair<OsdNode, Integer> leftNodePair = findTheClusterNodetoAddIterative(root.headNode.leftNode, root.headNode, 1);
+    	Pair<Pair<OsdNode,Node>, Integer> leftNodePair = findTheClusterNodetoAddIterative(root.headNode.leftNode, root.headNode, 1);
 		if(leftNodePair != null)
 		{
 			Integer value = leftNodePair.getValue();
-			OsdNode key = leftNodePair.getKey();
+			Pair<OsdNode,Node> key = leftNodePair.getKey();
+			OsdNode internalKey = key.getKey();
 			if(value == depthofOsdMap)
 			{
-				Node newlyAddedNode = key.AddNode(randomWeightGenerator(), clusterId, nodeId,value);
+				
+				Node newlyAddedNode = internalKey.AddNodeAtStartOfList(randomWeightGenerator(), clusterId, nodeId,value);
+				
+				// Now need to set the Osd Map pointer to the newly added node as cluster start point
+				key.getValue().leftNode.headNode = newlyAddedNode;
 				// Need to move the files from other node in sub cluster
-				MoveFileInClusterOnNewNodeAddition(key, newlyAddedNode);	
+				MoveFileInClusterOnNewNodeAddition(newlyAddedNode);	
 			}
 			else
-				key.AddNode(0, clusterId, -1,value);				
+				internalKey.AddNode(0, clusterId, -1,value);				
 		}
     }
     
-    public void MoveFileInClusterOnNewNodeAddition(OsdNode headofCluster, Node newlyAddedNode)
+    public void MoveFileInClusterOnNewNodeAddition(Node newlyAddedNode)
     {
     	// Iterate through all the node except the newlyAdded node and move files from other node to new node.
-    	double weightofSubCluster = sumofClusterNode(headofCluster);
-    	Node tempNode = headofCluster.headNode;
-    	while(tempNode.nodeId != newlyAddedNode.nodeId)
+    	double weightofSubCluster = sumofClusterNode(newlyAddedNode);
+    	//double totalweight = weightofSubCluster;
+    	Node tempNode = newlyAddedNode.nextNode;
+    	while(tempNode != null)
     	{
     		// Get all files of this node 
     		ArrayList<DataObject> filesForNode = CephDataNode.getInstance().map.get(tempNode.nodeId);
@@ -116,12 +135,12 @@ public class OsdMap {
     		{
     			for(DataObject obj : filesForNode)
     			{
-    				double hashvalue = hashGenerator.generateHashValue(newlyAddedNode.clusterId, obj.placementGroup,obj.replicaId);
-    				double weightFactor = hashGenerator.GetWeightFactor(tempNode.weight, weightofSubCluster);
+    				double hashvalue = HashGenerator.getInstance().generateHashValue(newlyAddedNode.clusterId, obj.placementGroup,obj.replicaId);
+    				double weightFactor = HashGenerator.getInstance().GetWeightFactor(tempNode.weight, weightofSubCluster);
     				if(hashvalue < weightFactor)
     				{
     					// file will move from temp node to newly added node
-    					System.out.println("file with fileName " + obj.fileName + " with replication " + obj.replicaId + " moves from node " + tempNode.nodeId + " to node " + newlyAddedNode.nodeId);
+    					System.out.println("fileName " + obj.fileName + " pGroup " + obj.placementGroup + " replication " + obj.replicaId + " moves from node " + tempNode.nodeId + " to node " + newlyAddedNode.nodeId);
                         // TODO : Add the file to local system of datanode and remove from source node
     					CephDataNode.getInstance().addDataToNode(newlyAddedNode.nodeId, obj.fileName, obj.placementGroup, obj.replicaId);
     					// remove the file from the source 
@@ -131,6 +150,7 @@ public class OsdMap {
     			
     		}
     		tempNode = tempNode.nextNode;
+    		if(tempNode != null)
     		weightofSubCluster = weightofSubCluster - tempNode.weight;
     	}
     	
@@ -199,7 +219,7 @@ public class OsdMap {
    }
    private int _findNodeWithRequestedReplica(OsdNode headNode, int placementGroupId, int replicaId, int level)
    {
-	   double totalclusterSum = sumofClusterNode(headNode);
+	   double totalclusterSum = sumofClusterNode(headNode.headNode);
 	   
 	   // Now find the hash value of each node in cluster and follow the path
 	   // where the hashvalue is less than node weight / Total cluster weight
@@ -228,7 +248,7 @@ public class OsdMap {
    {
 	   if(node != null && node.headNode.level == depthofOsdMap)
 	   {
-		   return sumofClusterNode(node);
+		   return sumofClusterNode(node.headNode);
 	   }
 	   if(node == null)
 		   return 0;
@@ -243,9 +263,9 @@ public class OsdMap {
 	   return sum;
    }
    
-   private double sumofClusterNode(OsdNode node)
+   private double sumofClusterNode(Node node)
    {
-	   Node temp = node.headNode;
+	   Node temp = node;
 	   double sum = 0;
 	   while(temp != null)
 	   {
@@ -295,7 +315,7 @@ public class OsdMap {
    }
    
    // Private member function
-   private Pair<OsdNode, Integer> findTheClusterNodetoAddIterative(OsdNode currentnode, Node parentnode, int level)
+   private Pair<Pair<OsdNode,Node>, Integer> findTheClusterNodetoAddIterative(OsdNode currentnode, Node parentnode, int level)
    {
    
 	   if(currentnode == null)
@@ -306,11 +326,11 @@ public class OsdMap {
 			   
 			   // Add this head node to next level parent queue
 			   Parentqueue.add(newlyAddedNode);
-		   return new Pair<>(newlyAddedNode, parentnode.level +1);
+		   return new Pair<>(new Pair<>(currentnode,parentnode), parentnode.level +1);
 		}
 	   }
 	   if(currentnode.clusterCountInLevel < maxclusterInlevel)
-		   return new Pair<>(currentnode, parentnode.level+1);
+		   return new Pair<>(new Pair<>(currentnode,parentnode), parentnode.level+1);
 	   
 	   // if above condition not satisfied then we need to move to next node of the parent level
 	   Node nextParent = parentnode.nextNode;
@@ -323,10 +343,10 @@ public class OsdMap {
 			   OsdNode newlyAddedNode = new OsdNode();
 			   nextParent.leftNode = newlyAddedNode;
 			   Parentqueue.add(newlyAddedNode);
-			   return new Pair<>(newlyAddedNode, nextParent.level + 1);
+			   return new Pair<>(new Pair<>(newlyAddedNode,nextParent), nextParent.level + 1);
 		   }
 		   else if(nextChildNode.clusterCountInLevel < maxclusterInlevel)
-			   return new Pair<>(nextChildNode, nextParent.level + 1);
+			   return new Pair<>(new Pair<>(nextChildNode,nextParent), nextParent.level + 1);
 		   else
 		   {
 			   nextParent = nextParent.nextNode;
@@ -342,10 +362,10 @@ public class OsdMap {
 	    	   OsdNode newlyAddedNode = new OsdNode();
 	    	   nextlevelParent.headNode.leftNode = newlyAddedNode;
 	    	   Parentqueue.add(newlyAddedNode);
-	    	   return new Pair<>(newlyAddedNode, nextlevelParent.headNode.level + 1);
+	    	   return new Pair<>(new Pair<>(newlyAddedNode,nextlevelParent.headNode), nextlevelParent.headNode.level + 1);
 	     }
 	     else if(nextlevelParent.headNode.leftNode.clusterCountInLevel < maxclusterInlevel)
-			   return new Pair<>(nextlevelParent.headNode.leftNode, nextlevelParent.headNode.level + 1);
+			   return new Pair<>(new Pair<>(nextlevelParent.headNode.leftNode,nextlevelParent.headNode), nextlevelParent.headNode.level + 1);
 	     else
 	     {
 	    	 Node nextNodeInLevel = nextlevelParent.headNode.nextNode;
@@ -357,10 +377,10 @@ public class OsdMap {
 	    	    	   OsdNode newlyAddedNode = new OsdNode();
 	    	    	   nextNodeInLevel.leftNode = newlyAddedNode;
 	    	    	   Parentqueue.add(newlyAddedNode);
-	    	    	   return new Pair<>(newlyAddedNode, nextNodeInLevel.level + 1);
+	    	    	   return new Pair<>(new Pair<>(newlyAddedNode,nextNodeInLevel), nextNodeInLevel.level + 1);
 	    	     }
 	    	     else if(nextNodeInLevel.leftNode.clusterCountInLevel < maxclusterInlevel)
-	    			   return new Pair<>(nextNodeInLevel.leftNode, nextNodeInLevel.level + 1);
+	    			   return new Pair<>(new Pair<>(nextNodeInLevel.leftNode,nextNodeInLevel), nextNodeInLevel.level + 1);
 	    	     else
 	    	    	 nextNodeInLevel = nextNodeInLevel.nextNode;
 	    	 }
