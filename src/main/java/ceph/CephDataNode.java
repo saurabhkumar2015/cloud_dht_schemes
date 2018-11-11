@@ -26,7 +26,7 @@ public class CephDataNode  implements IDataNode{
     public CephDataNode(int nodeId)
     {
     	this.hashGenerator = HashGenerator.getInstance();
-    	this.config = new DHTConfig();
+    	this.config = ConfigLoader.config;
     	this.NodeId = nodeId;
     	cephRtTable = CephRoutingTable.getInstance();
     }
