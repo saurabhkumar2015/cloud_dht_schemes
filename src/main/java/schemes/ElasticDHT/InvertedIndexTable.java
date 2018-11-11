@@ -2,6 +2,8 @@ package schemes.ElasticDHT;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import config.ConfigLoader;
+import config.DHTConfig;
 
 public class InvertedIndexTable {
 
@@ -10,7 +12,9 @@ public class InvertedIndexTable {
 	// Create a singleton for InvertedIndexTable
 	private static InvertedIndexTable single_instance = null;
 
-	private int hashforIndexTables[]; 
+	private int hashforIndexTables[];
+
+	private int ks[]; 
 	
 	public InvertedIndexTable()
 	{
@@ -31,12 +35,13 @@ public class InvertedIndexTable {
 	public void CreateInvertedIndexTable()
 	{
 		ElasticRoutingTableInstance[] rt = RoutingTable.GetInstance().getRoutingTable();
-		int nodeId[] = {1,2,3,4,5,6,7};
+		int nodeId[] = populateNodeId();
 		String bits="";
 		hashforIndexTables = null;
-		for(int i = 0;i<7;i++) {
-			for(int j = 0;j<7;j++) {
-				if(nodeId[i]==rt[j].nodeId1||nodeId[i]==rt[j].nodeId2||nodeId[i]==rt[j].nodeId3) {
+		DHTConfig config = ConfigLoader.config;
+		for(int i = 0;i<(config.nodeIdEnd-config.nodeIdStart);i++) {
+			for(int j = 0;j<config.bucketSize;j++) {
+				if(replicaPosition(rt[j].hashIndex,nodeId[i])) {
 					hashforIndexTables[j] = j+1; 
 				}
 				else {
@@ -69,6 +74,24 @@ public class InvertedIndexTable {
 	        }
 	    }
 	    return bitset;
+	}
+	public int[] populateNodeId() {
+		ks = null;
+		for(int i = 0;i<(config.ConfigLoader.config.nodeIdEnd-config.ConfigLoader.config.nodeIdStart);i++) {
+			ks[i] = config.ConfigLoader.config.nodeIdStart+i;
+		}
+		return ks;
+	}
+	boolean replicaPosition( int hashBucket, int nodeId) {
+		int s;
+		ElasticRoutingTableInstance[] rt = RoutingTable.GetInstance().getRoutingTable();
+
+		for(s=0;s<config.ConfigLoader.config.nodeIdEnd-config.ConfigLoader.config.nodeIdStart;s++) {
+			if((Integer)rt[hashBucket].nodeId.get(s)==nodeId) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 }
