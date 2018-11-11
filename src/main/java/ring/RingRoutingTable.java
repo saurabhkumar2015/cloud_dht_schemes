@@ -1,27 +1,32 @@
 package ring;
 import java.io.*;
 import java.util.*;
+import java.util.HashMap;
 
+import common.IRoutingTable;
+import config.ConfigLoader;
 import config.DHTConfig;
-public class RingRoutingTable {
+
+public class RingRoutingTable implements IRoutingTable {
 
     public long version;
     public Map<Integer,Integer> routingMap; // HashMap for hashStartIndex to nodeId mapping
     public DHTConfig conf;
     public Map<Integer, String> physicalTable;
     private static final int MAX_HASH = 2013265907;
-    int numNodeIds;
+    public int numNodeIds;
     public byte replicationFactor;
     
-    public RingRoutingTable(String dhtType, byte replicationFactor){
-    	this.conf = new DHTConfig();
+    public RingRoutingTable(String configFile) throws IOException {
+        ConfigLoader.init(configFile);
+        this.conf = ConfigLoader.config;
     	this.conf.scheme = "RING";
-    	this.conf.dhtType = dhtType;
+    	//this.conf.dhtType = dhtType;
     	this.numNodeIds = this.conf.nodeIdEnd-this.conf.nodeIdStart+1;
     	this.version = conf.version;
     	this.routingMap = new TreeMap<Integer,Integer>();
     	this.physicalTable = new HashMap<Integer,String>();
-    	this.replicationFactor = replicationFactor;
+    	this.replicationFactor = conf.replicationFactor;
     	this.populateTables(); 
     	//printing Routing table which will be kept with each data node 
     	System.out.print("This is the initial routing table which will be available at every data node\n");
@@ -38,34 +43,29 @@ public class RingRoutingTable {
                 ", routingMap=" + routingMap +
                 '}';
     }
-    
+
     //Hash generator for given string
     public int getHasValueFromIpPort(String ipPort) {
-    	return Math.abs((ipPort.hashCode())%MAX_HASH);
+        return Math.abs((ipPort.hashCode())%MAX_HASH);
     }
-    
+
     //initiating physical table and routing map
     public void populateTables() {
-    	int nodeId =0;
-    	try {
-    		BufferedReader reader = new BufferedReader(new FileReader(this.conf.nodeMapLocation));
-    	    String line;
-    	    while ((line = reader.readLine()) != null) {
-    	    	
-    	    	nodeId+=1;
-    	    	this.physicalTable.put(nodeId, line);
-    	    	//Generate random hash for every IP:Port
-    	    	int hashVal = this.getHasValueFromIpPort(line);
-    	    	this.routingMap.put(hashVal, nodeId);
-    	    }
-    	    reader.close();
-    	  }
-    	  catch (Exception e) {
-    	    System.err.format("Exception occurred trying to read '%s'.", this.conf.nodeMapLocation);
-    	    e.printStackTrace();
-    	  }
-    	//this.numNodeIds = nodeId;
-    	//System.out.println(this.getNodeId("asddfr3rgerg",3));
+        int nodeId =0;
+        try {
+            for ( Map.Entry<Integer, String> e : this.conf.nodesMap.entrySet())
+            {
+                this.physicalTable.put(e.getKey(), e.getValue());
+                //Generate random hash for every IP:Port
+                int hashVal = this.getHasValueFromIpPort(e.getValue());
+                this.routingMap.put(hashVal, nodeId);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        //this.numNodeIds = nodeId;
+        //System.out.println(this.getNodeId("asddfr3rgerg",3));
     }
     
     public void printRoutingTable() {
@@ -86,9 +86,10 @@ public class RingRoutingTable {
     	}
     }    
     
+
     /*Find nodeId corresponding to given hashval
     Binary search done on routing table (Tree map)
-    */  
+    */
     public LinkedList<Integer> modifiedBinarySearch(int findHashVal){
     	System.out.println("Searching Hash Val: "+findHashVal);
     	
@@ -151,12 +152,24 @@ public class RingRoutingTable {
     	//return listOfNodesForGivenHash;
     	return listOfHashesForGivenHash;
     }
-    
+
     //Find Node corresponding to given filename
-    public int getNodeId(String fileName, int replicationId) {
+    public int getNodeId(String fileName, int replicaId) {
     	int hashVal = this.getHasValueFromIpPort(fileName);
     	LinkedList<Integer> listOfNodesForGivenHash = modifiedBinarySearch(hashVal);
-    	return listOfNodesForGivenHash.get(replicationId-1);
-    	
+    	return listOfNodesForGivenHash.get(replicaId-1);
+    }
+    
+    public IRoutingTable addNode(int nodeId) {
+    	System.out.println("hey");
+        return  null;
+    }
+
+    public IRoutingTable deleteNode(int nodeId) {
+        return null;
+    }
+
+    public IRoutingTable loadBalance(int nodeId, double loadFactor) {
+        return null;
     }
 }

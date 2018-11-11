@@ -2,20 +2,28 @@ package ring;
 
 import schemes.IDHTScheme;
 import java.util.Map;
+import java.io.IOException;
 import java.util.*;
 
 public class RingDHTScheme implements IDHTScheme {
 	
 	public RingRoutingTable routingTable;
 	//public Map<Integer,Integer> routingMap; // HashMap for hashStartIndex to nodeId mapping
-    public Map<Integer, String> physicalTable;
-    public byte replicationFactor;
-    
+    //public Map<Integer, String> physicalTable;
+    //public byte replicationFactor;
+	public String configFile;
     //Constructor
-    public RingDHTScheme(String dhtType, byte replicationFactor) {
-    	this.routingTable = new RingRoutingTable(dhtType,replicationFactor);
-    	this.physicalTable = routingTable.physicalTable; // Node Id --> Ip:port for a datanode
-    	this.replicationFactor = replicationFactor;
+    public RingDHTScheme(String configFile) {
+    	
+    	//this.physicalTable = routingTable.physicalTable; // Node Id --> Ip:port for a datanode
+    	//this.replicationFactor = replicationFactor;
+    	this.configFile = configFile;
+    	try {
+			this.routingTable = new RingRoutingTable(configFile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
      
     //Bootstrap
@@ -28,7 +36,8 @@ public class RingDHTScheme implements IDHTScheme {
     	//byte replicationFactor = scan.nextByte();
     	byte replicationFactor = 4;
     	//Initialize the ring with the existing node details
-    	RingDHTScheme ring = new RingDHTScheme(dhtType, replicationFactor);  
+    	String configFile = "";
+    	RingDHTScheme ring = new RingDHTScheme(configFile);  
     
     	DataNode dNode = new DataNode(ring);
     	dNode.addNode("192.168.0.101:2050");

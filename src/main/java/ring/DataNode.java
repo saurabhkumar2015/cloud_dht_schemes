@@ -2,16 +2,12 @@ package ring;
 
 import java.util.*;
 
-import ring.IDataNode;
-import ring.RingDHTScheme;
-
 public class DataNode implements IDataNode {
 	
 	RingRoutingTable routingTableObj;
     public DataNode(RingDHTScheme ring) {
     	this.routingTableObj = ring.routingTable;
     }
-    
     
     //nodeId = ip:port
     public void addNode(String nodeId) {
@@ -34,7 +30,7 @@ public class DataNode implements IDataNode {
     	System.out.println("\n");
     	System.out.println("New NodeId - PhysicalNode mapping after new node added");
     	routingTableObj.printPhysicalTable();
-    }
+}
 	
 	public void deleteNode(String nodeId) {
 		
