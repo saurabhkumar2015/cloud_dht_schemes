@@ -1,10 +1,10 @@
 package schemes.ElasticDHT;
 
 import common.IRoutingTable;
+
 import config.ConfigLoader;
 import config.DHTConfig;
 
-import java.io.IOException;
 import java.util.BitSet;
 import java.util.Random;
 
@@ -39,8 +39,8 @@ public class RoutingTable implements IRoutingTable{
 		 return elasticTable;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public IRoutingTable addNode(int clusterId, int nodeId)
+	//@SuppressWarnings("unchecked")
+/*	public IRoutingTable addNode(int clusterId, int nodeId)
 	{
 		Random rno =  new Random(config.seed);
 		int noOfHashIndices = rno.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
@@ -64,10 +64,10 @@ public class RoutingTable implements IRoutingTable{
 
 
 
-
+*/
 	
 	@SuppressWarnings("unchecked")
-	public IRoutingTable deleteNode(int nodeId)
+	public void deleteNode(int nodeId)
 	{
 		int replaceNodeId = 0;
 		Random rn = new Random(config.seed);
@@ -83,12 +83,9 @@ public class RoutingTable implements IRoutingTable{
 			
 			// check if nodeId is in hash and get that index
 		}
-		return null;
 	}
 
-	public IRoutingTable loadBalance(int nodeId, double loadFactor) {
-		return null;
-	}
+	
 
 	public boolean Resize()
 	{
@@ -106,17 +103,17 @@ public class RoutingTable implements IRoutingTable{
 		 return nodeId;
 	}
 
-	public IRoutingTable addNode(int nodeId) throws IOException {
-		return null;
-	}
+	//public void addNode(int nodeId) throws IOException {
+	//	return null;
+	//}
 
 	@SuppressWarnings("unchecked")
-	public IRoutingTable loadBalance(int nodeId, int factor) {
+	public void loadBalance(int nodeId, double factor) {
 		int replaceNodeId = 0;
 		Random rn = new Random(config.seed);
 		replaceNodeId = rn.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
-		Random rn = new Random();
-		replaceNodeId = rn.nextInt(7)+0;
+		Random rn1 = new Random(config.seed);
+		replaceNodeId = rn1.nextInt(7)+0;
 		while(replaceNodeId==nodeId) {
 			replaceNodeId = rn.nextInt(7)+0;
 		}
@@ -141,14 +138,14 @@ public class RoutingTable implements IRoutingTable{
 			}
 			count++;
 		}
-		int newStrength = currentStrength*factor;
+		int newStrength = (int) (currentStrength*factor);
 		for(int k = 0;k<currentStrength-newStrength;k++) {
 			int index = check(elasticTable[changes[k]].hashIndex,nodeId);
 			elasticTable[changes[k]].nodeId.set(index, replaceNodeId);
 			System.out.println("Files were moved from "+nodeId +"to "+replaceNodeId);
 		}
 		
-		return null;
+		
 		
 	}
 
@@ -166,6 +163,23 @@ public class RoutingTable implements IRoutingTable{
 		RoutingTable r =  new RoutingTable();
 		elasticTable = r.getRoutingTable();
 //		r.addNode(5);
+	}
+
+	@SuppressWarnings("unchecked")
+	public void addNode(int nodeId) {
+		Random rno =  new Random(config.seed);
+		int noOfHashIndices = rno.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
+		int mainIndex = 0;//The number of hash values for which we change the node Id.
+		for(int i = 0;i<noOfHashIndices;i++) {
+			Random rno1 = new Random();
+			 mainIndex = rno1.nextInt(noOfHashIndices); // For which hashIndex, we want
+			int subIndex = rno1.nextInt(config.replicationFactor)+1;
+			elasticTable[mainIndex].nodeId.set(subIndex, nodeId);
+			
+			
+		}
+		// TODO Auto-generated method stub
+		
 	}
 }
 

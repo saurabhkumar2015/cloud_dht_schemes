@@ -1,5 +1,4 @@
 package schemes.ElasticDHT;
-import java.io.IOException;
 
 import common.IDataNode;
 
@@ -32,29 +31,22 @@ public class DataNodeElastic implements IDataNode {
 		
 	}
 
-	public void addNode(String nodeId) {
-		try {
-			RoutingTable.GetInstance().addNode(Integer.parseInt(nodeId));
-		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	
+
+	public void addNode(int nodeId) {
+		RoutingTable.GetInstance().addNode(nodeId);
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void deleteNode(String nodeId) {
-		RoutingTable.GetInstance().deleteNode(Integer.parseInt(nodeId));
+	public void deleteNode(int nodeId) {
+		RoutingTable.GetInstance().deleteNode(nodeId);
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void loadBalance(String nodeId, float loadFraction) {
-		RoutingTable.GetInstance().loadBalance(Integer.parseInt(nodeId), (float)loadFraction);
+	public void loadBalance(int nodeId, double loadFraction) {
+		RoutingTable.GetInstance().loadBalance(nodeId, loadFraction);
+
 		// TODO Auto-generated method stub
 		
 	}
