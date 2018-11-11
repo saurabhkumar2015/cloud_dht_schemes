@@ -143,9 +143,9 @@ public class OsdMap {
     					System.out.println(" pGroup " + obj.placementGroup + " replication " + obj.replicaId + " moves from node " + tempNode.nodeId + " to node " + newlyAddedNode.nodeId);
                         
     					// Add the file to local system of datanode and remove from source node
-    					Commons.messageSender.sendMessage(ConfigLoader.GetNodeAddressFromNodeId(newlyAddedNode.nodeId), Constants.ADD_FILE,Commons.GeneratePayload(obj.fileName,obj.placementGroup, obj.replicaId));
+    					Commons.messageSender.sendMessage(ConfigLoader.GetNodeAddressFromNodeId(newlyAddedNode.nodeId), Constants.ADD_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
     					// Now delete from Source Data Node					
-    					Commons.messageSender.sendMessage(ConfigLoader.GetNodeAddressFromNodeId(tempNode.nodeId), Constants.DELETE_FILE,Commons.GeneratePayload(obj.fileName,obj.placementGroup, obj.replicaId));
+    					Commons.messageSender.sendMessage(ConfigLoader.GetNodeAddressFromNodeId(tempNode.nodeId), Constants.DELETE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
     				}
     			}
     			
