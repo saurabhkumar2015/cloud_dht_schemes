@@ -2,12 +2,21 @@ package ceph;
 
 import java.util.Random;
 
+import config.DHTConfig;
+
 public class HashGenerator {
 	
     private static HashGenerator single_instance = null;
 	
     private final long MAX_VALUE = 0xFFFFFFFFL;
     private final double MAX_NODE = 15359.0;
+    
+    private DHTConfig config;
+    
+    private HashGenerator()
+    {
+    	this.config = new DHTConfig();
+    }
     
 	// we can pass the configuration here
 	public static HashGenerator getInstance() 
@@ -20,7 +29,7 @@ public class HashGenerator {
 	
 	public double randomWeightGenerator()
 	{
-		long seed = 123L;
+		int seed = config.seed;
 		Random rand = new Random(seed);
 		return rand.nextDouble();
 	}
