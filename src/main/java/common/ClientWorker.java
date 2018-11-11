@@ -1,6 +1,7 @@
 package common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import common.IDataNode;
 import org.apache.commons.lang3.SerializationUtils;
 import socket.Request;
 import sun.misc.IOUtils;
@@ -21,7 +22,7 @@ public class ClientWorker extends Thread {
 
     public ClientWorker(Socket client, IDataNode node) {
         this.client = client;
-        this.dataNode = node;
+        dataNode = node;
     }
 
     @Override

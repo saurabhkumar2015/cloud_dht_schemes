@@ -22,7 +22,7 @@ import com.rabbitmq.client.Envelope;
 public class MessageSendImpl implements IMessageSend {
 
 	
-	 public String call(Request message, String NodeId) throws IOException, InterruptedException, TimeoutException, ClassNotFoundException {
+	 public String call(Request message, String NodeId) throws IOException, InterruptedException {
 		    final String corrId = UUID.randomUUID().toString();
 
 		    ConnectionFactory factory = new ConnectionFactory();
@@ -55,7 +55,7 @@ public class MessageSendImpl implements IMessageSend {
 		    byte[] stream = null;
 		    // ObjectOutputStream is used to convert a Java object into OutputStream
 		    try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		            ObjectOutputStream oos = new ObjectOutputStream(baos);) {
+		            ObjectOutputStream oos = new ObjectOutputStream(baos)) {
 		        oos.writeObject(message);
 		        stream = baos.toByteArray();
 		    } catch (IOException e) {
@@ -105,15 +105,9 @@ public class MessageSendImpl implements IMessageSend {
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (TimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-	     
-		
+
+
 	}
 
 }

@@ -72,9 +72,9 @@ public class RoutingTable implements IRoutingTable{
 	{
 		int replaceNodeId = 0;
 		Random rn = new Random();
-		replaceNodeId = rn.nextInt(7);
+		replaceNodeId = rn.nextInt(7)+0;
 		while(replaceNodeId==nodeId) {
-			replaceNodeId = rn.nextInt(7);
+			replaceNodeId = rn.nextInt(7)+0;
 		}
 		for(int i = 0;i<100;i++) {
 			if(elasticTable[i].nodeId1==nodeId) {
@@ -128,9 +128,9 @@ public class RoutingTable implements IRoutingTable{
 	public IRoutingTable loadBalance(int nodeId, int factor) {
 		int replaceNodeId = 0;
 		Random rn = new Random();
-		replaceNodeId = rn.nextInt(7);
+		replaceNodeId = rn.nextInt(7)+0;
 		while(replaceNodeId==nodeId) {
-			replaceNodeId = rn.nextInt(7);
+			replaceNodeId = rn.nextInt(7)+0;
 		}
 		InvertedIndexTable i = InvertedIndexTable.GetInstance();
 		i.CreateInvertedIndexTable();

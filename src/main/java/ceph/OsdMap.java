@@ -2,7 +2,6 @@ package ceph;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 import java.util.Random;
 import javafx.util.Pair;
@@ -38,6 +37,13 @@ public class OsdMap {
         return single_instance; 
     } 
 	
+	// Utility funtion to generate weight
+	public double randomWeightGenerator()
+	{
+		Random rand = new Random();
+		return rand.nextDouble();
+	}
+	
 	// Input to populate the osd map need to think
     public void AddNodeToOsdMap(int clusterId, int nodeId)
 	{
@@ -45,7 +51,7 @@ public class OsdMap {
 		{
 			OsdNode currentnode = new OsdNode();
 			if(depthofOsdMap == 1)
-			currentnode.AddNode(hashGenerator.randomWeightGenerator(), clusterId, nodeId, 1);
+			currentnode.AddNode(randomWeightGenerator(), clusterId, nodeId, 1);
 			else
 				currentnode.AddNode(0, clusterId, -1, 1);
 			
@@ -55,7 +61,7 @@ public class OsdMap {
 	if(this.root.clusterCountInLevel < maxclusterInlevel)
 	{
 		if(depthofOsdMap == 1)
-		   this.root.AddNode(hashGenerator.randomWeightGenerator(), clusterId, nodeId,1);
+		   this.root.AddNode(randomWeightGenerator(), clusterId, nodeId,1);
 		else
 			this.root.AddNode(0, clusterId, -1,1);
 	}
@@ -72,10 +78,7 @@ public class OsdMap {
 					{
 						OsdNode internalKey = key.getKey();
 						if(internalKey != null)
-						{
-							double weight = hashGenerator.randomWeightGenerator();
-						    internalKey.AddNode(weight, clusterId, nodeId,value);
-						}
+						internalKey.AddNode(randomWeightGenerator(), clusterId, nodeId,value);
 					}
 				}
 				else
@@ -124,7 +127,7 @@ public class OsdMap {
     	while(tempNode != null)
     	{
     		// Get all files of this node 
-    		ArrayList<DataObject> filesForNode = CephDataNode.getInstance(tempNode.nodeId).dataList;
+    		ArrayList<DataObject> filesForNode = CephDataNode.getInstance().map.get(tempNode.nodeId);
     		
     		// Iterate over files to check wheather to move or not
     		if(filesForNode != null)
@@ -136,14 +139,11 @@ public class OsdMap {
     				if(hashvalue < weightFactor)
     				{
     					// file will move from temp node to newly added node
-    					System.out.println(" pGroup " + obj.placementGroup + " replication " + obj.replicaId + " moves from node " + tempNode.nodeId + " to node " + newlyAddedNode.nodeId);
-                        
-    					// Add the file to local system of datanode and remove from source node
-    					CephDataNode.getInstance(newlyAddedNode.nodeId).writeFile(obj.fileName, obj.replicaId);
-    					
-    					// Now delete from Source Data Node
-    					CephDataNode.getInstance(tempNode.nodeId).deleteFile(obj.fileName);					
-    					
+    					System.out.println("fileName " + obj.fileName + " pGroup " + obj.placementGroup + " replication " + obj.replicaId + " moves from node " + tempNode.nodeId + " to node " + newlyAddedNode.nodeId);
+                        // TODO : Add the file to local system of datanode and remove from source node
+    					CephDataNode.getInstance().addDataToNode(newlyAddedNode.nodeId, obj.fileName, obj.placementGroup, obj.replicaId);
+    					// remove the file from the source 
+    					// TODO: Not required to write code here.
     				}
     			}
     			
@@ -214,7 +214,7 @@ public class OsdMap {
 	   int nodeId = findNodeWithRequestedReplica(replicaId, placementGroupId); 
 
 	   // we can add files to CephDataNode
-	    CephDataNode.getInstance(nodeId).writeFile(fileName,replicaId);
+//	    CephDataNode.getInstance(nodeId).addDataToNode(nodeId, fileName, placementGroupId, replicaId);
    }
    private int _findNodeWithRequestedReplica(OsdNode headNode, int placementGroupId, int replicaId, int level)
    {

@@ -145,7 +145,11 @@ public class ProxyServer {
 		    		else {
 		    			
 		    			ElasticRoutingTable updated_elastic_routing_table = (ElasticRoutingTable)message.getPayload();
-
+		    			
+//		    			if(elastic_routing_table.version < updated_elastic_routing_table.version) {
+//		    				elastic_routing_table = updated_elastic_routing_table;
+//		    				sendUpdatedDhtToDatanodes(config);
+//		    			}
 		    		}
 		    			//compare epoch number & if greater...update dht and send messages to datanodes
 		    	

@@ -36,7 +36,7 @@ public class CephDataNode implements IDataNode {
         int placementGroupId = this.hashGenerator.getPlacementGroupIdFromFileName(fileName, config.PlacementGroupMaxLimit);
 
         // Step 2: push the Data to the DataNode
-        DataObject obj = new DataObject(placementGroupId, replicaId, fileName);
+        DataObject obj = new DataObject(fileName, placementGroupId, replicaId);
         dataList.add(obj);
         if(config.verbose.equalsIgnoreCase("debug")) {
             System.out.println("File Write ::" + fileName + " ReplicaId:" + replicaId);
@@ -64,8 +64,8 @@ public class CephDataNode implements IDataNode {
     public void addNode(int nodeId) {
         // TODO Auto-generated method stub
         try {
-            this.cephRtTable = this.cephRtTable.addNode(nodeId);
-        } catch (IOException e) {
+            this.cephRtTable.addNode(nodeId);
+        } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

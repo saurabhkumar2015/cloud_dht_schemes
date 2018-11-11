@@ -1,18 +1,18 @@
 package ceph;
 
 public class DataObject {
+
+	public String fileName;
 	
 	public int placementGroup;
 	
 	public int replicaId;
 	
-	public String fileName;
-	
-	public DataObject(int placementGroup, int replicaId, String fileName)
+	public DataObject(String fileName, int placementGroup, int replicaId)
 	{
+		this.fileName = fileName;
 		this.placementGroup = placementGroup;
 		this.replicaId = replicaId;
-		this.fileName = fileName;
 	}
 
 	@Override
@@ -24,4 +24,3 @@ public class DataObject {
 				'}';
 	}
 }
-

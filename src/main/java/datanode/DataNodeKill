@@ -1,0 +1,4 @@
+#!/bin/bash
+# My first script
+
+ps -ef | grep DataNodeLoader | grep -v grep |awk '{print $2}' | xargs kill

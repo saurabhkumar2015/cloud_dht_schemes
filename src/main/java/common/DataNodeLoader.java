@@ -1,6 +1,7 @@
 package common;
 
 import config.ConfigLoader;
+import common.IDataNode;
 
 import java.net.ServerSocket;
 import java.net.Socket;

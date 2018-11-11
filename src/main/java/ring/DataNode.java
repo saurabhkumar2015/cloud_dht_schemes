@@ -1,83 +1,34 @@
 package ring;
 
-import common.IDataNode;
-
-import java.util.*;
-
 public class DataNode implements IDataNode {
 
     RingRoutingTable routingTableObj;
 
     public DataNode(RingDHTScheme ring) {
-        this.routingTableObj = ring.routingTable;
-    }
-
-    @Override
-    public void writeFile(String fileName, int replicaId) {
-        System.out.println("File Written "+ fileName + " replica: " + replicaId);
-    }
-
-    @Override
-    public void deleteFile(String fileName) {
-        System.out.println("File Deleted "+ fileName );
+    	this.routingTableObj = ring.routingTableObj;
     }
 
     //nodeId = ip:port
     public void addNode(int nodeId) {
-        int newHash = routingTableObj.getHasValueFromIpPort(Integer.toString(nodeId));
-        LinkedList<Integer> listOfHashesForNewHash = routingTableObj.modifiedBinarySearch(newHash);
-        System.out.println("\n");
-        System.out.println("Adding new node: " + nodeId);
-        System.out.println("Hash range " + newHash + " - " + (listOfHashesForNewHash.get(1) - 1) + " removed from Node :" + routingTableObj.routingMap.get(listOfHashesForNewHash.get(0)));
-        System.out.println("Hash range " + listOfHashesForNewHash.get(0) + " - " + (newHash - 1) + " removed from Node :" + routingTableObj.routingMap.get(listOfHashesForNewHash.get(listOfHashesForNewHash.size() - 1)));
-        int newNodeId = ++this.routingTableObj.numNodeIds;
-        System.out.println("Hash range " + newHash + " - " + (listOfHashesForNewHash.get(1) - 1) + " added to Node :" + newNodeId);
-
-        //update physical table
-        //this.routingTableObj.physicalTable.put(newNodeId, nodeId);
-
-        //update routing map
-        this.routingTableObj.routingMap.put(newHash, newNodeId);
-
-        //Print updated Routing Table
-        System.out.println("\n");
-        System.out.println("New Routing Map after new node added");
-        routingTableObj.printRoutingTable();
-
-        //System.out.println("\n");
-        //System.out.println("New NodeId - PhysicalNode mapping after new node added");
-        //routingTableObj.printPhysicalTable();
+    	routingTableObj.addNode(nodeId);
     }
+	
+	public void deleteNode(int nodeId) {
+		routingTableObj.deleteNode(nodeId);
+	}
+	
+	public void loadBalance(int nodeId, double loadFraction) {
+		routingTableObj.loadBalance(nodeId, loadFraction);
+	}
 
-    public void deleteNode(int nodeId) {
-        int deleteHash = routingTableObj.getHasValueFromIpPort(Integer.toString(nodeId));
-        LinkedList<Integer> listOfAssociatedHashes = routingTableObj.modifiedBinarySearch(deleteHash);
-        LinkedList<Integer> predecessors = routingTableObj.modifiedBinarySearch(deleteHash - 1);
-        System.out.println("\n");
-        System.out.println("Deleting node: " + nodeId);
-        System.out.println("Hash range " + predecessors.get(0) + " - " + (deleteHash - 1) + "added to " + routingTableObj.routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size() - 1)));
+	public void writeFile(String fileName, int replicaId) {
+		// TODO Auto-generated method stub
+		
+	}
 
-        //update routing map
-        this.routingTableObj.routingMap.remove(deleteHash);
-
-        System.out.println("\n");
-        //Print updated Routing Table
-        System.out.println("New Routing Map after new node added");
-        routingTableObj.printRoutingTable();
-
-        //System.out.println("\n");
-        //System.out.println("New NodeId - PhysicalNode mapping after new node added");
-        //routingTableObj.printPhysicalTable();
-    }
-
-    public void loadBalance(int nodeId, double loadFraction) {
-        if (loadFraction > 1.0) {
-            System.out.println("Move node's start hash range to left side - increase the load");
-        } else if (loadFraction < 1.0) {
-            System.out.println("Move node's start hash range to right side - decrease the load");
-        } else {
-            System.out.println("No change in the load");
-        }
-    }
-
+	public void deleteFile(String fileName) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 }

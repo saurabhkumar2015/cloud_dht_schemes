@@ -3,6 +3,7 @@ package common;
 import ceph.CephDataNode;
 import ceph.CephRoutingTable;
 import config.DHTConfig;
+import common.IDataNode;
 import ring.RingRoutingTable;
 import schemes.ElasticDHT.RoutingTable;
 
