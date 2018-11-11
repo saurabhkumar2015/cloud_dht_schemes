@@ -48,15 +48,6 @@ public class CephRoutingTable implements IRoutingTable {
         return CephRoutingTable.getInstance();
     }
 
-    @Override
-    public IRoutingTable deleteNode(int nodeId) {
-        return null;
-    }
-
-    @Override
-    public IRoutingTable loadBalance(int nodeId, double loadFactor) {
-        return null;
-    }
 
     public int getNodeId(String fileName, int replicaId) {
         return mapInstance.findNodeWithRequestedReplica(replicaId,
@@ -75,4 +66,16 @@ public class CephRoutingTable implements IRoutingTable {
         int high = 21;
         return r.nextInt(high - low) + low;
     }
+
+
+	public IRoutingTable deleteNode(int nodeId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	public IRoutingTable loadBalance(int nodeId, double loadFactor) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
