@@ -68,7 +68,7 @@ public class RoutingTable implements IRoutingTable{
 }
 
 	
-	public void deleteNode(int nodeId)
+	public IRoutingTable deleteNode(int nodeId)
 	{
 		int replaceNodeId = 0;
 		Random rn = new Random();
@@ -88,10 +88,12 @@ public class RoutingTable implements IRoutingTable{
 				elasticTable[i].nodeId3 = replaceNodeId;
 			}
 		}
+		return null;
 	}
 
 	@Override
-	public void loadBalance(int nodeId, double loadFactor) {
+	public IRoutingTable loadBalance(int nodeId, double loadFactor) {
+		return null;
 	}
 
 	public boolean Resize()
@@ -119,7 +121,8 @@ public class RoutingTable implements IRoutingTable{
 	}
 
 	@Override
-	public void addNode(int nodeId) {
+	public IRoutingTable addNode(int nodeId) {
+		return null;
 	}
 
 	public IRoutingTable loadBalance(int nodeId, int factor) {
