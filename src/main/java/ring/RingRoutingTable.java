@@ -1,6 +1,7 @@
 package ring;
 import java.io.*;
 import java.util.*;
+import java.util.HashMap;
 import config.DHTConfig;
 public class RingRoutingTable {
 
@@ -17,7 +18,7 @@ public class RingRoutingTable {
     	this.numNodeIds = this.conf.nodeIdEnd-this.conf.nodeIdStart+1;
     	this.version = conf.version;
     	this.routingMap = new TreeMap<Integer,Integer>();
-    	this.physicalTable = this.conf.nodesMap;
+    	this.physicalTable = new HashMap<Integer,String>();
     	this.populateTables(); 
     	
     }
@@ -42,6 +43,7 @@ public class RingRoutingTable {
     		BufferedReader reader = new BufferedReader(new FileReader(this.conf.nodeMapLocation));
     	    String line;
     	    while ((line = reader.readLine()) != null) {
+    	    	
     	    	nodeId+=1;
     	    	this.physicalTable.put(nodeId, line);
     	    	//Generate random hash for every IP:Port
@@ -54,8 +56,8 @@ public class RingRoutingTable {
     	    System.err.format("Exception occurred trying to read '%s'.", this.conf.nodeMapLocation);
     	    e.printStackTrace();
     	  }
-    	this.numNodeIds = nodeId;
-    	System.out.println(this.getNodeId("asddfr3rgerg",3));
+    	//this.numNodeIds = nodeId;
+    	//System.out.println(this.getNodeId("asddfr3rgerg",3));
     }
     
     /*Find nodeId corresponding to given hashval
@@ -131,7 +133,6 @@ public class RingRoutingTable {
     	for(int hash: listOfHashesForGivenHash){
     		System.out.println("hash: "+hash);
     	}
-    	
     	
     	//return listOfNodesForGivenHash;
     	return listOfHashesForGivenHash;

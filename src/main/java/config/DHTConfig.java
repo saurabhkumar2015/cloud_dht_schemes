@@ -19,7 +19,7 @@ public class DHTConfig {
     public String scheme; // ring, elastic or ceph
     public byte replicationFactor;
     public byte cephMaxClusterSize = 5;
-    public String nodeMapLocation;
+    public String nodeMapLocation= "C:\\Users\\kavit\\Documents\\GitHub\\cloud_dht_schemes\\src\\main\\java\\config\\PhysicalNodeDetails.txt"; 
     public int seed = 32;
     public int PlacementGroupMaxLimit = 10;
     public Map<Integer, String> nodesMap; // Node Id --> Ip:port for a datanode

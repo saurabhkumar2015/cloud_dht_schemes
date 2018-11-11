@@ -13,7 +13,7 @@ public class RingDHTScheme implements IDHTScheme {
     //Constructor
     public RingDHTScheme(String dhtType, byte replicationFactor) {
     	this.routingTable = new RingRoutingTable(dhtType,replicationFactor);
-    	this.physicalTable = routingTable.conf.nodesMap; // Node Id --> Ip:port for a datanode
+    	this.physicalTable = routingTable.physicalTable; // Node Id --> Ip:port for a datanode
     }
      
     public void printRoutingTable() {
@@ -27,7 +27,7 @@ public class RingDHTScheme implements IDHTScheme {
     
     public void printPhysicalTable() {
     	System.out.println("NodeId\tNodeIp_Port");
-    	for (Map.Entry<Integer, String> e : physicalTable.entrySet()) {
+    	for (Map.Entry<Integer, String> e : this.physicalTable.entrySet()) {
     		System.out.print(e.getKey());
     		System.out.print("\t");
     		System.out.println(e.getValue());
@@ -49,6 +49,7 @@ public class RingDHTScheme implements IDHTScheme {
     	//printing Routing table which will be kept with each data node 
     	System.out.print("This is the initial routing table which will be available at every data node\n");
     	ring.printRoutingTable();
+    	ring.printPhysicalTable();
     	
     	DataNode dNode = new DataNode(ring);
     	
