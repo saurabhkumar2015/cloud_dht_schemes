@@ -1,7 +1,5 @@
 package ring;
 
-import common.IDataNode;
-
 public class DataNode implements IDataNode {
 
     RingRoutingTable routingTableObj;
