@@ -20,7 +20,7 @@ public class Receiver {
 	    	 
 	    	while(true) {
 				server = new ServerSocket(5000);
-				socket = server.accept(); 
+				socket = server.accept();
 		         // takes input from the client socket 
 		        in = socket.getInputStream(); 
 		        byte[] bytes = IOUtils.readFully(in, -1, true);

@@ -9,12 +9,16 @@ public class DataNode implements IDataNode {
     public DataNode(RingDHTScheme ring) {
     	this.routingTableObj = ring.routingTable;
     }
-    //nodeId = ip:port
+
+	@Override
+	public void writeFile(String fileName, String replicaId) {
+		System.out.println("Got write request "+ fileName + "with replica ID" + replicaId );
+	}
+
+	//nodeId = ip:port
     public void addNode(String nodeId) {
     	int newHash = routingTableObj.getHasValueFromIpPort(nodeId);
     	LinkedList<Integer> listOfHashesForNewHash = routingTableObj.modifiedBinarySearch(newHash);
-    	
-    	
     }
 	
 	public void deleteNode(String nodeId) {
@@ -24,5 +28,4 @@ public class DataNode implements IDataNode {
 	public void loadBalance(String nodeId, float loadFraction) {
 		
 	}
-	
 }

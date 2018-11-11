@@ -32,7 +32,7 @@ public class ProxyServer {
 	
 	/* Bootstrapping the DHT table according to scheme */
 	
-    public static void initProxy(DHTConfig config) {
+    public static void initProxy(DHTConfig config) throws Exception {
     	
     	//get initial Instances of routing tables or osdMap 
     	scheme = config.scheme;
@@ -48,7 +48,7 @@ public class ProxyServer {
             case "ceph":
                 EntryPoint entryPoint = new EntryPoint();
                 entryPoint.BootStrapCeph();
-                ceph_routing_table = CephRoutingTable.getInstance(config.cephMaxClusterSize, -1);
+                ceph_routing_table = CephRoutingTable.getInstance();
                 break;
             default:
                 throw new Exception("Incompatible DHT schema found!");
@@ -145,11 +145,7 @@ public class ProxyServer {
 		    		else {
 		    			
 		    			ElasticRoutingTable updated_elastic_routing_table = (ElasticRoutingTable)message.getPayload();
-		    			
-		    			if(elastic_routing_table.version < updated_elastic_routing_table.version) {
-		    				elastic_routing_table = updated_elastic_routing_table;
-		    				sendUpdatedDhtToDatanodes(config);
-		    			}
+
 		    		}
 		    			//compare epoch number & if greater...update dht and send messages to datanodes
 		    	

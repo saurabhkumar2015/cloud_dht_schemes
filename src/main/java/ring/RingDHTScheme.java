@@ -12,7 +12,7 @@ public class RingDHTScheme implements IDHTScheme {
     
     //Constructor
     public RingDHTScheme(String dhtType, byte replicationFactor) {
-    	this.routingTable = new RingRoutingTable(dhtType,replicationFactor);
+    	this.routingTable = new RingRoutingTable();
     	this.physicalTable = routingTable.physicalTable; // Node Id --> Ip:port for a datanode
     }
      

@@ -1,6 +1,8 @@
 package ring;
 
 public interface IDataNode {
+
+	public void writeFile(String fileName, String replicaId);
 	
 	public void addNode(String nodeId);
 	

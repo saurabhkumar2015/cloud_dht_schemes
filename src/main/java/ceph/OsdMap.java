@@ -107,12 +107,12 @@ public class OsdMap {
 			if(value == depthofOsdMap)
 			{
 				
-				Node newlyAddedNode = internalKey.AddNodeAtStartOfList(randomWeightGenerator(), clusterId, nodeId,value);
+//				Node newlyAddedNode = internalKey.AddNodeAtStartOfList(randomWeightGenerator(), clusterId, nodeId,value);
 				
 				// Now need to set the Osd Map pointer to the newly added node as cluster start point
-				key.getValue().leftNode.headNode = newlyAddedNode;
+//				key.getValue().leftNode.headNode = newlyAddedNode;
 				// Need to move the files from other node in sub cluster
-				MoveFileInClusterOnNewNodeAddition(newlyAddedNode);	
+//				MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
 			}
 			else
 				internalKey.AddNode(0, clusterId, -1,value);				

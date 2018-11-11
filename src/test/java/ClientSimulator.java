@@ -2,9 +2,6 @@
 
 import org.json.simple.JSONObject;
 
-
-import clients.RegularClient;
-import models.RingRoutingTable;
 import socket.IMessageSend;
 import socket.MessageSendImpl;
 
