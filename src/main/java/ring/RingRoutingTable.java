@@ -16,7 +16,7 @@ public class RingRoutingTable implements IRoutingTable {
     public int numNodeIds;
     public byte replicationFactor;
     
-    public RingRoutingTable() {
+    public RingRoutingTable() throws IOException {
         //ConfigLoader.init(configFile);
         this.conf = ConfigLoader.config;
     	//this.conf.scheme = "RING";
@@ -143,17 +143,18 @@ public class RingRoutingTable implements IRoutingTable {
     	else
     		replicationStartIndex = 0;
     	
-    	for (int j = replicationStartIndex ; j<= this.replicationFactor-1; j++) {
+    	for (int j = replicationStartIndex ; j< this.replicationFactor; j++) {
     		listOfNodesForGivenHash.add(this.routingMap.get(listOfHash.get((returnHashValIndex+j)%this.numNodeIds)));
 			listOfHashesForGivenHash.add(listOfHash.get((returnHashValIndex+j)%this.numNodeIds));
     	}
+    	/*
     	System.out.println("\n");
     	//Print List of nodes associated with given hash value
     	System.out.println("List of nodes under consideration now:");
     	for (int i=0; i<listOfNodesForGivenHash.size();i++) {
     		System.out.println("NodeId: "+listOfNodesForGivenHash.get(i)+" hashStartValue: "+listOfHashesForGivenHash.get(i));
     	}
-    	
+    	*/
     	//return listOfNodesForGivenHash;
     	return listOfHashesForGivenHash;
 
@@ -168,10 +169,17 @@ public class RingRoutingTable implements IRoutingTable {
     }
     
     //nodeId = ip:port
-    public void addNode(int nodeIdInt) {
+    public IRoutingTable addNode(int nodeIdInt) {
     	String nodeId = physicalTable.get(nodeIdInt); 
     	int newHash = getHasValueFromIpPort(nodeId);
     	LinkedList<Integer> listOfHashesForNewHash = modifiedBinarySearch(newHash);
+    	System.out.println("\n");
+    	//Print List of nodes associated with given hash value
+    	System.out.println("List of nodes under consideration now:");
+    	for (int i=0; i<listOfHashesForNewHash.size()-1;i++) {
+    		System.out.println("NodeId: "+routingMap.get(listOfHashesForNewHash.get(i))+" hashStartValue: "+listOfHashesForNewHash.get(i));
+    	}
+    	
     	System.out.println("\n");
     	System.out.println("Adding new node: "+nodeId);
     	System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " removed from Node :"+ routingMap.get(listOfHashesForNewHash.get(0)));
@@ -193,14 +201,21 @@ public class RingRoutingTable implements IRoutingTable {
     	//System.out.println("\n");
     	//System.out.println("New NodeId - PhysicalNode mapping after new node added");
     	//routingTableObj.printPhysicalTable();
+    	return this;
     }
 	
-	public void deleteNode(int nodeIdInt) {
+	public IRoutingTable deleteNode(int nodeIdInt) {
 		String nodeId = physicalTable.get(nodeIdInt);
 		int deleteHash = getHasValueFromIpPort(nodeId);
     	LinkedList<Integer> listOfAssociatedHashes = modifiedBinarySearch(deleteHash);
     	System.out.println("To get predecessor of node getting deleted");
     	LinkedList<Integer> predecessors = modifiedBinarySearch(deleteHash-1);
+    	System.out.println("\n");
+    	//Print List of nodes associated with given hash value
+    	System.out.println("List of nodes under consideration now:");
+    	for (int i=0; i<predecessors.size();i++) {
+    		System.out.println("NodeId: "+routingMap.get(predecessors.get(i))+" hashStartValue: "+predecessors.get(i));
+    	}
     	System.out.println("\n");
     	System.out.println("Deleting node: "+nodeId);
     	System.out.println("Hash range "+ predecessors.get(0)+" - "+ (deleteHash-1) +"added to "+routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
@@ -216,18 +231,58 @@ public class RingRoutingTable implements IRoutingTable {
     	//System.out.println("\n");
     	//System.out.println("New NodeId - PhysicalNode mapping after new node added");
     	//routingTableObj.printPhysicalTable();
+    	return this;
 	}
 	
-	public void loadBalance(int nodeIdInt, double loadFraction) {
+	public IRoutingTable loadBalance(int nodeIdInt, double loadFraction) {
 		String nodeId = physicalTable.get(nodeIdInt);
+		int nodeHash = getHasValueFromIpPort(nodeId);
+		LinkedList<Integer> listOfAssociatedHashes = modifiedBinarySearch(nodeHash-1);
+		//Print List of nodes associated with given hash value
+    	System.out.println("List of nodes under consideration now:");
+    	for (int i=0; i<listOfAssociatedHashes.size();i++) {
+    		System.out.println("NodeId: "+routingMap.get(listOfAssociatedHashes.get(i))+" hashStartValue: "+listOfAssociatedHashes.get(i));
+    	}
+    	
 		if(loadFraction>1.0) {
-			System.out.println("Move node's start hash range to left side - increase the load");
+			System.out.println("Moving node's start hash range to left side - increasing the load");
+			int initialTotalHashRang = listOfAssociatedHashes.get(1)-listOfAssociatedHashes.get(0);
+	    	System.out.println("Total number of hashes handled so far, by predecessor: "+initialTotalHashRang);
+			int numOfHashesToBeAdded = (int) Math.ceil(initialTotalHashRang*(loadFraction-1.0));
+			int newStartHash = listOfAssociatedHashes.get(1)-numOfHashesToBeAdded;
+			System.out.println("newStartHash Value will be: "+newStartHash);
+			//update routing table
+			routingMap.remove(nodeHash);
+			routingMap.put(newStartHash, nodeIdInt);
+			System.out.println("\n");
+	    	//Print updated Routing Table
+	    	System.out.println("New Routing Map after new node added");
+	    	printRoutingTable();
+	    	//What all nodes will be updates
+	    	System.out.println("Hash range "+ newStartHash +" - "+ (nodeHash-1) +" added to "+routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
 		}
 		else if(loadFraction<1.0) {
-			System.out.println("Move node's start hash range to right side - decrease the load");
+			System.out.println("Moving node's start hash range to right side - decreaseing the load");
+			int initialTotalHashRang = listOfAssociatedHashes.get(2)-listOfAssociatedHashes.get(1);
+	    	System.out.println("Total number of hashes handled so far, by predecessor: "+initialTotalHashRang);
+			int numOfHashesToBeRemoved = (int) Math.ceil(initialTotalHashRang*(1.0-loadFraction));
+			int newStartHash = listOfAssociatedHashes.get(1)+numOfHashesToBeRemoved;
+			System.out.println("newStartHash Value will be: "+newStartHash);
+			//update routing table
+			routingMap.remove(nodeHash);
+			routingMap.put(newStartHash, nodeIdInt);
+			System.out.println("\n");
+	    	//Print updated Routing Table
+	    	System.out.println("New Routing Map after new node added");
+	    	printRoutingTable();
+	    	//What all nodes will be updates
+	    	System.out.println("Hash range "+ nodeHash + " - "+ (newStartHash-1) +" added to "+routingMap.get(listOfAssociatedHashes.get(0)));
+	    	System.out.println("Hash range "+ nodeHash + " - "+ (newStartHash-1) +" removed from "+routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
 		}
+		
 		else {
 			System.out.println("No change in the load");
 		}
+		return this;
 	}
 }
