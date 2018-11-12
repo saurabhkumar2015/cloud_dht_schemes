@@ -1,6 +1,7 @@
 package ceph;
+import java.io.Serializable;
 
-public class OsdNode {
+public class OsdNode implements Serializable {
 	
 	public Node headNode;
 	
