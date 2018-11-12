@@ -99,6 +99,8 @@ public class CephDataNode  implements IDataNode{
     public void UpdateRoutingTable(IRoutingTable cephrtTable)
     {
     	this.cephRtTable = cephrtTable;
+		CephRoutingTable rt = (CephRoutingTable)cephrtTable;
+    	System.out.println("OSD Routing table is updated::" + rt.VersionNo);
     }
     
 }
