@@ -67,7 +67,7 @@ public class RoutingTable implements IRoutingTable{
 */
 	
 	@SuppressWarnings("unchecked")
-	public void deleteNode(int nodeId)
+	public IRoutingTable deleteNode(int nodeId)
 	{
 		System.out.println("Entering delete functions");
 		int replaceNodeId = 0;
@@ -90,6 +90,7 @@ public class RoutingTable implements IRoutingTable{
 			
 			// check if nodeId is in hash and get that index
 		}
+		return this;
 	}
 
 	
@@ -119,7 +120,7 @@ public class RoutingTable implements IRoutingTable{
 	//}
 
 	@SuppressWarnings("unchecked")
-	public void loadBalance(int nodeId, double factor) {
+	public IRoutingTable loadBalance(int nodeId, double factor) {
 		int replaceNodeId = 0;
 		Random rn = new Random(config.seed);
 		replaceNodeId = rn.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
@@ -157,7 +158,7 @@ public class RoutingTable implements IRoutingTable{
 		}
 		
 		
-		
+		return this;
 	}
 
 	
@@ -186,7 +187,7 @@ public class RoutingTable implements IRoutingTable{
 	}
 
 	@SuppressWarnings("unchecked")
-	public void addNode(int nodeId) {
+	public IRoutingTable addNode(int nodeId) {
 		Random rno =  new Random(config.seed);
 		int noOfHashIndices = rno.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
 		int mainIndex = 0;//The number of hash values for which we change the node Id.
@@ -207,8 +208,7 @@ public class RoutingTable implements IRoutingTable{
 			}
 		}
 		
-		// TODO Auto-generated method stub
-		
+		return this;
 	}
 }
 
