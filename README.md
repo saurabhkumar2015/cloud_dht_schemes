@@ -16,3 +16,9 @@ java -cp schemes-1.0-SNAPSHOT-jar-with-dependencies.jar clients.ControlClient /h
 3) command to start regular client
 java -cp schemes-1.0-SNAPSHOT-jar-with-dependencies.jar clients.RegularClient /home/config.conf /home/full2.txt
 
+4) Command to start all data nodes on machine
+
+5) Command to kill all data nodes on machine
+
+6) Command to start proxy server
+
