@@ -10,8 +10,9 @@ import common.Commons;
 import common.Constants;
 import config.ConfigLoader;
 import javafx.util.Pair;
+import java.io.Serializable;
 
-public class OsdMap {
+public class OsdMap implements Serializable{
 	
 	private static OsdMap single_instance = null;
 	
