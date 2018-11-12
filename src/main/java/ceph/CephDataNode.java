@@ -97,5 +97,10 @@ public class CephDataNode  implements IDataNode{
 		}	
     }
     
+    public void UpdateRoutingTable(IRoutingTable cephrtTable)
+    {
+    	this.cephRtTable = cephrtTable;
+    }
+    
 }
 
