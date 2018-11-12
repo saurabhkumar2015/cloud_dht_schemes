@@ -6,11 +6,11 @@ public class ElasticRoutingTableInstance {
 
 	public int hashIndex;
 	@SuppressWarnings("rawtypes")
-	public ArrayList nodeId;
+	public ArrayList<Integer> nodeId;
 	
 	
 	@SuppressWarnings("rawtypes")
-	public ElasticRoutingTableInstance(int k, ArrayList l) {
+	public ElasticRoutingTableInstance(int k, ArrayList<Integer> l) {
 		hashIndex = k;
 		nodeId = l;
 		// TODO Auto-generated constructor stub
