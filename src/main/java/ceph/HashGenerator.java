@@ -4,8 +4,9 @@ import java.util.Random;
 
 import config.ConfigLoader;
 import config.DHTConfig;
+import java.io.Serializable;
 
-public class HashGenerator {
+public class HashGenerator implements Serializable{
 	
     private static HashGenerator single_instance = null;
 	
