@@ -11,7 +11,7 @@ public class EntryPoint {
      // BootStrapping
      // Step 1 : using no of nodes and cluster size from configuration find the depth of Osd Map
      DHTConfig config = ConfigLoader.config;
-     int depth = FindDepthOfOsdMap(config.nodeIdEnd - config.nodeIdStart, config.cephMaxClusterSize);
+     int depth = FindDepthOfOsdMap(config.nodeIdEnd - config.nodeIdStart + 1, config.cephMaxClusterSize);
      System.out.println("Osd Depth is :" + depth);
      // Step 2 : create the Osd Map with Leaf node with weight 
      // Populate the osd map from Configuration
@@ -20,7 +20,7 @@ public class EntryPoint {
       // 
      // Step 3: populate the internal node weight using the commutative weight of child node
      // step 3.a Populate OsdMap
-      PopulateOsdMap(mapInstance, config.nodeIdEnd - config.nodeIdStart, depth,config.cephMaxClusterSize );
+      PopulateOsdMap(mapInstance, config.nodeIdEnd - config.nodeIdStart + 1, depth,config.cephMaxClusterSize );
       
      //set the internal node weight
       mapInstance.PopulateWeightOfInternalNode(mapInstance.root);
