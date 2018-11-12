@@ -7,7 +7,7 @@ import config.DHTConfig;
 import java.io.IOException;
 import java.util.Random;
 
-public class CephRoutingTable implements IRoutingTable {
+public class CephRoutingTable implements IRoutingTable, Serializable {
 
     private DHTConfig config;
 
