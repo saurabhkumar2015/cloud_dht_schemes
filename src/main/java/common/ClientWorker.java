@@ -39,13 +39,28 @@ public class ClientWorker extends Thread {
                 switch(request.getType()) {
                     case WRITE_FILE:
                         Payload p = (Payload)request.getPayload();
-                        System.out.println("File Write"+ p.fileName);
+                        System.out.println("File Write::"+ p.fileName);
                         dataNode.writeFile(p.fileName, p.replicaId);
                         break;
                     case DELETE_FILE:
                         Payload p1 = (Payload)request.getPayload();
-                        System.out.println("File Write"+ p1.fileName);
+                        System.out.println("File Write::"+ p1.fileName);
                         dataNode.writeFile(p1.fileName, p1.replicaId);
+                        break;
+                    case ADD_NODE:
+                        Integer  nodeId = (Integer)request.getPayload();
+                        System.out.println("Add node"+ nodeId);
+                        dataNode.addNode(nodeId);
+                        break;
+                    case DELETE_NODE:
+                        Integer  nodeId1 = (Integer)request.getPayload();
+                        System.out.println("Delete node"+ nodeId1);
+                        dataNode.deleteNode(nodeId1);
+                        break;
+                    case LOAD_BALANCE:
+                        LoadBalance  lb = (LoadBalance)request.getPayload();
+                        System.out.println("Load Balance"+ lb );
+                        dataNode.loadBalance(lb.nodeId, lb.loadFactor);
                         break;
                     default:
                         throw new Exception("Unsupported message type");

@@ -1,4 +1,4 @@
-import datanode.DataNode;
+import datanode.DataNodeDeleted;
 import datanode.FileRequest;
 
 import java.util.*;
@@ -11,7 +11,7 @@ public class NSuccessorsReplicationSimulator extends ReplicationSimulator{
 
         //Simulate Add Files
         Scanner sc = new Scanner(System.in);
-        List<DataNode> datanodes = getDataNodeList(12);
+        List<DataNodeDeleted> datanodes = getDataNodeList(12);
 
         Map<Integer, List<Integer>> inputMap = new HashMap<Integer, List<Integer>>();
         inputMap.put(4, Arrays.asList(90,91,92,93));
@@ -52,20 +52,20 @@ public class NSuccessorsReplicationSimulator extends ReplicationSimulator{
 
     }
 
-    private static void removeNodeInRingStrategy(List<DataNode> datanodes, int i) {
+    private static void removeNodeInRingStrategy(List<DataNodeDeleted> datanodes, int i) {
 
         //get position of failed node.
         int pos =0;
         int j = 0;
-        for (DataNode dn : datanodes) {
+        for (DataNodeDeleted dn : datanodes) {
             if(dn.nodeId == i) {
                 pos = j;
                 break;
             }
             j++;
         }
-        DataNode predecessor = datanodes.get(pos-1);
-        DataNode successor = datanodes.get(pos-1);
+        DataNodeDeleted predecessor = datanodes.get(pos-1);
+        DataNodeDeleted successor = datanodes.get(pos-1);
     }
 
     /**
@@ -75,11 +75,11 @@ public class NSuccessorsReplicationSimulator extends ReplicationSimulator{
      * @param startRange
      * @param endRange
      */
-    private static void addNodeInRingStrategy(List<DataNode> datanodes, int pos, int nodeId, int startRange, int endRange) {
+    private static void addNodeInRingStrategy(List<DataNodeDeleted> datanodes, int pos, int nodeId, int startRange, int endRange) {
 
-        DataNode dn = new DataNode(nodeId);
+        DataNodeDeleted dn = new DataNodeDeleted(nodeId);
         datanodes.add(pos-1, dn);
-        DataNode successor  = datanodes.get(pos);
+        DataNodeDeleted successor  = datanodes.get(pos);
 
         // Remove and get file indexes from all nodes for which the new node will have the primary file.
         FileRequest primary = new FileRequest();
@@ -160,7 +160,7 @@ public class NSuccessorsReplicationSimulator extends ReplicationSimulator{
      * @param inputMap
      * @param numReplicas
      */
-    private static void addFilesWithRingStrategy(List<DataNode> datanodes,
+    private static void addFilesWithRingStrategy(List<DataNodeDeleted> datanodes,
                                                  Map<Integer,List<Integer>> inputMap,
                                                  int numReplicas) {
 

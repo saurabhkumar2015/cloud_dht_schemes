@@ -4,7 +4,11 @@ import common.IDataNode;
 
 public class DataNodeElastic implements IDataNode {
 
-	private int nodeId;
+	public DataNodeElastic(int nodeId) {
+		this.nodeId = nodeId;
+	}
+
+	public int nodeId;
 
 	public void writeFile(String fileName, int replicaId) {
 		int hashcode = fileName.hashCode();

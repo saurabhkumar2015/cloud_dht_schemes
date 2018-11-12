@@ -12,13 +12,7 @@ public class RingDHTScheme implements IDHTScheme {
 	public RingRoutingTable routingTableObj;
 	
     public RingDHTScheme() {
-    	try {
 			this.routingTableObj = new RingRoutingTable();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
     }
 
     //Bootstrap

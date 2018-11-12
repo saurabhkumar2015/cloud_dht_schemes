@@ -7,21 +7,21 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class DataNode {
+public class DataNodeDeleted {
 
-    private Logger log = Logger.getLogger(DataNode.class);
+    private Logger log = Logger.getLogger(DataNodeDeleted.class);
     public ConcurrentMap<Integer, Set<Integer>> storeMap; // HashIndex --> Set(replica ID Set)
     public int nodeId;
     public IStrategy strategy; //In case of DHT routing table update. Which is the best strategy to follow.
 
-    public DataNode(int nodeId) {
+    public DataNodeDeleted(int nodeId) {
         storeMap = new ConcurrentHashMap<Integer, Set<Integer>>();
         this.nodeId = nodeId;
-        log.info("DataNode " + nodeId + " created successfully");
+        log.info("DataNodeDeleted " + nodeId + " created successfully");
     }
 
     /**
-     * @param newFiles  Add new files i.e. hash index to DataNode
+     * @param newFiles  Add new files i.e. hash index to DataNodeDeleted
      */
     public void addNewFiles(Map<Integer, Integer> newFiles) {
         for (Map.Entry<Integer, Integer> e : newFiles.entrySet()) {
@@ -127,7 +127,7 @@ public class DataNode {
      * Print the current state of datanode.
      */
     public void printStatus() {
-        System.out.println("\nPrinting Status of DataNode "+ nodeId);
+        System.out.println("\nPrinting Status of DataNodeDeleted "+ nodeId);
         for(Map.Entry<Integer, Set<Integer>> e : storeMap.entrySet()) {
             System.out.println("Hash Index: "+ e.getKey() + " replicas: " +  e.getValue());
         }

@@ -3,7 +3,11 @@ package common;
 import ceph.CephDataNode;
 import ceph.CephRoutingTable;
 import config.DHTConfig;
+import ring.DataNode;
+import ring.RingDHTScheme;
 import ring.RingRoutingTable;
+import schemes.ElasticDHT.DataNodeElastic;
+import schemes.ElasticDHT.RoutingTable;
 import socket.IMessageSend;
 
 public class Commons {
@@ -17,7 +21,9 @@ public class Commons {
                 return new RingRoutingTable();
             case "ELASTIC":
             case "elastic":
-
+                schemes.ElasticDHT.RoutingTable r = new schemes.ElasticDHT.RoutingTable();
+                RoutingTable.GetInstance().getRoutingTable();
+                return r;
             case "CEPH":
             case "ceph":
                 return new CephRoutingTable();
@@ -32,10 +38,10 @@ public class Commons {
         switch (scheme) {
             case "RING":
             case "ring":
-                return null;
+                return new DataNode(new RingDHTScheme());
             case "ELASTIC":
             case "elastic":
-                return null;
+                return new DataNodeElastic(nodeId);
             case "CEPH":
             case "ceph":
                 return new CephDataNode(nodeId);
@@ -45,7 +51,7 @@ public class Commons {
         }
     }
     
-        // Message Sender
+    // Message Sender
     public static IMessageSend messageSender;
     
     public static Payload GeneratePayload(String fileName, int replica)

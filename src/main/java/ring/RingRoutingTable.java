@@ -1,12 +1,9 @@
 package ring;
-import java.io.*;
 import java.util.*;
 
 import common.IRoutingTable;
 import config.ConfigLoader;
 import config.DHTConfig;
-import common.Commons;
-import common.Constants;
 
 public class RingRoutingTable implements IRoutingTable {
 
@@ -18,15 +15,11 @@ public class RingRoutingTable implements IRoutingTable {
     public int numNodeIds;
     public byte replicationFactor;
     
-    public RingRoutingTable() throws IOException {
-        //ConfigLoader.init(configFile);
+    public RingRoutingTable() {
         this.conf = ConfigLoader.config;
-    	//this.conf.scheme = "RING";
-    	//this.conf.dhtType = dhtType;
     	this.numNodeIds = this.conf.nodeIdEnd-this.conf.nodeIdStart+1;
     	this.version = conf.version;
     	this.routingMap = new TreeMap<Integer,Integer>();
-    	//this.physicalTable = new HashMap<Integer,String>();
     	this.physicalTable = conf.nodesMap;
     	this.replicationFactor = conf.replicationFactor;
     	this.populateTables(); 

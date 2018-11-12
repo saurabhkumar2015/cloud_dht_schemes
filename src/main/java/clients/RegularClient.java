@@ -7,6 +7,7 @@ import common.Payload;
 import config.ConfigLoader;
 import config.DHTConfig;
 import ring.RingRoutingTable;
+import schemes.ElasticDHT.RoutingTable;
 import socket.MessageSendImpl;
 
 import java.io.BufferedReader;
@@ -17,14 +18,15 @@ import java.util.Scanner;
 
 import static common.Constants.*;
 
+/**
+ * Regular client to launch a reader from file list
+ */
 public class RegularClient {
 
 
-    private static String scheme;
-    private static String dhtType;
     private static IRoutingTable routingTable;
     private static MessageSendImpl messageSender = new MessageSendImpl();
-    public static Scanner sc = new Scanner(System.in);
+    private static Scanner sc = new Scanner(System.in);
 
 
     public static void main(String[] args) throws Exception {
@@ -39,20 +41,20 @@ public class RegularClient {
         String line = bf.readLine();
 
         int counter = 1;
-        int z= 10;
+        int z= 2;
         while(line != null && line.length() != 0) {
-
-            if(counter++ %z == 0) {
-                System.out.println("Paused. Do you want to continue. Press a number");
+            if(counter %z == 0) {
+                System.out.println("Paused. Do you want to continue? Press a number n to write n files::");
                 z = sc.nextInt();
             }
+            counter++;
             String [] splits = line.split("]");
             if(splits.length > 1 && splits[1].trim().length() > 0) {
                 String fileName = splits[1].trim();
                 for(int i=1 ; i <= config.replicationFactor;i++) {
                     Integer nodeId = routingTable.getNodeId(fileName, i);
                     if(config.verbose.equalsIgnoreCase("debug")) {
-                        System.out.println("Write "+ fileName + "to "+ nodeId);
+                        System.out.println("Write "+ fileName + " to "+ nodeId + " replicaid: " + i);
                     }
                     Payload payload = new Payload(fileName, i);
                     messageSender.sendMessage(config.nodesMap.get(nodeId), WRITE_FILE, payload);
@@ -64,8 +66,7 @@ public class RegularClient {
     }
 
     private static void initRegularClient(DHTConfig config) throws Exception {
-        scheme = config.scheme;
-        dhtType = config.dhtType;
+        String scheme = config.scheme;
 
         switch (scheme) {
             case "RING":
@@ -74,6 +75,9 @@ public class RegularClient {
                 break;
             case "ELASTIC":
             case "elastic":
+                schemes.ElasticDHT.RoutingTable r = new schemes.ElasticDHT.RoutingTable();
+                RoutingTable.GetInstance().getRoutingTable();
+                routingTable = r;
                 break;
             case "CEPH":
             case "ceph":

@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 import common.Commons;
 import common.Constants;
-
+import common.IDataNode;
 public class DataNode implements IDataNode {
 
     RingRoutingTable routingTableObj;

@@ -43,7 +43,7 @@ public class CephDataNode  implements IDataNode{
 		//step 1. find the placementGroupId for file
 		int placementGroupId = this.hashGenerator.getPlacementGroupIdFromFileName(fileName, config.PlacementGroupMaxLimit);
 		
-		// Step 2: push the Data to the DataNode
+		// Step 2: push the Data to the DataNodeDeleted
 		DataObject obj = new DataObject(placementGroupId, replicaId,fileName);
 		dataList.add(obj);
 		
@@ -51,7 +51,7 @@ public class CephDataNode  implements IDataNode{
 
 	public void deleteFile(String fileName) {
 		// TODO Auto-generated method stub				
-				// Step 1: Remove the Data from the DataNode
+				// Step 1: Remove the Data from the DataNodeDeleted
 				for(DataObject obj : dataList)
 				{
 					if(obj.fileName == fileName)
