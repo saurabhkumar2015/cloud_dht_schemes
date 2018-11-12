@@ -8,7 +8,7 @@ public class Constants {
     public final static String ADD_NODE = "ADD_NODE";
     public final static String DELETE_NODE = "DELETE_NODE";
     public final static String LOAD_BALANCE = "LOAD_BALANCE";
-
+    public final static String MOVE_FILE = "MOVE_FILE";
 
     //Payload Keywords here
     public final static String FILE_NAME = "FILE_NAME";

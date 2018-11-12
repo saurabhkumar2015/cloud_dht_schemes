@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import common.Commons;
 import common.Constants;
 import common.IDataNode;
+import common.IRoutingTable;
+
 public class DataNode implements IDataNode {
 
     public RingRoutingTable routingTableObj;
@@ -23,6 +25,16 @@ public class DataNode implements IDataNode {
 	
 	public void loadBalance(int nodeId, double loadFraction) {
 		routingTableObj.loadBalance(nodeId, loadFraction);
+	}
+
+	@Override
+	public void MoveFiles(int clusterIdofNewNode, String nodeIp, double newnodeWeight, double clusterWeight) {
+
+	}
+
+	@Override
+	public void UpdateRoutingTable(IRoutingTable cephrtTable) {
+
 	}
 
 	public void writeFile(String fileName, int replicaId) {

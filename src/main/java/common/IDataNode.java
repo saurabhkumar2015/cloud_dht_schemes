@@ -20,4 +20,9 @@ public interface IDataNode {
 	
 	public void loadBalance(int nodeId, double loadFraction);
 	
+	public void MoveFiles(int clusterIdofNewNode,String nodeIp, double newnodeWeight, double clusterWeight);
+	
+	public void UpdateRoutingTable(IRoutingTable cephrtTable);
+	
 }
+

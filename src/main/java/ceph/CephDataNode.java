@@ -3,6 +3,7 @@ package ceph;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import common.Commons;
@@ -78,16 +79,19 @@ public class CephDataNode  implements IDataNode{
     
     public void MoveFiles(int clusterIdofNewNode,String nodeIp, double newnodeWeight, double clusterWeight)
     {
+
     	// iterate on local file copy and move the file accordingly
-    	for(DataObject obj : dataList)
+    	Iterator<DataObject> iter = dataList.iterator();
+    	while(iter.hasNext())
 		{
+    		DataObject obj = iter.next();
 			double hashvalue = HashGenerator.getInstance().generateHashValue(clusterIdofNewNode, obj.placementGroup, obj.replicaId);
 			double weightFactor = HashGenerator.getInstance().GetWeightFactor(newnodeWeight, clusterWeight);
 			
 			if(hashvalue < weightFactor)
 			{
 				Commons.messageSender.sendMessage(nodeIp, Constants.ADD_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
-				dataList.remove(obj);
+				iter.remove();
 			}
 		}	
     }

@@ -7,6 +7,8 @@ import socket.Request;
 import java.io.*;
 import java.net.Socket;
 
+import ceph.CephRoutingTable;
+
 import static common.Constants.*;
 
 public class ClientWorker {
@@ -58,6 +60,12 @@ public class ClientWorker {
                     LoadBalance lb = (LoadBalance) request.getPayload();
                     System.out.println("Load Balance    " + lb);
                     dataNode.loadBalance(lb.nodeId, lb.loadFactor);
+                    break;
+                    
+                case MOVE_FILE:
+                	CephPayload payload = (CephPayload) request.getPayload();
+                    dataNode.MoveFiles(payload.clusterId, payload.nodeIp, payload.nodeWeight, payload.totalWt);
+                    dataNode.UpdateRoutingTable((IRoutingTable)payload.updated_ceph_routing_table);
                     break;
                 default:
                     throw new Exception("Unsupported message type");
