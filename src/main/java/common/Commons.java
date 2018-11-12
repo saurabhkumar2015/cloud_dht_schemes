@@ -56,21 +56,18 @@ public class Commons {
         String scheme = config.scheme;
         IRoutingTable routingTable;
 
-        switch (scheme) {
+        switch (scheme.toUpperCase().trim()) {
             case "RING":
-            case "ring":
                 RingDHTScheme ring = new RingDHTScheme();
                 DataNode dNode = new DataNode(ring);
                 routingTable = dNode.routingTableObj;
                 break;
             case "ELASTIC":
-            case "elastic":
                 schemes.ElasticDHT.RoutingTable r = new schemes.ElasticDHT.RoutingTable();
                 RoutingTable.GetInstance().getRoutingTable();
                 routingTable = r;
                 break;
             case "CEPH":
-            case "ceph":
                 EntryPoint entryPoint = new EntryPoint();
                 entryPoint.BootStrapCeph();
                 routingTable = CephRoutingTable.getInstance();

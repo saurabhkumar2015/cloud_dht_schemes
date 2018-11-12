@@ -16,17 +16,15 @@ import static common.Constants.*;
 public class ControlClient {
 
     private static Scanner sc = new Scanner(System.in);
-    private static IRoutingTable routingTable;
     private static IMessageSend messageSender = new MessageSendImpl();
-    private static Random r;
 
     public static void main(String[] args) throws Exception {
 
         ConfigLoader.init(args[0]);
         DHTConfig config = ConfigLoader.config;
         boolean exit = true;
-        routingTable = Commons.initRoutingTable(config);
-        r = new Random(config.seed);
+        IRoutingTable routingTable = Commons.initRoutingTable(config);
+        Random r = new Random(config.seed);
 
         while(exit) {
             System.out.println("Enter \"A\" to add node in DHT scheme " + config.scheme);
@@ -37,9 +35,8 @@ public class ControlClient {
             int nodeId = r.nextInt(config.nodeIdEnd - config.nodeIdStart);
             nodeId = nodeId %(config.nodeIdEnd - config.nodeIdStart);
 
-            switch (input){
+            switch (input.toUpperCase().trim()){
                 case "A":
-                case "a":
                     System.out.println("Enter comma seperated nodeId to add node in DHT scheme " + config.scheme);
                     input = sc.next();
                     String[] ids = input.split(",");
@@ -49,7 +46,6 @@ public class ControlClient {
                     }
                     break;
                 case "D":
-                case "d":
                     System.out.println("Enter comma seperated nodeId to delete node in DHT scheme " + config.scheme);
                     input = sc.next();
                     ids = input.split(",");
@@ -59,16 +55,17 @@ public class ControlClient {
                     }
                     break;
                 case "L":
-                case "l":
                     System.out.println("Enter comma seperated node id and factor. newload = oldload* factor in DHT scheme " + config.scheme);
                     input = sc.next();
                     ids = input.split(",");
                     int node = Integer.parseInt(ids[0].trim());
                     double factor = Double.parseDouble(ids[1].trim());
-                    messageSender.sendMessage(config.nodesMap.get(nodeId), LOAD_BALANCE, new LoadBalance(node, factor));
+                    if(config.dhtType.toLowerCase().equalsIgnoreCase("centralized"))
+                        messageSender.sendMessage(config.proxyIp, LOAD_BALANCE, new LoadBalance(node, factor));
+                    else
+                        messageSender.sendMessage(config.nodesMap.get(nodeId), LOAD_BALANCE, new LoadBalance(node, factor));
                     break;
                 case "X":
-                case "x":
                     exit = false;
             }
         }
