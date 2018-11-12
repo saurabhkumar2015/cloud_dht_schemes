@@ -2,6 +2,8 @@ package common;
 
 import java.io.Serializable;
 
+import ceph.CephRoutingTable;
+
 public class CephPayload implements Serializable {
 	
 	public String nodeIp;
@@ -12,12 +14,15 @@ public class CephPayload implements Serializable {
 	
 	public double totalWt;
 	
-	public CephPayload(String nodeIp, int clusterId, double nodeWeight, double totalWt)
+	public CephRoutingTable updated_ceph_routing_table;
+	
+	public CephPayload(String nodeIp, int clusterId, double nodeWeight, double totalWt, CephRoutingTable updated_ceph_routing_table)
 	{
 		this.nodeIp = nodeIp;
 		this.clusterId = clusterId;
 		this.nodeWeight = nodeWeight;
 		this.totalWt = totalWt;
+		this.updated_ceph_routing_table = updated_ceph_routing_table;
 	}
 
 	@Override
@@ -26,6 +31,7 @@ public class CephPayload implements Serializable {
 				"nodeIp='" + nodeIp + '\'' +
 				", clusterId=" + clusterId +
 				", nodeWeight=" + nodeWeight+
+				", updated_ceph_routing_table=" + updated_ceph_routing_table+
 				", totalWt=" + totalWt+"}";
 	}
 

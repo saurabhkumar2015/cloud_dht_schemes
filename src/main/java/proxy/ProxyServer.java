@@ -151,7 +151,7 @@ public class ProxyServer {
 	             		   
 	             		   double weight = temp1.weight;
 	             		   String nodeIp = config.nodesMap.get(temp1.nodeId);
-	             		   CephPayload payload = new CephPayload(newNodeStr, newNodeClusterId, newNodeWt, sum);
+	             		   CephPayload payload = new CephPayload(newNodeStr, newNodeClusterId, newNodeWt, sum, ceph_routing_table);
 	             		   sendMsg.sendMessage(nodeIp, Constants.MOVE_FILE, payload);
 	             		   sum = sum - weight;
 	             	   }
