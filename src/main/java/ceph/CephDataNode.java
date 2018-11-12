@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import common.Commons;
+import common.Constants;
 import common.IDataNode;
 import common.IRoutingTable;
 import config.ConfigLoader;
@@ -43,7 +45,7 @@ public class CephDataNode  implements IDataNode{
 		//step 1. find the placementGroupId for file
 		int placementGroupId = this.hashGenerator.getPlacementGroupIdFromFileName(fileName, config.PlacementGroupMaxLimit);
 		
-		// Step 2: push the Data to the DataNodeDeleted
+		// Step 2: push the Data to the DataNode
 		DataObject obj = new DataObject(placementGroupId, replicaId,fileName);
 		dataList.add(obj);
 		
@@ -51,7 +53,7 @@ public class CephDataNode  implements IDataNode{
 
 	public void deleteFile(String fileName) {
 		// TODO Auto-generated method stub				
-				// Step 1: Remove the Data from the DataNodeDeleted
+				// Step 1: Remove the Data from the DataNode
 				for(DataObject obj : dataList)
 				{
 					if(obj.fileName == fileName)
@@ -62,8 +64,8 @@ public class CephDataNode  implements IDataNode{
 	public void addNode(int nodeId) {
 		// TODO Auto-generated method stub
 		try {
-			this.cephRtTable.addNode(nodeId);
-		} catch (Exception e) {
+			this.cephRtTable = this.cephRtTable.addNode(nodeId);
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -79,8 +81,21 @@ public class CephDataNode  implements IDataNode{
 		
 	}
     
-    
+    public void MoveFiles(int clusterIdofNewNode,String nodeIp, double newnodeWeight, double clusterWeight)
+    {
+    	// iterate on local file copy and move the file accordingly
+    	for(DataObject obj : dataList)
+		{
+			double hashvalue = HashGenerator.getInstance().generateHashValue(clusterIdofNewNode, obj.placementGroup, obj.replicaId);
+			double weightFactor = HashGenerator.getInstance().GetWeightFactor(newnodeWeight, clusterWeight);
+			
+			if(hashvalue < weightFactor)
+			{
+				Commons.messageSender.sendMessage(nodeIp, Constants.ADD_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
+				dataList.remove(obj);
+			}
+		}	
+    }
     
 }
-
 
