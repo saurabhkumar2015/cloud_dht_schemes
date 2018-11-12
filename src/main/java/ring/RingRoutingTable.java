@@ -132,7 +132,9 @@ public class RingRoutingTable implements IRoutingTable {
 			}
     		}
     	}
-    	
+    	if(start>end){
+		return null;
+	}
     	//add successors
     	//System.out.println("returnHashValIndex: "+returnHashValIndex);
     	int replicationStartIndex = 0;
@@ -162,8 +164,13 @@ public class RingRoutingTable implements IRoutingTable {
     public int getNodeId(String fileName, int replicationId) {
         int hashVal = this.getHasValueFromIpPort(fileName);
         LinkedList<Integer> listOfNodesForGivenHash = modifiedBinarySearch(hashVal);
-        return listOfNodesForGivenHash.get(replicationId-1);
-
+	if(listOfNodesForGivenHash!=null){
+	    if(listOfNodesForGivenHash.size()==this.replicationFactor)
+		    return listOfNodesForGivenHash.get(replicationId-1);
+	    else
+		    return -1;
+	}
+        return -1
     }
     
     //nodeId = ip:port
