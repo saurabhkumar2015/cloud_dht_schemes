@@ -65,8 +65,8 @@ public class ClientWorker {
                 case MOVE_FILE:
                 	CephPayload payload = (CephPayload) request.getPayload();
                 	System.out.println("Received move file request from proxy: "+ payload);
-                    dataNode.MoveFiles(payload.clusterId, payload.nodeIp, payload.nodeWeight, payload.totalWt);
                     dataNode.UpdateRoutingTable((IRoutingTable)payload.updated_ceph_routing_table);
+                    dataNode.MoveFiles(payload.clusterId, payload.nodeIp, payload.nodeWeight, payload.totalWt);
                     break;
                 default:
                     throw new Exception("Unsupported message type");
