@@ -1,19 +1,14 @@
 package clients;
 
-import ceph.CephRoutingTable;
-import ceph.EntryPoint;
+import common.Commons;
 import common.IRoutingTable;
 import common.Payload;
 import config.ConfigLoader;
 import config.DHTConfig;
-import ring.RingRoutingTable;
-import schemes.ElasticDHT.RoutingTable;
 import socket.MessageSendImpl;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
 
 import static common.Constants.*;
@@ -34,7 +29,7 @@ public class RegularClient {
 
         ConfigLoader.init(args[0]);
         DHTConfig config = ConfigLoader.config;
-        initRegularClient(config);
+        routingTable = Commons.initRoutingTable(config);
         FileReader f = new FileReader(args[1]);
         BufferedReader bf = new BufferedReader(f);
         String line = bf.readLine();
@@ -62,32 +57,5 @@ public class RegularClient {
             line = bf.readLine();
         }
         bf.close();
-    }
-
-    private static void initRegularClient(DHTConfig config) throws Exception {
-        String scheme = config.scheme;
-
-        switch (scheme) {
-            case "RING":
-            case "ring":
-                routingTable = new RingRoutingTable();
-                break;
-            case "ELASTIC":
-            case "elastic":
-                schemes.ElasticDHT.RoutingTable r = new schemes.ElasticDHT.RoutingTable();
-                RoutingTable.GetInstance().getRoutingTable();
-                routingTable = r;
-                break;
-            case "CEPH":
-            case "ceph":
-                EntryPoint entryPoint = new EntryPoint();
-                entryPoint.BootStrapCeph();
-                routingTable = CephRoutingTable.getInstance();
-                break;
-            default:
-                throw new Exception("Incompatible DHT schema found!");
-
-        }
-
     }
 }

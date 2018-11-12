@@ -2,6 +2,7 @@ package common;
 
 import ceph.CephDataNode;
 import ceph.CephRoutingTable;
+import ceph.EntryPoint;
 import config.DHTConfig;
 import ring.DataNode;
 import ring.RingDHTScheme;
@@ -49,6 +50,35 @@ public class Commons {
                 throw new Exception("Unsupported DHT scheme found " + config.scheme);
 
         }
+    }
+
+    public static IRoutingTable initRoutingTable(DHTConfig config) throws Exception {
+        String scheme = config.scheme;
+        IRoutingTable routingTable;
+
+        switch (scheme) {
+            case "RING":
+            case "ring":
+                RingDHTScheme ring = new RingDHTScheme();
+                DataNode dNode = new DataNode(ring);
+                routingTable = dNode.routingTableObj;
+                break;
+            case "ELASTIC":
+            case "elastic":
+                schemes.ElasticDHT.RoutingTable r = new schemes.ElasticDHT.RoutingTable();
+                RoutingTable.GetInstance().getRoutingTable();
+                routingTable = r;
+                break;
+            case "CEPH":
+            case "ceph":
+                EntryPoint entryPoint = new EntryPoint();
+                entryPoint.BootStrapCeph();
+                routingTable = CephRoutingTable.getInstance();
+                break;
+            default:
+                throw new Exception("Incompatible DHT schema found!");
+        }
+        return routingTable;
     }
     
     // Message Sender

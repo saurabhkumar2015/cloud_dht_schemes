@@ -7,13 +7,12 @@ import common.Constants;
 import common.IDataNode;
 public class DataNode implements IDataNode {
 
-    RingRoutingTable routingTableObj;
+    public RingRoutingTable routingTableObj;
 
     public DataNode(RingDHTScheme ring) {
     	this.routingTableObj = ring.routingTableObj;
     }
 
-    //nodeId = ip:port
     public void addNode(int nodeId) {
     	routingTableObj.addNode(nodeId);
     }

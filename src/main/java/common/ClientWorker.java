@@ -1,5 +1,7 @@
 package common;
 
+import config.ConfigLoader;
+import config.DHTConfig;
 import socket.Request;
 
 import java.io.*;
@@ -11,10 +13,12 @@ public class ClientWorker {
 
     private static IDataNode dataNode;
     private static int exceptionCount;
+    private static boolean debug = true;
 
 
     public ClientWorker(IDataNode node) {
         dataNode = node;
+        debug = "debug".equalsIgnoreCase(ConfigLoader.config.verbose);
     }
 
     public void run(Socket client) {
@@ -32,27 +36,27 @@ public class ClientWorker {
             switch (request.getType()) {
                 case WRITE_FILE:
                     Payload p = (Payload) request.getPayload();
-                    System.out.println("File Write::" + p.fileName);
+                    System.out.println("File Write:: " + p.fileName);
                     dataNode.writeFile(p.fileName, p.replicaId);
                     break;
                 case DELETE_FILE:
                     Payload p1 = (Payload) request.getPayload();
-                    System.out.println("File Write::" + p1.fileName);
+                    System.out.println("File Write:: " + p1.fileName);
                     dataNode.writeFile(p1.fileName, p1.replicaId);
                     break;
                 case ADD_NODE:
                     Integer nodeId = (Integer) request.getPayload();
-                    System.out.println("Add node" + nodeId);
+                    System.out.println("Add node " + nodeId);
                     dataNode.addNode(nodeId);
                     break;
                 case DELETE_NODE:
                     Integer nodeId1 = (Integer) request.getPayload();
-                    System.out.println("Delete node" + nodeId1);
+                    System.out.println("Delete node " + nodeId1);
                     dataNode.deleteNode(nodeId1);
                     break;
                 case LOAD_BALANCE:
                     LoadBalance lb = (LoadBalance) request.getPayload();
-                    System.out.println("Load Balance" + lb);
+                    System.out.println("Load Balance    " + lb);
                     dataNode.loadBalance(lb.nodeId, lb.loadFactor);
                     break;
                 default:
