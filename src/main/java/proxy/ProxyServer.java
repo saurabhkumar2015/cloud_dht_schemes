@@ -2,16 +2,21 @@ package proxy;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import common.CephPayload;
 import common.Constants;
+import common.IRoutingTable;
 
 import org.apache.commons.lang3.SerializationUtils;
 
 import ceph.CephRoutingTable;
 import ceph.EntryPoint;
+import ceph.Node;
 import config.ConfigLoader;
 import config.DHTConfig;
 import socket.MessageSendImpl;
@@ -28,9 +33,6 @@ public class ProxyServer {
 	private static RingRoutingTable ring_routing_table;
 	private static ElasticRoutingTable elastic_routing_table;
 	private static IMessageSend sendMsg = new MessageSendImpl();
-	
-	
-    
 	
 	/* Bootstrapping the DHT table according to scheme */
 	
@@ -110,13 +112,53 @@ public class ProxyServer {
 	    	while(true) {
 	    		
 	    		// listening on port 5000
+	            // takes input from the client socket 
+			   /*  in = socket.getInputStream(); 
+			    byte[] bytes = IOUtils.readFully(in, -1, true);
+			        
+			     Request message = SerializationUtils.deserialize(bytes);*/
+	    		
 				server = new ServerSocket(5000);
 				socket = server.accept(); 
-		         // takes input from the client socket 
-		        in = socket.getInputStream(); 
-		        byte[] bytes = IOUtils.readFully(in, -1, true);
-		        
-		    	Request message = SerializationUtils.deserialize(bytes);
+		 
+		    	
+		    	ObjectInputStream ins = new ObjectInputStream(socket.getInputStream());
+		        Request message = (Request) ins.readObject();
+
+		    	if((message.getType()).equals(Constants.ADD_NODE)) {
+		    		
+		    		Integer nodeId = (Integer) message.getPayload();
+                    System.out.println("Add node " + nodeId);
+                    CephRoutingTable updated_ceph_routing_table = (CephRoutingTable)ceph_routing_table.addNode(nodeId);
+                    ceph_routing_table = updated_ceph_routing_table;
+                    
+                    Node headNode = ceph_routing_table.mapInstance.FindNodeInOsdMap(nodeId);
+                    
+	                   Node temp = headNode;
+	                   Node temp1 = headNode.nextNode;
+	             	   double sum = 0;
+	             	   while(temp != null)
+	             	   {
+	             		   sum = sum + temp.weight;
+	             		   temp = temp.nextNode;
+	             	   }
+	             	   
+	             	  String newNodeStr = config.nodesMap.get(headNode.nodeId);
+            		  int newNodeClusterId = headNode.clusterId;
+            		  double newNodeWt = headNode.weight;
+            		  
+	             	   while(temp1 != null) {
+	             		   
+	             		   double weight = temp1.weight;
+	             		   String nodeIp = config.nodesMap.get(temp1.nodeId);
+	             		   CephPayload payload = new CephPayload(newNodeStr, newNodeClusterId, newNodeWt, sum);
+	             		   sendMsg.sendMessage(nodeIp, Constants.MOVE_FILE, payload);
+	             		   sum = sum - weight;
+	             	   }
+                       
+                 
+		    		
+		    	}
 		    	
 		    	if(message.getType() == Constants.NEW_VERSION) {
 		    		
@@ -130,27 +172,8 @@ public class ProxyServer {
 		    			}
 		    			
 		    		}
+		   
 		    		
-		    		else if(scheme.equals("RING") || scheme.equals("ring")) {
-		    			
-		    			RingRoutingTable updated_ring_routing_table = (RingRoutingTable)message.getPayload();
-		    			
-		    			if(ring_routing_table.version < updated_ring_routing_table.version) {
-		    				ring_routing_table = updated_ring_routing_table;
-		    				sendUpdatedDhtToDatanodes(config);
-		    			}
-		    			
-		    		}
-		    		
-		    		else {
-		    			
-		    			ElasticRoutingTable updated_elastic_routing_table = (ElasticRoutingTable)message.getPayload();
-		    			
-//		    			if(elastic_routing_table.version < updated_elastic_routing_table.version) {
-//		    				elastic_routing_table = updated_elastic_routing_table;
-//		    				sendUpdatedDhtToDatanodes(config);
-//		    			}
-		    		}
 		    			//compare epoch number & if greater...update dht and send messages to datanodes
 		    	
 		    	}
