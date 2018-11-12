@@ -63,12 +63,7 @@ public class CephDataNode  implements IDataNode{
 
 	public void addNode(int nodeId) {
 		// TODO Auto-generated method stub
-		try {
-			this.cephRtTable = this.cephRtTable.addNode(nodeId);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		this.cephRtTable = this.cephRtTable.addNode(nodeId);
 	}
 
 	public void deleteNode(int nodeId) {
