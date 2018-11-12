@@ -1,6 +1,8 @@
 package ceph;
 
-public class Node {
+import java.io.Serializable;
+
+public class Node implements Serializable {
   // each cell in the OsdNode is a node
 	public double weight;
     
