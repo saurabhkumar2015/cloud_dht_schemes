@@ -91,6 +91,7 @@ public class RingRoutingTable implements IRoutingTable {
     	LinkedList<Integer> listOfHashesForGivenHash = new LinkedList<Integer>();
     	int start = 0;
     	int end = this.routingMap.size()-1;
+	int originalSize = end;
     	int returnHashValIndex = 0;
     	boolean nodeFound = false;
     	while(start<=end) {
@@ -119,6 +120,7 @@ public class RingRoutingTable implements IRoutingTable {
     		else {
     			//System.out.println("second half");
     			start = mid+1;
+			if(start < originalSize){
     			int nextVal = listOfHash.get(start);
     			if(nextVal>findHashVal) {
         			System.out.println("found hash: "+midVal);
@@ -127,6 +129,7 @@ public class RingRoutingTable implements IRoutingTable {
         			returnHashValIndex = start;
         			break;
         		}
+			}
     		}
     	}
     	
