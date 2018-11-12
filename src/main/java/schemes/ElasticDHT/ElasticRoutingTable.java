@@ -18,7 +18,6 @@ public class ElasticRoutingTable {
 		
 		DHTConfig config = ConfigLoader.config;
 		int size = config.bucketSize;
-		 l = new ArrayList<Integer>();
 		int r = config.replicationFactor;
 		
 		ElasticRoutingTableInstance[] initialTable  = new ElasticRoutingTableInstance[size];
@@ -27,9 +26,10 @@ public class ElasticRoutingTable {
 		// randomly get a nodeId between start and end
 		// i is the hashbucket
 		// config.replicationFactor
+		rno = new Random(config.seed);
 		for(int k = 0;k<size;k++) {
-			l.clear();
-			rno = new Random(config.seed);
+			 l = new ArrayList<Integer>();
+
 			rint = rno.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
 			
 			l.add(rint);

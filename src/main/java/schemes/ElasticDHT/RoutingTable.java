@@ -80,6 +80,7 @@ public class RoutingTable implements IRoutingTable{
 		for(int i = 0;i<size;i++) {
 			
 			int  k  = check(i,nodeId);
+			System.out.println("k = "+k+"i = "+i);
 			if(k!=-1) {
 				elasticTable[i].nodeId.set(k, replaceNodeId);
 				System.out.println("Deleting and replacing with : "+replaceNodeId);
@@ -124,7 +125,7 @@ public class RoutingTable implements IRoutingTable{
 		Random rn = new Random(config.seed);
 		replaceNodeId = rn.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
 		Random rn1 = new Random(config.seed);
-		replaceNodeId = rn1.nextInt(7)+0;
+		replaceNodeId = rn1.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
 		while(replaceNodeId==nodeId) {
 			replaceNodeId = rn.nextInt(7)+0;
 		}
@@ -164,9 +165,12 @@ public class RoutingTable implements IRoutingTable{
 	int check(int index, int nodeId) {
 		int i = 0;
 		boolean b =false;
+		if(index == 401) {
+			System.out.println("" );
+		}
 		
-		for( i = 0;i<config.replicationFactor;i++) {
-			if((Integer)elasticTable[index].nodeId.get(i)==nodeId) {
+		for( i = 0;i<3;i++) {
+			if(elasticTable[index].nodeId.get(i)==nodeId) {
 				b= true;
 				break;
 			}
@@ -189,11 +193,14 @@ public class RoutingTable implements IRoutingTable{
 	public void addNode(int nodeId) {
 		Random rno =  new Random(config.seed);
 		int noOfHashIndices = rno.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
+		int  interval = config.bucketSize % noOfHashIndices;
+		int count =0;
 		int mainIndex = 0;//The number of hash values for which we change the node Id.
-		for(int i = 0;i<noOfHashIndices;i++) {
+		for(int i = interval;i<config.bucketSize;i+=interval) {
+			count++;
 			
 			Random rno1 = new Random();
-			 mainIndex = rno1.nextInt(noOfHashIndices);
+			 mainIndex = i;
 			 // For which hashIndex, we want
 			int subIndex = rno1.nextInt(3)+1;
 			if(nodeId!=elasticTable[mainIndex].nodeId.get(subIndex-1)) {
@@ -204,6 +211,9 @@ public class RoutingTable implements IRoutingTable{
 			
 			elasticTable[mainIndex].nodeId.set(subIndex-1, nodeId);
 			System.out.println("After : " +elasticTable[mainIndex].hashIndex +"    " + elasticTable[mainIndex].nodeId.get(subIndex-1));
+			}
+			if(count>10) {
+				break;
 			}
 		}
 		
