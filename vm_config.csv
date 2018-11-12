@@ -1,0 +1,15 @@
+{
+	"version": 0,
+	"nodeIdStart": 1,
+	"nodeIdEnd": 10 ,
+    "proxyIp": "192.168.0.100",
+	"bucketSize": 1024,
+	"verbose": "info",
+	"dhtType": "centralized",
+	"scheme": "ring",
+	"replicationFactor": 3,
+    "cephMaxClusterSize" : 5,
+	"seed": 32,
+	"PlacementGroupMaxLimit":10,
+	"nodeMapLocation":"/home/vm_nodes.csv"
+}
