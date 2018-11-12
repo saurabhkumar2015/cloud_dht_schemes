@@ -43,7 +43,10 @@ public class ControlClient {
                     for (String id : ids) {
                         int i = Integer.parseInt(id.trim());
                         if(config.dhtType.toLowerCase().equalsIgnoreCase("centralized"))
+                        {
+                            System.out.print("Add Node "+ id +"sent to Proxy:"+config.proxyIp);
                             messageSender.sendMessage(config.proxyIp, ADD_NODE, i);
+                        }
                         else messageSender.sendMessage(config.nodesMap.get(nodeId), ADD_NODE, i);
                     }
                     break;

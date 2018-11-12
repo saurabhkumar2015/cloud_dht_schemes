@@ -110,7 +110,6 @@ public class ProxyServer {
 	     try {
 	    	 
 		server = new ServerSocket(5000);
-		socket = server.accept(); 
 	    	while(true) {
 	    		
 	    		// listening on port 5000
@@ -119,11 +118,8 @@ public class ProxyServer {
 			    byte[] bytes = IOUtils.readFully(in, -1, true);
 			        
 			     Request message = SerializationUtils.deserialize(bytes);*/
-	    		
-				
-		 
-		    	
-		    	ObjectInputStream ins = new ObjectInputStream(socket.getInputStream());
+				socket = server.accept();
+				ObjectInputStream ins = new ObjectInputStream(socket.getInputStream());
 		        Request message = (Request) ins.readObject();
 
 		    	if((message.getType()).equals(Constants.ADD_NODE)) {
