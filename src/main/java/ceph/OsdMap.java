@@ -17,6 +17,8 @@ public class OsdMap {
 	
 	public OsdNode root= null;
 	
+	public Node foundNode = null;
+	
 	public int maxclusterInlevel;   // This value will come from Configuration file
 	
 	public int depthofOsdMap;  // This is the calculated value using #node & #clusterSize
@@ -188,9 +190,11 @@ public class OsdMap {
    }
    
    // Find the given nodeId in the OsdMap
-   public void FindNodeInOsdMap(int nodeId)
+   public Node FindNodeInOsdMap(int nodeId)
    {
+	   this.foundNode = null;
 	   _findNodeInOsdMap(root,nodeId, 1, true);
+	   return this.foundNode;
    }
    
    // Set the activation flag false for given nodeId
@@ -292,8 +296,8 @@ public class OsdMap {
 		   return;
 	   }
 	   // show the current node 
-	   boolean isNodeFound = _findNodeInOsdMapAtThisLevel(node,nodeId, level, isActive);
-	   if(isNodeFound)
+	   boolean foundNode = _findNodeInOsdMapAtThisLevel(node,nodeId, level, isActive);
+	   if(foundNode)
 		   return;
 	   // iterate over the next node and show their child
 	   Node tempNode = node.headNode;
@@ -313,6 +317,7 @@ public class OsdMap {
 		   {
 			   currentNode.isActive = isActiveStatus;
 			   System.out.println(String.format("NodeId = %d present at level = %d with Status = %s", nodeId, level, currentNode.isActive));
+			   this.foundNode = currentNode;
 			   return true;
 		   }
 		   currentNode = currentNode.nextNode;

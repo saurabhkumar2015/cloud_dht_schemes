@@ -13,7 +13,7 @@ public class CephRoutingTable implements IRoutingTable {
 
     private int depth;
 
-    private OsdMap mapInstance;
+    public OsdMap mapInstance;
 
     private static CephRoutingTable single_instance = null;
 

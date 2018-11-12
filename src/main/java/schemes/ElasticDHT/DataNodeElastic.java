@@ -4,14 +4,10 @@ import common.IDataNode;
 
 public class DataNodeElastic implements IDataNode {
 
-	public DataNodeElastic(int nodeId) {
-		this.nodeId = nodeId;
-	}
-
-	public int nodeId;
+	private int nodeId;
 
 	public void writeFile(String fileName, int replicaId) {
-		int hashcode = fileName.hashCode();
+		int hashcode = fileName.hashCode()%1024;
 		nodeId = 0;
 		for(int i = 0; i<schemes.ElasticDHT.RoutingTable.elasticTable.length;i++) {
 			if(schemes.ElasticDHT.RoutingTable.elasticTable[i].hashIndex==hashcode) {

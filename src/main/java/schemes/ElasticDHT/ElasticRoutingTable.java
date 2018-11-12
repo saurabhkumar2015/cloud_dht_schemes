@@ -12,12 +12,13 @@ public class ElasticRoutingTable {
 	private ArrayList<Integer> l;
 	private Random rno;
 
+	@SuppressWarnings("unchecked")
 	public ElasticRoutingTableInstance[] populateRoutingTable() {
 		
 		
 		DHTConfig config = ConfigLoader.config;
 		int size = config.bucketSize;
-		 l = new ArrayList();
+		 l = new ArrayList<Integer>();
 		int r = config.replicationFactor;
 		
 		ElasticRoutingTableInstance[] initialTable  = new ElasticRoutingTableInstance[size];
