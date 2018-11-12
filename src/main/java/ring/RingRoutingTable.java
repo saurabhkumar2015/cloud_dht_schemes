@@ -170,7 +170,7 @@ public class RingRoutingTable implements IRoutingTable {
 	    else
 		    return -1;
 	}
-        return -1
+        return -1;
     }
     
     //nodeId = ip:port

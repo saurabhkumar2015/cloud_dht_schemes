@@ -5,6 +5,7 @@ import config.ConfigLoader;
 import config.DHTConfig;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Random;
 
 public class CephRoutingTable implements IRoutingTable, Serializable {

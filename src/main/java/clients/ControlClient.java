@@ -42,7 +42,9 @@ public class ControlClient {
                     String[] ids = input.split(",");
                     for (String id : ids) {
                         int i = Integer.parseInt(id.trim());
-                        messageSender.sendMessage(config.nodesMap.get(nodeId), ADD_NODE, i);
+                        if(config.dhtType.toLowerCase().equalsIgnoreCase("centralized"))
+                            messageSender.sendMessage(config.proxyIp, ADD_NODE, i);
+                        else messageSender.sendMessage(config.nodesMap.get(nodeId), ADD_NODE, i);
                     }
                     break;
                 case "D":

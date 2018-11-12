@@ -104,7 +104,7 @@ public class OsdMap implements Serializable{
     	if(root.clusterCountInLevel < maxclusterInlevel)
     	{
     			Node newlyAddedNode = root.AddNodeAtStartOfList(hashGenerator.randomWeightGenerator(), clusterId, nodeId,1);
-    			MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
+//    			MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
     	    	return;
     	}
     	ParentChildPair leftNodePair = findTheClusterNodetoAddIterative(root.headNode.leftNode, root.headNode, 1);
