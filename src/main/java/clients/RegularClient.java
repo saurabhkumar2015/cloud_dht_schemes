@@ -23,7 +23,6 @@ import static common.Constants.*;
  */
 public class RegularClient {
 
-
     private static IRoutingTable routingTable;
     private static MessageSendImpl messageSender = new MessageSendImpl();
     private static Scanner sc = new Scanner(System.in);

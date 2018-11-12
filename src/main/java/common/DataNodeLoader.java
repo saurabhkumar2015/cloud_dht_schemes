@@ -19,10 +19,10 @@ public class DataNodeLoader {
         int port = Integer.parseInt(ipPort[1]);
         IDataNode dataNode = Commons.loadDataNode(ConfigLoader.config, nodeId);
         ServerSocket server = new ServerSocket(port);
+        ClientWorker w = new ClientWorker( dataNode);
         while(true) {
             Socket clientSocket = server.accept();
-            Thread th = new ClientWorker(clientSocket, dataNode);
-            th.start();
+            w.run(clientSocket);
         }
     }
 
