@@ -1,18 +1,52 @@
 package schemes.ElasticDHT;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import config.ConfigLoader;
+import config.DHTConfig;
+
 public class ElasticRoutingTable {
+	private int rint;
+	private ArrayList<Integer> l;
+	private Random rno;
+
 	public ElasticRoutingTableInstance[] populateRoutingTable() {
-		ElasticRoutingTableInstance[] initialTable  = new ElasticRoutingTableInstance[7];
 		
-		initialTable[0]= new ElasticRoutingTableInstance(1,1,2,3) ;
-		initialTable[1]= new ElasticRoutingTableInstance(2,2,1,4) ;
-		initialTable[2]= new ElasticRoutingTableInstance(3,4,5,3) ;
-		initialTable[3]= new ElasticRoutingTableInstance(4,5,4,1) ;
-		initialTable[4]= new ElasticRoutingTableInstance(5,2,4,1) ;	
 		
-		initialTable[5]= new ElasticRoutingTableInstance(6,1,2,2) ;	
-	
-		initialTable[6]= new ElasticRoutingTableInstance(7,3,4,5) ;	
+		DHTConfig config = ConfigLoader.config;
+		int size = config.bucketSize;
+		 l = new ArrayList();
+		int r = config.replicationFactor;
+		
+		ElasticRoutingTableInstance[] initialTable  = new ElasticRoutingTableInstance[size];
+		//for loop till size-1  var i
+		//node id list is : config.nideIdStart till config.nodeIdEnd
+		// randomly get a nodeId between start and end
+		// i is the hashbucket
+		// config.replicationFactor
+		for(int k = 0;k<size;k++) {
+			l.clear();
+			rno = new Random(config.seed);
+			rint = rno.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
+			
+			l.add(rint);
+			for(int i = 1;i<r;i++) {
+				boolean b= false;
+				while(b== false) {
+					rno = new Random();
+					rint = rno.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
+					b = check(rint);
+				}
+				l.add(rint);
+				
+			}
+			
+			initialTable[k] =  new ElasticRoutingTableInstance(k,l);
+		
+		}
+	 //make it a list
 	
 	
 		
@@ -20,6 +54,22 @@ public class ElasticRoutingTable {
 		return initialTable;
 		
 		
+	}
+
+	@SuppressWarnings("unused")
+	private boolean check(int rint2) {
+		int size = l.size();
+		for(int i = 0;i<size;i++) {
+			if(rint2==(Integer)l.get(i)) {
+				break;
+			}
+			else {
+				return true;
+			}
+		}
+		
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

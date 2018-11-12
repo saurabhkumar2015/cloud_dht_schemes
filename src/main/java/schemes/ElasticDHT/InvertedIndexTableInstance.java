@@ -1,9 +1,11 @@
 package schemes.ElasticDHT;
 import java.util.*;
 
+
+
 public class InvertedIndexTableInstance {
 	public int nodeId;
-	public BitSet usedHashedIndex = new BitSet(7);
+	public BitSet usedHashedIndex = new BitSet(config.ConfigLoader.config.bucketSize);
 	
 	
 	// Constructor which could be parameterized later
