@@ -119,7 +119,7 @@ public class OsdMap {
 				// Now need to set the Osd Map pointer to the newly added node as cluster start point
        			leftNodePair.Parent.leftNode.headNode = newlyAddedNode;
 				// Need to move the files from other node in sub cluster
-				MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
+				//MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
 			}
 			else
 				internalKey.AddNode(0, clusterId, -1,value);				
