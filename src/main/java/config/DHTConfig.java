@@ -1,13 +1,14 @@
 package config;
 
 import java.util.Map;
+import java.io.Serializable;
 
 /* Doc link
  * https://docs.google.com/document/d/1zJuuDiHpp24EAniAqsfeKmsXrEXuPTuteHOf3zakkEc/edit
  */
 
 
-public class DHTConfig {
+public class DHTConfig implements Serializable{
 
     public long version;
     public int nodeIdStart= 1;
