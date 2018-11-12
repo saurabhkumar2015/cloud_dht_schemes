@@ -5,6 +5,8 @@ import java.util.*;
 import common.IRoutingTable;
 import config.ConfigLoader;
 import config.DHTConfig;
+import common.Commons;
+import common.Constants;
 
 public class RingRoutingTable implements IRoutingTable {
 
@@ -183,6 +185,7 @@ public class RingRoutingTable implements IRoutingTable {
     	System.out.println("\n");
     	System.out.println("Adding new node: "+nodeId);
     	System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " removed from Node :"+ routingMap.get(listOfHashesForNewHash.get(0)));
+    	
     	System.out.println("Hash range "+ listOfHashesForNewHash.get(0)+" - "+(newHash-1)+ " removed from Node :"+ routingMap.get(listOfHashesForNewHash.get(listOfHashesForNewHash.size()-1)));
     	int newNodeId = ++this.numNodeIds;
     	System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " added to Node :"+ newNodeId);
@@ -192,9 +195,11 @@ public class RingRoutingTable implements IRoutingTable {
     	
     	//update routing map
     	this.routingMap.put(newHash, newNodeId);
+    	this.version++;
     	
     	//Print updated Routing Table
     	System.out.println("\n");
+    	System.out.println("Routing Table version: "+this.version);
     	System.out.println("New Routing Map after new node added");
     	printRoutingTable();
     	
@@ -222,8 +227,10 @@ public class RingRoutingTable implements IRoutingTable {
     	
     	//update routing map
     	this.routingMap.remove(deleteHash);
+    	this.version++;
     	
     	System.out.println("\n");
+    	System.out.println("Routing Table version: "+this.version);
     	//Print updated Routing Table
     	System.out.println("New Routing Map after new node added");
     	printRoutingTable();
@@ -245,6 +252,7 @@ public class RingRoutingTable implements IRoutingTable {
     	}
     	
 		if(loadFraction>1.0) {
+			System.out.println("\n");
 			System.out.println("Moving node's start hash range to left side - increasing the load");
 			int initialTotalHashRang = listOfAssociatedHashes.get(1)-listOfAssociatedHashes.get(0);
 	    	System.out.println("Total number of hashes handled so far, by predecessor: "+initialTotalHashRang);
@@ -254,7 +262,9 @@ public class RingRoutingTable implements IRoutingTable {
 			//update routing table
 			routingMap.remove(nodeHash);
 			routingMap.put(newStartHash, nodeIdInt);
+			this.version++;
 			System.out.println("\n");
+			System.out.println("Routing Table version: "+this.version);
 	    	//Print updated Routing Table
 	    	System.out.println("New Routing Map after new node added");
 	    	printRoutingTable();
@@ -262,6 +272,7 @@ public class RingRoutingTable implements IRoutingTable {
 	    	System.out.println("Hash range "+ newStartHash +" - "+ (nodeHash-1) +" added to "+routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
 		}
 		else if(loadFraction<1.0) {
+			System.out.println("\n");
 			System.out.println("Moving node's start hash range to right side - decreaseing the load");
 			int initialTotalHashRang = listOfAssociatedHashes.get(2)-listOfAssociatedHashes.get(1);
 	    	System.out.println("Total number of hashes handled so far, by predecessor: "+initialTotalHashRang);
@@ -271,16 +282,19 @@ public class RingRoutingTable implements IRoutingTable {
 			//update routing table
 			routingMap.remove(nodeHash);
 			routingMap.put(newStartHash, nodeIdInt);
+			this.version++;
 			System.out.println("\n");
+			System.out.println("Routing Table version: "+this.version);
 	    	//Print updated Routing Table
 	    	System.out.println("New Routing Map after new node added");
 	    	printRoutingTable();
 	    	//What all nodes will be updates
-	    	System.out.println("Hash range "+ nodeHash + " - "+ (newStartHash-1) +" added to "+routingMap.get(listOfAssociatedHashes.get(0)));
-	    	System.out.println("Hash range "+ nodeHash + " - "+ (newStartHash-1) +" removed from "+routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
+	    	System.out.println("Hash range "+ nodeHash + " - "+ (newStartHash-1) +" added to NodeId "+routingMap.get(listOfAssociatedHashes.get(0)));
+	    	System.out.println("Hash range "+ nodeHash + " - "+ (newStartHash-1) +" removed from NodeId "+routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
 		}
 		
 		else {
+			System.out.println("\n");
 			System.out.println("No change in the load");
 		}
 		return this;

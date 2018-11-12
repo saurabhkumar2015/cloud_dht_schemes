@@ -13,13 +13,13 @@ public class ElasticRoutingTable {
 	private Random rno;
 
 	public ElasticRoutingTableInstance[] populateRoutingTable() {
-
-
+		
+		
 		DHTConfig config = ConfigLoader.config;
 		int size = config.bucketSize;
-		l = new ArrayList();
+		 l = new ArrayList();
 		int r = config.replicationFactor;
-
+		
 		ElasticRoutingTableInstance[] initialTable  = new ElasticRoutingTableInstance[size];
 		//for loop till size-1  var i
 		//node id list is : config.nideIdStart till config.nodeIdEnd
@@ -30,7 +30,7 @@ public class ElasticRoutingTable {
 			l.clear();
 			rno = new Random(config.seed);
 			rint = rno.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
-
+			
 			l.add(rint);
 			for(int i = 1;i<r;i++) {
 				boolean b= false;
@@ -40,20 +40,20 @@ public class ElasticRoutingTable {
 					b = check(rint);
 				}
 				l.add(rint);
-
+				
 			}
-
+			
 			initialTable[k] =  new ElasticRoutingTableInstance(k,l);
-
+		
 		}
-		//make it a list
-
-
-
+	 //make it a list
+	
+	
+		
 
 		return initialTable;
-
-
+		
+		
 	}
 
 	@SuppressWarnings("unused")
@@ -67,7 +67,7 @@ public class ElasticRoutingTable {
 				return true;
 			}
 		}
-
+		
 		// TODO Auto-generated method stub
 		return false;
 	}

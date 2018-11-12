@@ -11,34 +11,34 @@ import java.util.Random;
 public class RoutingTable implements IRoutingTable{
 
 	public static   ElasticRoutingTableInstance[] elasticTable  = new ElasticRoutingTableInstance[100];
-
+	
 	public static RoutingTable single_instance = null;
 
-	private int changes[];
+	private int changes[]; 
 	DHTConfig config = ConfigLoader.config;
 	int size = config.bucketSize;
-
+	
 	public RoutingTable()
 	{
-
+		
 	}
-
-	// Make singleton Instance of routing table
+	
+	// Make singleton Instance of routing table 
 	public static RoutingTable GetInstance()
 	{
-		if (single_instance == null)
-			single_instance = new RoutingTable();
-
-		return single_instance;
+		if (single_instance == null) 
+            single_instance = new RoutingTable(); 
+  
+        return single_instance; 
 	}
-
+    
 	public ElasticRoutingTableInstance[] getRoutingTable()
 	{
 		ElasticRoutingTable elasticTable1 = new ElasticRoutingTable();
-		elasticTable = elasticTable1.populateRoutingTable();
-		return elasticTable;
+		 elasticTable = elasticTable1.populateRoutingTable();
+		 return elasticTable;
 	}
-
+	
 	//@SuppressWarnings("unchecked")
 /*	public IRoutingTable addNode(int clusterId, int nodeId)
 	{
@@ -50,8 +50,8 @@ public class RoutingTable implements IRoutingTable{
 			 mainIndex = rno1.nextInt(noOfHashIndices); // For which hashIndex, we want
 			int subIndex = rno1.nextInt(config.replicationFactor)+1;
 			elasticTable[mainIndex].nodeId.set(subIndex, nodeId);
-
-
+			
+			
 		}
 		return null;
 	}
@@ -59,10 +59,13 @@ public class RoutingTable implements IRoutingTable{
 		//System.out.print(elasticTable[mainIndex].nodeId1);
 		//System.out.print(elasticTable[mainIndex].nodeId2);
 		//System.out.print( elasticTable[mainIndex].nodeId3);
-
+		
 		// Implement this
-*/
 
+
+
+*/
+	
 	@SuppressWarnings("unchecked")
 	public IRoutingTable deleteNode(int nodeId)
 	{
@@ -76,23 +79,23 @@ public class RoutingTable implements IRoutingTable{
 		System.out.println(replaceNodeId);
 		for(int i = 0;i<size;i++) {
 			int  k  = check(i,nodeId);
-
+			
 			if(k==0) {
 				elasticTable[i].nodeId.set(k, replaceNodeId);
 
 			}
 			else if(k!=-1) {
-
+			
 				elasticTable[i].nodeId.set(k-1, replaceNodeId);
 			}
 			System.out.println(elasticTable[i].hashIndex + "  "+ elasticTable[i].nodeId.get(k));
-
+			
 			// check if nodeId is in hash and get that index
 		}
 		return this;
 	}
 
-
+	
 
 	public boolean Resize()
 	{
@@ -100,18 +103,18 @@ public class RoutingTable implements IRoutingTable{
 		return false;
 	}
 	public int getNodeId(String filename, int replicaId) {
-		int code = filename.hashCode()%1024;
-		System.out.println(code);
-		// May not be the temporary hash code I have
-		int nodeId = 0;
-
-		for(int k = 0;k<elasticTable.length;k++) {
-			if(elasticTable[k].hashIndex==code) {
+		 int code = filename.hashCode()%1024;
+		 System.out.println(code);
+		 // May not be the temporary hash code I have
+		 int nodeId = 0;
+		 
+		 for(int k = 0;k<elasticTable.length;k++) {
+			 if(elasticTable[k].hashIndex==code) {
 				nodeId = (Integer) elasticTable[k].nodeId.get(replicaId-1);
-				System.out.println("In function");
-			}
-		}
-		return nodeId;
+			 System.out.println("In function");
+			 }
+		 }
+		 return nodeId;
 	}
 
 	//public void addNode(int nodeId) throws IOException {
@@ -155,12 +158,12 @@ public class RoutingTable implements IRoutingTable{
 			elasticTable[changes[k]].nodeId.set(index, replaceNodeId);
 			System.out.println("Files were moved from "+nodeId +"to "+replaceNodeId);
 		}
+		
 		return this;
-
-
+		
 	}
 
-
+	
 	int check(int index, int nodeId) {
 		int i = 0;
 		for( i = 0;i<config.replicationFactor;i++) {
@@ -169,7 +172,7 @@ public class RoutingTable implements IRoutingTable{
 			}
 		}
 		return -1;
-
+		
 	}
 	public static void main(String arg[]) {
 		RoutingTable r =  new RoutingTable();
@@ -184,12 +187,15 @@ public class RoutingTable implements IRoutingTable{
 		int mainIndex = 0;//The number of hash values for which we change the node Id.
 		for(int i = 0;i<noOfHashIndices;i++) {
 			Random rno1 = new Random();
-			mainIndex = rno1.nextInt(noOfHashIndices); // For which hashIndex, we want
+			 mainIndex = rno1.nextInt(noOfHashIndices); // For which hashIndex, we want
 			int subIndex = rno1.nextInt(3)+1;
 			elasticTable[mainIndex].nodeId.set(subIndex-1, nodeId);
 			System.out.println(elasticTable[mainIndex].hashIndex +"    " + elasticTable[mainIndex].nodeId.get(subIndex-1));
-
+			
 		}
+		
 		return this;
+		
 	}
 }
+
