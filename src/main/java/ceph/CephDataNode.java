@@ -6,10 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import common.Commons;
-import common.Constants;
-import common.IDataNode;
-import common.IRoutingTable;
+import common.*;
 import config.ConfigLoader;
 import config.DHTConfig;
 import socket.IMessageSend;
@@ -90,7 +87,9 @@ public class CephDataNode  implements IDataNode{
 			
 			if(hashvalue < weightFactor)
 			{
-				Commons.messageSender.sendMessage(nodeIp, Constants.ADD_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
+				Payload payload = Commons.GeneratePayload(obj.fileName, obj.replicaId);
+				System.out.println("Add file request sent to "+ nodeIp + "payload: "+ payload);
+				Commons.messageSender.sendMessage(nodeIp, Constants.WRITE_FILE, payload);
 				iter.remove();
 			}
 		}	

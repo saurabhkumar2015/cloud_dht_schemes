@@ -45,7 +45,7 @@ public class DataNode implements IDataNode {
 		
 		int nId = routingTableObj.getNodeId(fileName, replicaId);
 		System.out.println("File written into node id: "+nId+" Replication Id:"+replicaId);
-		Commons.messageSender.sendMessage(routingTableObj.physicalTable.get(nId), Constants.ADD_FILE, Commons.GeneratePayload(fileName, replicaId));
+		Commons.messageSender.sendMessage(routingTableObj.physicalTable.get(nId), Constants.WRITE_FILE, Commons.GeneratePayload(fileName, replicaId));
 		/*
 		LinkedList<Integer> listOfAssociatedHashes =  routingTableObj.modifiedBinarySearch(hashVal);
 		for(int start=0; start<routingTableObj.replicationFactor;start++) {
