@@ -28,6 +28,7 @@ public class OsdNode implements Serializable {
 			 tempNode = tempNode.nextNode;
 		 Node newNode = new Node(weight,clusterId, nodeid, level);
 		 tempNode.nextNode = newNode;
+		 newNode.prevNode = tempNode;
 		 
 		 return newNode;
 		}
@@ -52,6 +53,7 @@ public class OsdNode implements Serializable {
 				 Node tempNode = headNode;
 				 Node newNode = new Node(weight,clusterId, nodeid, level);
 				 newNode.nextNode = headNode;
+				 headNode.prevNode = newNode;
 				 headNode = newNode;
 				 return newNode;
 				}
