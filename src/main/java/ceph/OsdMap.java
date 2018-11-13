@@ -59,13 +59,13 @@ public class OsdMap implements Serializable{
 			// set root of the Osd map
 			root = currentnode;
 		}
-	else if(this.root.clusterCountInLevel < maxclusterInlevel)
-	{
+		else if(this.root.clusterCountInLevel < maxclusterInlevel)
+	   {
 		if(depthofOsdMap == 1)
 		   this.root.AddNode(hashGenerator.randomWeightGenerator(), clusterId, nodeId,1);
 		else
 			this.root.AddNode(0, clusterId, -1,1);
-	}
+	   }
 	else
 	{
 			ParentChildPair leftNodePair = findTheClusterNodetoAddIterative(root.headNode.leftNode, root.headNode, 1);
@@ -104,7 +104,7 @@ public class OsdMap implements Serializable{
     	if(root.clusterCountInLevel < maxclusterInlevel)
     	{
     			Node newlyAddedNode = root.AddNodeAtStartOfList(hashGenerator.randomWeightGenerator(), clusterId, nodeId,1);
-//    			MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
+    			//MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
     	    	return;
     	}
     	ParentChildPair leftNodePair = findTheClusterNodetoAddIterative(root.headNode.leftNode, root.headNode, 1);
@@ -151,9 +151,9 @@ public class OsdMap implements Serializable{
     					System.out.println(" pGroup " + obj.placementGroup + " replication " + obj.replicaId + " moves from node " + tempNode.nodeId + " to node " + newlyAddedNode.nodeId);
                         
     					// Add the file to local system of datanode and remove from source node
-    					Commons.messageSender.sendMessage(ConfigLoader.GetNodeAddressFromNodeId(newlyAddedNode.nodeId), Constants.WRITE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
+    					//Commons.messageSender.sendMessage(ConfigLoader.GetNodeAddressFromNodeId(newlyAddedNode.nodeId), Constants.ADD_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
     					// Now delete from Source Data Node					
-    					Commons.messageSender.sendMessage(ConfigLoader.GetNodeAddressFromNodeId(tempNode.nodeId), Constants.DELETE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
+    					//Commons.messageSender.sendMessage(ConfigLoader.GetNodeAddressFromNodeId(tempNode.nodeId), Constants.DELETE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
     				}
     			}
     			
@@ -165,8 +165,12 @@ public class OsdMap implements Serializable{
     	
     }
     
+    public void ShowOsdMap()
+    {
+    	_showOsdMap(root);
+    }
     // Traverse the OSD map and show the snapshot 
-   public void ShowOsdMap(OsdNode currentNode)
+   private void _showOsdMap(OsdNode currentNode)
    {
 	   //System.out.println("Show the nodes of osd map");
 	   
@@ -185,7 +189,7 @@ public class OsdMap implements Serializable{
 	   Node tempNode = currentNode.headNode;
 	   while(tempNode != null)
 	   {
-	     ShowOsdMap(tempNode.leftNode);
+	     _showOsdMap(tempNode.leftNode);
 	     tempNode = tempNode.nextNode;
 	   }
    }
@@ -219,7 +223,17 @@ public class OsdMap implements Serializable{
 	 return nodeId;
    }
    
-   
+   public Node findHeadNodeOfTheCluster(int nodeId)
+   {
+	   this.foundNode = null;
+	   _findNodeInOsdMap(root,nodeId, 1, true);
+	   Node tempNode = this.foundNode;
+	   while(tempNode.prevNode != null)
+	   {
+		   tempNode = tempNode.prevNode;
+	   }
+	   return tempNode;
+   }
    public void AddFileToCephSystem(String fileName, int replicaId, int placementGroupSize)
    {
 	   int placementGroupId = hashGenerator.getPlacementGroupIdFromFileName(fileName, placementGroupSize);
@@ -228,6 +242,8 @@ public class OsdMap implements Serializable{
 	   // we can add files to CephDataNode
 	    CephDataNode.getInstance(nodeId).writeFile(fileName,replicaId);
    }
+   
+   
    private int _findNodeWithRequestedReplica(OsdNode headNode, int placementGroupId, int replicaId, int level)
    {
 	   double totalclusterSum = sumofClusterNode(headNode.headNode);
@@ -338,7 +354,7 @@ public class OsdMap implements Serializable{
 			   
 			   // Add this head node to next level parent queue
 			   Parentqueue.add(newlyAddedNode);
-		   return new ParentChildPair(currentnode,parentnode, parentnode.level +1);
+		   return new ParentChildPair(newlyAddedNode,parentnode, parentnode.level +1);
 		}
 	   }
 	   if(currentnode.clusterCountInLevel < maxclusterInlevel)
