@@ -12,6 +12,8 @@ public class Node implements Serializable {
 	
     public Node nextNode;
     
+    public Node prevNode;
+    
     public OsdNode leftNode;
     
     public boolean isActive;
@@ -26,6 +28,7 @@ public class Node implements Serializable {
     	this.nodeId = nodeid;
     	this.clusterId = clusterId;
     	this.nextNode = null;
+        this.prevNode = null;
     	this.leftNode = null;
         this.isActive = true;
         this.level = level;
@@ -46,3 +49,4 @@ public class Node implements Serializable {
     	}
     }
 }
+
