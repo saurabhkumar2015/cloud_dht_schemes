@@ -53,7 +53,7 @@ public class EntryPoint {
 			// populate internal node
 			for(int j = 0; j< Math.pow(clusterSize,i); j++)
 			{
-				mapInstance.AddNodeToOsdMap(randomClusterNoGenerator(), 1);
+				mapInstance.AddNodeToOsdMap(randomClusterNoGenerator(), -1);
 			}
 		}
 		// Insert regular data node
