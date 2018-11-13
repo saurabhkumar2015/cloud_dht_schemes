@@ -17,10 +17,11 @@ public class Test {
 		r.GetInstance().getRoutingTable();
 		System.out.println("End loading routing table");
 		System.out.println(r.GetInstance().getNodeId("abc", 2));
-		r.GetInstance().addNode(101);
+		//r.GetInstance().addNode(101);
 		
 		System.out.println("Exiting add and entering delete");
-		r.GetInstance().deleteNode(7);
+		//r.GetInstance().deleteNode(7);
+		r.GetInstance().loadBalance(4, 0.7);
 	}
 
 }

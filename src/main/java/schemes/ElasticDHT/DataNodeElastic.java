@@ -1,15 +1,10 @@
 package schemes.ElasticDHT;
 
 import common.IDataNode;
-import common.IRoutingTable;
 
 public class DataNodeElastic implements IDataNode {
 
-	public  int nodeId;
-
-	public DataNodeElastic(int nodeId) {
-		this.nodeId =nodeId;
-	}
+	private int nodeId;
 
 	public void writeFile(String fileName, int replicaId) {
 		int hashcode = fileName.hashCode()%1024;
@@ -56,15 +51,6 @@ public class DataNodeElastic implements IDataNode {
 		
 	}
 
-	@Override
-	public void MoveFiles(int clusterIdofNewNode, String nodeIp, double newnodeWeight, double clusterWeight) {
-
-	}
-
-	@Override
-	public void UpdateRoutingTable(IRoutingTable cephrtTable) {
-
-	}
-
+	
 
 }

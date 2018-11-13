@@ -12,9 +12,10 @@ public class InvertedIndexTable {
 	// Create a singleton for InvertedIndexTable
 	private static InvertedIndexTable single_instance = null;
 
-	private int hashforIndexTables[];
+	private ArrayList<Integer> hashforIndexTables = new ArrayList();
 
-	private int ks[]; 
+	private ArrayList<Integer> ks =  new ArrayList();; 
+
 	
 	public InvertedIndexTable()
 	{
@@ -32,35 +33,39 @@ public class InvertedIndexTable {
 	}
 	
 	
-	public void CreateInvertedIndexTable()
+	public void CreateInvertedIndexTable(ElasticRoutingTableInstance[] rt)
 	{
-		ElasticRoutingTableInstance[] rt = RoutingTable.GetInstance().getRoutingTable();
-		int nodeId[] = populateNodeId();
+		System.out.println("Entering create Inverted Index");
+		ArrayList<Integer> nodeId = populateNodeId();
 		String bits="";
-		hashforIndexTables = null;
+		hashforIndexTables = new ArrayList();
 		DHTConfig config = ConfigLoader.config;
 		for(int i = 0;i<(config.nodeIdEnd-config.nodeIdStart);i++) {
 			for(int j = 0;j<config.bucketSize;j++) {
-				if(replicaPosition(rt[j].hashIndex,nodeId[i])) {
-					hashforIndexTables[j] = j+1; 
+				System.out.println("Entering loop for createinverted index + " + i+" "+j);
+				if(replicaPosition(rt[j].hashIndex,nodeId.get(i),rt)) {
+				hashforIndexTables.add(j+1);
 				}
 				else {
-					hashforIndexTables[j] = j;
+					hashforIndexTables.add(0);
 				}
 			}
-			for(int k = 0;k<hashforIndexTables.length;k++) {
-				if(hashforIndexTables[k]==k+1) {
+			for(int k = 0;k<hashforIndexTables.size();k++) {
+				if(hashforIndexTables.get(k)==k+1) {
 					bits = bits+"1";
 				}
 				else {
 					bits = bits+"0";
 				}
 			}
-			BitSet b = fromString(bits);
-			InvertedIndexTableInstance e = new InvertedIndexTableInstance(nodeId[i],b);
+			
+			InvertedIndexTableInstance e = new InvertedIndexTableInstance(nodeId.get(i),bits);
 			indexInstance.add(e);
+			bits = "";
 			
 		}
+		
+
 		// Iterate over the routing table Instance and Create the Inverted Index table accordingly
 		
 		
@@ -75,19 +80,21 @@ public class InvertedIndexTable {
 	    }
 	    return bitset;
 	}
-	public int[] populateNodeId() {
-		ks = null;
-		for(int i = 0;i<(config.ConfigLoader.config.nodeIdEnd-config.ConfigLoader.config.nodeIdStart);i++) {
-			ks[i] = config.ConfigLoader.config.nodeIdStart+i;
+	public ArrayList<Integer> populateNodeId() {
+		ks = new ArrayList();
+		DHTConfig config = ConfigLoader.config;
+
+		for(int i = 0;i<=(config.nodeIdEnd-config.nodeIdStart);i++) {
+			ks.add(config.nodeIdStart+i);
 		}
 		return ks;
 	}
-	boolean replicaPosition( int hashBucket, int nodeId) {
+	boolean replicaPosition( int hashBucket, int nodeId,ElasticRoutingTableInstance[] rt) {
 		int s;
-		ElasticRoutingTableInstance[] rt = RoutingTable.GetInstance().getRoutingTable();
+		
 
-		for(s=0;s<config.ConfigLoader.config.nodeIdEnd-config.ConfigLoader.config.nodeIdStart;s++) {
-			if((Integer)rt[hashBucket].nodeId.get(s)==nodeId) {
+		for(s=0;s<3;s++) {
+			if(rt[hashBucket].nodeId.get(s)==nodeId) {
 				return true;
 			}
 		}

@@ -14,7 +14,6 @@ public class RoutingTable implements IRoutingTable{
 	
 	public static RoutingTable single_instance = null;
 
-	private int changes[]; 
 	DHTConfig config = ConfigLoader.config;
 	int size = config.bucketSize;
 	
@@ -36,6 +35,7 @@ public class RoutingTable implements IRoutingTable{
 	{
 		ElasticRoutingTable elasticTable1 = new ElasticRoutingTable();
 		 elasticTable = elasticTable1.populateRoutingTable();
+		 
 		 return elasticTable;
 	}
 	
@@ -66,8 +66,7 @@ public class RoutingTable implements IRoutingTable{
 
 */
 	
-	@SuppressWarnings("unchecked")
-	public IRoutingTable deleteNode(int nodeId)
+	public void deleteNode(int nodeId)
 	{
 		System.out.println("Entering delete functions");
 		int replaceNodeId = 0;
@@ -91,7 +90,7 @@ public class RoutingTable implements IRoutingTable{
 			
 			// check if nodeId is in hash and get that index
 		}
-		return this;
+		
 	}
 
 	
@@ -121,46 +120,56 @@ public class RoutingTable implements IRoutingTable{
 	//}
 
 	@SuppressWarnings("unchecked")
-	public IRoutingTable loadBalance(int nodeId, double factor) {
+	public void loadBalance(int nodeId, double factor) {
+		System.out.println("Entering Load Balance");
 		int replaceNodeId = 0;
 		Random rn = new Random(config.seed);
 		replaceNodeId = rn.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
 		Random rn1 = new Random(config.seed);
 		replaceNodeId = rn1.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
 		while(replaceNodeId==nodeId) {
-			replaceNodeId = rn.nextInt(7)+0;
+			replaceNodeId = rn.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
 		}
 		InvertedIndexTable i = InvertedIndexTable.GetInstance();
-		i.CreateInvertedIndexTable();
+		i.CreateInvertedIndexTable(elasticTable);
 		int currentStrength = 0;
-		BitSet b = null;
-		// Get nodeId and the bitset value.
-		for(int k = 0; k<7;k++) {
+		String b = "";
+		for(int k = 0; k<(config.nodeIdEnd-config.nodeIdStart);k++) {
 			if(i.indexInstance.get(k).nodeId==nodeId) {
-				b = i.indexInstance.get(k).usedHashedIndex;
+				b = i.indexInstance.get(k).bitString;
 				break;
 			}
 		}
-		changes = null;
-		int count = 0;
-		// find strength
-		for(int j = 0;j <b.length();j++) {
-			if(b.get(j)) {
-				changes[count] = j;
+		System.out.println(b);
+		for(int m = 0;m<b.length();m++) {
+			if(b.charAt(m)=='1') {
 				currentStrength++;
 			}
-			count++;
 		}
 		int newStrength = (int) (currentStrength*factor);
-		for(int k = 0;k<currentStrength-newStrength;k++) {
-			int index = check(elasticTable[changes[k]].hashIndex,nodeId);
-			elasticTable[changes[k]].nodeId.set(index, replaceNodeId);
-			System.out.println("Files were moved from "+nodeId +"to "+replaceNodeId);
+		System.out.println("Current Strength = "+currentStrength);
+		System.out.println("New Strength = "+newStrength);
+		int count = 0;
+		for(int temp = 0;temp<b.length();temp++) {
+			if(count<newStrength) {
+				if(b.charAt(temp)=='1') {
+					int check = check(temp,nodeId);
+					if(check!=-1) {
+					elasticTable[temp].nodeId.set(check, replaceNodeId);
+					// replicaId to find.
+					count++;
+					System.out.println(elasticTable[temp].hashIndex+" "+elasticTable[temp].nodeId.get(check));
+					}
+				}
+			}
 		}
+		System.out.println("Files moved from "+nodeId+"to "+replaceNodeId);
 		
 		
-		return this;
+		
+		
 	}
+	
 
 	
 	int check(int index, int nodeId) {
@@ -191,7 +200,7 @@ public class RoutingTable implements IRoutingTable{
 	}
 
 	@SuppressWarnings("unchecked")
-	public IRoutingTable addNode(int nodeId) {
+	public void addNode(int nodeId) {
 		Random rno =  new Random(config.seed);
 		int noOfHashIndices = rno.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
 		int  interval = config.bucketSize % noOfHashIndices;
@@ -218,7 +227,9 @@ public class RoutingTable implements IRoutingTable{
 			}
 		}
 		
-		return this;
+		
+		// TODO Auto-generated method stub
+		
 	}
 }
 

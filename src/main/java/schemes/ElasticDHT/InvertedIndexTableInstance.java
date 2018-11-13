@@ -5,8 +5,7 @@ import java.util.*;
 
 public class InvertedIndexTableInstance {
 	public int nodeId;
-	public BitSet usedHashedIndex = new BitSet(config.ConfigLoader.config.bucketSize);
-	
+	String bitString;
 	
 	// Constructor which could be parameterized later
 	public InvertedIndexTableInstance()
@@ -15,9 +14,9 @@ public class InvertedIndexTableInstance {
 	}
 
 
-	public InvertedIndexTableInstance(int i, BitSet parseInt) {
+	public InvertedIndexTableInstance(int i, String parseInt) {
 		nodeId = i;
-		usedHashedIndex = parseInt;
+		bitString = parseInt;
 		// TODO Auto-generated constructor stub
 	}
 	
