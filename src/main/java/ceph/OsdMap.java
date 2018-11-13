@@ -59,7 +59,7 @@ public class OsdMap implements Serializable{
 			// set root of the Osd map
 			root = currentnode;
 		}
-	if(this.root.clusterCountInLevel < maxclusterInlevel)
+	else if(this.root.clusterCountInLevel < maxclusterInlevel)
 	{
 		if(depthofOsdMap == 1)
 		   this.root.AddNode(hashGenerator.randomWeightGenerator(), clusterId, nodeId,1);
