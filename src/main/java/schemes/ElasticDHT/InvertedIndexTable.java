@@ -83,7 +83,7 @@ public class InvertedIndexTable {
 	public ArrayList<Integer> populateNodeId() {
 		ks = new ArrayList();
 		DHTConfig config = ConfigLoader.config;
-
+// Get live nodes
 		for(int i = 0;i<=(config.nodeIdEnd-config.nodeIdStart);i++) {
 			ks.add(config.nodeIdStart+i);
 		}

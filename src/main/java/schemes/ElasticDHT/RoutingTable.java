@@ -5,8 +5,14 @@ import common.IRoutingTable;
 import config.ConfigLoader;
 import config.DHTConfig;
 
-import java.util.BitSet;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 public class RoutingTable implements IRoutingTable{
 
@@ -16,6 +22,8 @@ public class RoutingTable implements IRoutingTable{
 
 	DHTConfig config = ConfigLoader.config;
 	int size = config.bucketSize;
+	Set<Integer> liveNodes = new HashSet<Integer>();
+	Map<Integer,Integer> hashReplicaNodeId = new HashMap<Integer,Integer>();
 	
 	public RoutingTable()
 	{
@@ -79,7 +87,6 @@ public class RoutingTable implements IRoutingTable{
 		for(int i = 0;i<size;i++) {
 			
 			int  k  = check(i,nodeId);
-			System.out.println("k = "+k+"i = "+i);
 			if(k!=-1) {
 				elasticTable[i].nodeId.set(k, replaceNodeId);
 				System.out.println("Deleting and replacing with : "+replaceNodeId);
@@ -90,14 +97,16 @@ public class RoutingTable implements IRoutingTable{
 			
 			// check if nodeId is in hash and get that index
 		}
-		return this;
 		
 	}
+	
 
 	
 
 	public boolean Resize()
 	{
+		//Create new elasticTbaletemp and reassign to it.
+		//Ratio based resize factor hashbuckets/live nodes> read the resize factor config.
 		// Implement this
 		return false;
 	}
@@ -119,59 +128,92 @@ public class RoutingTable implements IRoutingTable{
 	//public void addNode(int nodeId) throws IOException {
 	//	return null;
 	//}
-
+// Get live nodes and choose randomly
+	//Map for hash and replica 
+	//Load balance
+	// Drop inverted index, <hash,replica> for nodeId in consideration  map for a node Id, Iterate over it, 
 	@SuppressWarnings("unchecked")
 	public IRoutingTable loadBalance(int nodeId, double factor) {
-		System.out.println("Entering Load Balance");
-		int replaceNodeId = 0;
-		Random rn = new Random(config.seed);
-		replaceNodeId = rn.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
-		Random rn1 = new Random(config.seed);
-		replaceNodeId = rn1.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
-		while(replaceNodeId==nodeId) {
-			replaceNodeId = rn.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
+		// Get strength of current nodeId
+		//Randomly choose replaceNodeId
+		//
+		liveNodes = getLiveNodes(elasticTable);
+		int maxLiveNodes = liveNodes.size();
+		System.out.println(maxLiveNodes);
+		hashReplicaNodeId = createMapforNodeId(nodeId,elasticTable);
+		Set<Integer> keys = hashReplicaNodeId.keySet();
+		Iterator<Integer> keyIterator = keys.iterator();
+		int currentstrength = hashReplicaNodeId.size();
+		int newStrength = (int) (currentstrength*factor);
+		System.out.println("Current Strength = "+currentstrength+" New Strength = "+newStrength);
+		Random rn = new Random();
+		int deleteNodes = currentstrength -newStrength;
+		Object[] liveArray = liveNodes.toArray();
+		
+		for(Entry<Integer, Integer> e : hashReplicaNodeId.entrySet()) {
+			if(deleteNodes <= 0) break;
+			
+			int nodeIndex = rn.nextInt(maxLiveNodes-1);
+			while(nodeId == (Integer)liveArray[nodeIndex]) {
+				 nodeIndex = rn.nextInt(maxLiveNodes-1);
+
+			}
+			elasticTable[e.getKey()].nodeId.set(e.getValue(), (Integer)liveArray[nodeIndex]);
+			System.out.println(deleteNodes+":File moved from "+nodeId +"to "+liveArray[nodeIndex]);
+			//System.out.println(elasticTable[e.getKey()]+ "  :"+ elasticTable[e.getKey()].nodeId.get(e.getValue()));
+			deleteNodes--;
+	
 		}
-		InvertedIndexTable i = InvertedIndexTable.GetInstance();
-		i.CreateInvertedIndexTable(elasticTable);
-		int currentStrength = 0;
-		String b = "";
-		for(int k = 0; k<(config.nodeIdEnd-config.nodeIdStart);k++) {
-			if(i.indexInstance.get(k).nodeId==nodeId) {
-				b = i.indexInstance.get(k).bitString;
-				break;
+		System.out.println("Load balanced");
+		
+	}
+	public Set<Integer> getLiveNodes(ElasticRoutingTableInstance rt []){
+		int tempNode;
+		for(int i = 0;i<config.bucketSize;i++) {
+			for(int j = 0;j<3;j++) {
+				
+				tempNode = elasticTable[i].nodeId.get(j);				
+					liveNodes.add(tempNode);
+				
+				
 			}
 		}
-		System.out.println(b);
-		for(int m = 0;m<b.length();m++) {
-			if(b.charAt(m)=='1') {
-				currentStrength++;
+		return liveNodes;
+	
+	}
+	public Map<Integer,Integer> createMapforNodeId(int nodeId,ElasticRoutingTableInstance rt[]){
+		for(int i = 0;i<config.bucketSize;i++) {
+			for(int j = 0;j<3;j++) {
+				if(nodeId==rt[i].nodeId.get(j)) {
+					hashReplicaNodeId.put(rt[i].hashIndex, j);
+				}
 			}
+			
 		}
-		int newStrength = (int) (currentStrength*factor);
-		System.out.println("Current Strength = "+currentStrength);
-		System.out.println("New Strength = "+newStrength);
-		int count = 0;
-		for(int temp = 0;temp<b.length();temp++) {
-			if(count<newStrength) {
-				if(b.charAt(temp)=='1') {
-					int check = check(temp,nodeId);
-					if(check!=-1) {
-					elasticTable[temp].nodeId.set(check, replaceNodeId);
-					// replicaId to find.
-					count++;
-					System.out.println(elasticTable[temp].hashIndex+" "+elasticTable[temp].nodeId.get(check));
-					}
+	
+		return hashReplicaNodeId;
+	}
+	
+	
+
+	
+	private boolean unique(int tempNode, int i,int j) {
+		boolean b =  true;
+		if(i==0) {
+			b = true;
+		}
+		else {
+			for(int k = 0;k<i;k++) {
+				if(elasticTable[k].nodeId.get(j)==tempNode) {
+					b = false;
+					
 				}
 			}
 		}
-		System.out.println("Files moved from "+nodeId+"to "+replaceNodeId);
-		
-		return this;
-		
+		// TODO Auto-generated method stub
+		return false;
 	}
-	
 
-	
 	int check(int index, int nodeId) {
 		int i = 0;
 		boolean b =false;
@@ -201,7 +243,7 @@ public class RoutingTable implements IRoutingTable{
 
 	@SuppressWarnings("unchecked")
 	public IRoutingTable addNode(int nodeId) {
-		Random rno =  new Random(config.seed);
+		Random rno =  new Random();
 		int noOfHashIndices = rno.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
 		int  interval = config.bucketSize % noOfHashIndices;
 		int count =0;
@@ -227,7 +269,9 @@ public class RoutingTable implements IRoutingTable{
 			}
 		}
 		
-		return this;
+		
+		// TODO Auto-generated method stub
+		
 	}
 }
 
