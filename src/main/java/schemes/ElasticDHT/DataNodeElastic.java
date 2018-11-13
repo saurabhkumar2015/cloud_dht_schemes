@@ -5,6 +5,11 @@ import common.IDataNode;
 public class DataNodeElastic implements IDataNode {
 
 	private int nodeId;
+	public void MoveFiles(int clusterIdofNewNode, String nodeIp, double newnodeWeight, double clusterWeight) {
+ 	}
+ 	@Override
+	public void UpdateRoutingTable(IRoutingTable cephrtTable) {
+ 	}
 
 	public void writeFile(String fileName, int replicaId) {
 		int hashcode = fileName.hashCode()%1024;
