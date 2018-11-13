@@ -41,7 +41,6 @@ public class TestGossip {
 
 
         SharedGossipDataMessage message = new SharedGossipDataMessage();
-        message.setTimestamp(System.currentTimeMillis());
         message.setExpireAt(System.currentTimeMillis()+60000);
         message.setKey("OSD_MAP");
         String nodeId = Integer.toString(port-50000);
@@ -52,6 +51,7 @@ public class TestGossip {
         while(true) {
             System.out.println("\n");
             if(mode.equals("w")) {
+                message.setTimestamp(System.currentTimeMillis());
                 map = new HashMap<>();
                 map.put(nodeId, Integer.toString(i++));
                 message.setPayload(map);

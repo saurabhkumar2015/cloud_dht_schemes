@@ -66,7 +66,7 @@ public class RoutingTable implements IRoutingTable{
 
 */
 	
-	public void deleteNode(int nodeId)
+	public IRoutingTable deleteNode(int nodeId)
 	{
 		System.out.println("Entering delete functions");
 		int replaceNodeId = 0;
@@ -90,6 +90,7 @@ public class RoutingTable implements IRoutingTable{
 			
 			// check if nodeId is in hash and get that index
 		}
+		return this;
 		
 	}
 
@@ -120,7 +121,7 @@ public class RoutingTable implements IRoutingTable{
 	//}
 
 	@SuppressWarnings("unchecked")
-	public void loadBalance(int nodeId, double factor) {
+	public IRoutingTable loadBalance(int nodeId, double factor) {
 		System.out.println("Entering Load Balance");
 		int replaceNodeId = 0;
 		Random rn = new Random(config.seed);
@@ -165,8 +166,7 @@ public class RoutingTable implements IRoutingTable{
 		}
 		System.out.println("Files moved from "+nodeId+"to "+replaceNodeId);
 		
-		
-		
+		return this;
 		
 	}
 	
@@ -200,7 +200,7 @@ public class RoutingTable implements IRoutingTable{
 	}
 
 	@SuppressWarnings("unchecked")
-	public void addNode(int nodeId) {
+	public IRoutingTable addNode(int nodeId) {
 		Random rno =  new Random(config.seed);
 		int noOfHashIndices = rno.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
 		int  interval = config.bucketSize % noOfHashIndices;
@@ -227,9 +227,7 @@ public class RoutingTable implements IRoutingTable{
 			}
 		}
 		
-		
-		// TODO Auto-generated method stub
-		
+		return this;
 	}
 }
 

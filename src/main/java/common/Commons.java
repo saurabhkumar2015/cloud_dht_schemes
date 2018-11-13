@@ -42,7 +42,7 @@ public class Commons {
                 return new DataNode(new RingDHTScheme());
             case "ELASTIC":
             case "elastic":
-                return new DataNodeElastic(nodeId);
+                return new DataNodeElastic();
             case "CEPH":
             case "ceph":
                 return new CephDataNode(nodeId);

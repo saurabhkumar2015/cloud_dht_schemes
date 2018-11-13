@@ -1,6 +1,7 @@
 package schemes.ElasticDHT;
 
 import common.IDataNode;
+import common.IRoutingTable;
 
 public class DataNodeElastic implements IDataNode {
 
@@ -51,6 +52,15 @@ public class DataNodeElastic implements IDataNode {
 		
 	}
 
-	
+	@Override
+	public void MoveFiles(int clusterIdofNewNode, String nodeIp, double newnodeWeight, double clusterWeight) {
+
+	}
+
+	@Override
+	public void UpdateRoutingTable(IRoutingTable cephrtTable) {
+
+	}
+
 
 }
