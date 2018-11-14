@@ -1,5 +1,6 @@
 package ceph;
 import java.io.Serializable;
+import java.util.List;
 
 public class OsdNode implements Serializable {
 	
@@ -69,11 +70,11 @@ public class OsdNode implements Serializable {
 		return this.clusterCountInLevel;
 	}
 	
-	public void ShowCurrentNode(OsdNode currentNode)
+	public void ShowCurrentNode(OsdNode currentNode, List<Integer> liveNodes, boolean isshow)
 	{
 		if(currentNode == null || currentNode.headNode == null)
 			return;
-		currentNode.headNode.iterateNodeList(currentNode.headNode);
+		currentNode.headNode.iterateNodeList(currentNode.headNode, liveNodes, isshow);
 	}
 	
 }
