@@ -83,6 +83,6 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
 
     @Override
     public List<Integer> getLiveNodes() {
-        return null;
+        return mapInstance.GetLiveNodes();
     }
 }
