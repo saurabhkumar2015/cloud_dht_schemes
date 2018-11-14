@@ -24,6 +24,8 @@ public class OsdMap implements Serializable{
 	
 	public int depthofOsdMap;  // This is the calculated value using #node & #clusterSize
 	
+	public List<Integer> liveNodes = new LinkedList<Integer>();
+	
 	public Queue<OsdNode> Parentqueue = new LinkedList<>();
 	
 	public HashGenerator hashGenerator;
@@ -101,10 +103,12 @@ public class OsdMap implements Serializable{
     public void AddExtraNodeToOsdMap(int clusterId, int nodeId)
     {
     	// Guard Clause for root node new node added to root and logic is totally different
+    	// Verbose Mode on. Print the log of new node addition
+    	System.out.println("New node add request triggered with NodeId: " + nodeId);
     	if(root.clusterCountInLevel < maxclusterInlevel)
     	{
     			Node newlyAddedNode = root.AddNodeAtStartOfList(hashGenerator.randomWeightGenerator(), clusterId, nodeId,1);
-    			//MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
+    			MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
     	    	return;
     	}
     	ParentChildPair leftNodePair = findTheClusterNodetoAddIterative(root.headNode.leftNode, root.headNode, 1);
@@ -120,7 +124,7 @@ public class OsdMap implements Serializable{
 				// Now need to set the Osd Map pointer to the newly added node as cluster start point
        			leftNodePair.Parent.leftNode.headNode = newlyAddedNode;
 				// Need to move the files from other node in sub cluster
-				//MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
+				MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
 			}
 			else
 				internalKey.AddNode(0, clusterId, -1,value);				
@@ -129,48 +133,84 @@ public class OsdMap implements Serializable{
     
     public void MoveFileInClusterOnNewNodeAddition(Node newlyAddedNode)
     {
-    	// Iterate through all the node except the newlyAdded node and move files from other node to new node.
-    	double weightofSubCluster = sumofClusterNode(newlyAddedNode);
-    	//double totalweight = weightofSubCluster;
+    	// Generally the data nodes should contain the local copies of files
+    	// excact file match should run on those Data nodes.
+    	// iterate over the cluster and print which Data nodes need to move data
     	Node tempNode = newlyAddedNode.nextNode;
     	while(tempNode != null)
     	{
-    		// Get all files of this node 
-    		ArrayList<DataObject> filesForNode = CephDataNode.getInstance(tempNode.nodeId).dataList;
-    		
-    		// Iterate over files to check wheather to move or not
-    		if(filesForNode != null)
-    		{
-    			for(DataObject obj : filesForNode)
-    			{
-    				double hashvalue = HashGenerator.getInstance().generateHashValue(newlyAddedNode.clusterId, obj.placementGroup,obj.replicaId);
-    				double weightFactor = HashGenerator.getInstance().GetWeightFactor(newlyAddedNode.weight, weightofSubCluster);
-    				if(hashvalue < weightFactor)
-    				{
-    					// file will move from temp node to newly added node
-    					System.out.println(" pGroup " + obj.placementGroup + " replication " + obj.replicaId + " moves from node " + tempNode.nodeId + " to node " + newlyAddedNode.nodeId);
-                        
-    					// Add the file to local system of datanode and remove from source node
-    					//Commons.messageSender.sendMessage(ConfigLoader.GetNodeAddressFromNodeId(newlyAddedNode.nodeId), Constants.ADD_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
-    					// Now delete from Source Data Node					
-    					//Commons.messageSender.sendMessage(ConfigLoader.GetNodeAddressFromNodeId(tempNode.nodeId), Constants.DELETE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
-    				}
-    			}
-    			
-    		}
+    		System.out.println("Files need to moves from Data Node: " + tempNode.nodeId + " to " + newlyAddedNode.nodeId);
     		tempNode = tempNode.nextNode;
-    		if(tempNode != null)
-    		weightofSubCluster = weightofSubCluster - tempNode.weight;
     	}
+    	
     	
     }
     
-    public void ShowOsdMap()
+    public void ShowOsdMap(boolean isShow)
     {
-    	_showOsdMap(root);
+    	liveNodes.clear();
+    	_showOsdMap(root, isShow);
+    	liveNodes.clear();
     }
+    
+    public List<Integer> GetLiveNodes()
+    {
+    	liveNodes.clear();
+    	_showOsdMap(root, false);
+    	return liveNodes;
+    }
+    
+    // Find the given nodeId in the OsdMap
+    public Node FindNodeInOsdMap(int nodeId)
+    {
+ 	   this.foundNode = null;
+ 	   _findNodeInOsdMap(root,nodeId, 1, true);
+ 	   return this.foundNode;
+    }
+    
+    // Set the activation flag false for given nodeId
+    public void DeleteNode(int nodeId)
+    {
+ 	   _findNodeInOsdMap(root,nodeId, 1, false);
+    }
+    
+    // Once we have weight distrubuted for leaf node, then populate weight from leaf to root
+    public void PopulateWeightOfInternalNode(OsdNode node)
+    {
+ 	   _populateWeight(root);
+    }
+   
+    // Find the node containing given file with replication value
+    // Ceph Algorithm for Finding NodeId for given filename and replica
+    public int findNodeWithRequestedReplica(int replicaId, int placementGroupId)
+    {
+ 	 //System.out.println("The placement Group for file: " +  fileName + " is : " + placementGroupId + " with replicaId: " + replicaId);
+ 	 int nodeId =  _findNodeWithRequestedReplica(root, placementGroupId, replicaId, 1);
+ 	 return nodeId;
+    }
+    
+    public Node findHeadNodeOfTheCluster(int nodeId)
+    {
+ 	   this.foundNode = null;
+ 	   _findNodeInOsdMap(root,nodeId, 1, true);
+ 	   Node tempNode = this.foundNode;
+ 	   while(tempNode.prevNode != null)
+ 	   {
+ 		   tempNode = tempNode.prevNode;
+ 	   }
+ 	   return tempNode;
+    }
+    public void AddFileToCephSystem(String fileName, int replicaId, int placementGroupSize)
+    {
+ 	   int placementGroupId = hashGenerator.getPlacementGroupIdFromFileName(fileName, placementGroupSize);
+ 	   int nodeId = findNodeWithRequestedReplica(replicaId, placementGroupId); 
+
+ 	   // we can add files to CephDataNode
+ 	    CephDataNode.getInstance(nodeId).writeFile(fileName,replicaId);
+    }
+    
     // Traverse the OSD map and show the snapshot 
-   private void _showOsdMap(OsdNode currentNode)
+   private void _showOsdMap(OsdNode currentNode, boolean isshow)
    {
 	   //System.out.println("Show the nodes of osd map");
 	   
@@ -184,66 +224,16 @@ public class OsdMap implements Serializable{
 		   return;
 	   }
 	   // show the current node 
-	   currentNode.ShowCurrentNode(currentNode);
+	   currentNode.ShowCurrentNode(currentNode, this.liveNodes, isshow);
 	   // iterate over the next node and show their child
 	   Node tempNode = currentNode.headNode;
 	   while(tempNode != null)
 	   {
-	     _showOsdMap(tempNode.leftNode);
+	     _showOsdMap(tempNode.leftNode, isshow);
 	     tempNode = tempNode.nextNode;
 	   }
    }
-   
-   // Find the given nodeId in the OsdMap
-   public Node FindNodeInOsdMap(int nodeId)
-   {
-	   this.foundNode = null;
-	   _findNodeInOsdMap(root,nodeId, 1, true);
-	   return this.foundNode;
-   }
-   
-   // Set the activation flag false for given nodeId
-   public void DeleteNode(int nodeId)
-   {
-	   _findNodeInOsdMap(root,nodeId, 1, false);
-   }
-   
-   // Once we have weight distrubuted for leaf node, then populate weight from leaf to root
-   public void PopulateWeightOfInternalNode(OsdNode node)
-   {
-	   _populateWeight(root);
-   }
-  
-   // Find the node containing given file with replication value
-   // Ceph Algorithm for Finding NodeId for given filename and replica
-   public int findNodeWithRequestedReplica(int replicaId, int placementGroupId)
-   {
-	 //System.out.println("The placement Group for file: " +  fileName + " is : " + placementGroupId + " with replicaId: " + replicaId);
-	 int nodeId =  _findNodeWithRequestedReplica(root, placementGroupId, replicaId, 1);
-	 return nodeId;
-   }
-   
-   public Node findHeadNodeOfTheCluster(int nodeId)
-   {
-	   this.foundNode = null;
-	   _findNodeInOsdMap(root,nodeId, 1, true);
-	   Node tempNode = this.foundNode;
-	   while(tempNode.prevNode != null)
-	   {
-		   tempNode = tempNode.prevNode;
-	   }
-	   return tempNode;
-   }
-   public void AddFileToCephSystem(String fileName, int replicaId, int placementGroupSize)
-   {
-	   int placementGroupId = hashGenerator.getPlacementGroupIdFromFileName(fileName, placementGroupSize);
-	   int nodeId = findNodeWithRequestedReplica(replicaId, placementGroupId); 
-
-	   // we can add files to CephDataNode
-	    CephDataNode.getInstance(nodeId).writeFile(fileName,replicaId);
-   }
-   
-   
+      
    private int _findNodeWithRequestedReplica(OsdNode headNode, int placementGroupId, int replicaId, int level)
    {
 	   double totalclusterSum = sumofClusterNode(headNode.headNode);
