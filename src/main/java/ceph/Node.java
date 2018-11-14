@@ -1,6 +1,7 @@
 package ceph;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class Node implements Serializable {
   // each cell in the OsdNode is a node
@@ -34,7 +35,7 @@ public class Node implements Serializable {
         this.level = level;
     }
     
-    public void iterateNodeList(Node headNode)
+    public void iterateNodeList(Node headNode,  List<Integer> liveNodes, boolean isshow)
     {
     	if(headNode == null)
     	{
@@ -44,9 +45,16 @@ public class Node implements Serializable {
     	Node temp = headNode;
     	while(temp != null)
     	{
+    		if(!isshow)
+    		{
+    		if(temp.isActive && temp.nodeId != -1)
+    			liveNodes.add(temp.nodeId);
+    		}
+    		else
+    		{
     		System.out.println(String.format("weight= %f ClusterId= %d nodeId = %d IsActive = %s at level = %d", temp.weight,temp.clusterId, temp.nodeId,temp.isActive,temp.level));
+    		}
     		temp = temp.nextNode;
     	}
     }
 }
-
