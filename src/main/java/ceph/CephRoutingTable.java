@@ -71,8 +71,9 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
 
 
 	public IRoutingTable deleteNode(int nodeId) {
-		// TODO Auto-generated method stub
-		return null;
+	        mapInstance.DeleteNode(nodeId);
+		this.VersionNo++;
+                return CephRoutingTable.getInstance();
 	}
 
 
