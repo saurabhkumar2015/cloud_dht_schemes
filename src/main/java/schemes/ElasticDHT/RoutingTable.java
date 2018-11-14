@@ -5,14 +5,8 @@ import common.IRoutingTable;
 import config.ConfigLoader;
 import config.DHTConfig;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Random;
-import java.util.Set;
 
 public class RoutingTable implements IRoutingTable{
 
@@ -97,7 +91,7 @@ public class RoutingTable implements IRoutingTable{
 			
 			// check if nodeId is in hash and get that index
 		}
-		
+		return this;
 	}
 	
 
@@ -165,8 +159,14 @@ public class RoutingTable implements IRoutingTable{
 	
 		}
 		System.out.println("Load balanced");
-		
+		return this;
 	}
+
+	@Override
+	public List<Integer> getLiveNodes() {
+		return null;
+	}
+
 	public Set<Integer> getLiveNodes(ElasticRoutingTableInstance rt []){
 		int tempNode;
 		for(int i = 0;i<config.bucketSize;i++) {
@@ -227,7 +227,7 @@ public class RoutingTable implements IRoutingTable{
 				break;
 			}
 		}
-		if(b==true) {
+		if(b) {
 			return i;
 		}
 		else {
@@ -271,7 +271,7 @@ public class RoutingTable implements IRoutingTable{
 		
 		
 		// TODO Auto-generated method stub
-		
+		return this;
 	}
 }
 

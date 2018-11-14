@@ -6,6 +6,7 @@ import config.DHTConfig;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Random;
 
 public class CephRoutingTable implements IRoutingTable, Serializable {
@@ -79,4 +80,9 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    @Override
+    public List<Integer> getLiveNodes() {
+        return null;
+    }
 }

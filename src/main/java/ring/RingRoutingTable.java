@@ -302,4 +302,9 @@ public class RingRoutingTable implements IRoutingTable {
 		}
 		return this;
 	}
+
+    @Override
+    public List<Integer> getLiveNodes() {
+        return null;
+    }
 }

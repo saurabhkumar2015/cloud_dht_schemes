@@ -23,6 +23,7 @@ public class ControlClient {
         ConfigLoader.init(args[0]);
         DHTConfig config = ConfigLoader.config;
         boolean exit = true;
+        boolean distributed = !"Centralized".equalsIgnoreCase(config.dhtType);
         IRoutingTable routingTable = Commons.initRoutingTable(config);
         Random r = new Random(config.seed);
 
@@ -42,12 +43,16 @@ public class ControlClient {
                     String[] ids = input.split(",");
                     for (String id : ids) {
                         int i = Integer.parseInt(id.trim());
-                        if(config.dhtType.toLowerCase().equalsIgnoreCase("centralized"))
+                        if(distributed)
                         {
-                            System.out.print("Add Node "+ id +"sent to Proxy:"+config.proxyIp);
+                            String node = config.nodesMap.get(nodeId);
+                            System.out.print("Add Node "+ id +" sent to DataNode:"+node);
+                            messageSender.sendMessage(node , ADD_NODE, i);
+                        }
+                        else{
+                            System.out.print("Add Node "+ id +" sent to Proxy:"+config.proxyIp);
                             messageSender.sendMessage(config.proxyIp, ADD_NODE, i);
                         }
-                        else messageSender.sendMessage(config.nodesMap.get(nodeId), ADD_NODE, i);
                     }
                     break;
                 case "D":
@@ -56,7 +61,15 @@ public class ControlClient {
                     ids = input.split(",");
                     for (String id : ids) {
                         int i = Integer.parseInt(id.trim());
-                        messageSender.sendMessage(config.nodesMap.get(nodeId), DELETE_NODE, i);
+                        if(distributed) {
+                            String node = config.nodesMap.get(nodeId);
+                            System.out.print("Delete Node "+ id +" sent to DataNode:"+node);
+                            messageSender.sendMessage(config.nodesMap.get(nodeId), DELETE_NODE, i);
+                        }
+                        else {
+                            System.out.print("Delete Node "+ id +" sent to Proxy:"+config.proxyIp);
+                            messageSender.sendMessage(config.proxyIp, DELETE_NODE, i);
+                        }
                     }
                     break;
                 case "L":
@@ -65,10 +78,15 @@ public class ControlClient {
                     ids = input.split(",");
                     int node = Integer.parseInt(ids[0].trim());
                     double factor = Double.parseDouble(ids[1].trim());
-                    if(config.dhtType.toLowerCase().equalsIgnoreCase("centralized"))
+                    if(distributed) {
+                        String sNode = config.nodesMap.get(nodeId);
+                        System.out.print("Load Balance request for node id " + node+" sent to DataNode:"+sNode);
+                        messageSender.sendMessage(sNode, LOAD_BALANCE, new LoadBalance(node, factor));
+                    }
+                    else {
+                        System.out.print("Load Balance request for node id " + node+" sent to Proxy:"+config.proxyIp);
                         messageSender.sendMessage(config.proxyIp, LOAD_BALANCE, new LoadBalance(node, factor));
-                    else
-                        messageSender.sendMessage(config.nodesMap.get(nodeId), LOAD_BALANCE, new LoadBalance(node, factor));
+                    }
                     break;
                 case "X":
                     exit = false;

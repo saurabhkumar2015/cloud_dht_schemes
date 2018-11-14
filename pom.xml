@@ -99,7 +99,10 @@
                                     </includes>
                                     <excludes>
                                         <exlude>
-                                            org/apache/gossip/manager/GossipManager*
+                                            org/apache/gossip/manager/GossipManager.class
+                                        </exlude>
+                                        <exlude>
+                                            org/apache/gossip/manager/GossipCore.class
                                         </exlude>
                                     </excludes>
                                 </filter>
