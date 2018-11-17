@@ -22,3 +22,4 @@ java -cp schemes-1.0-SNAPSHOT-jar-with-dependencies.jar clients.RegularClient /h
 
 6) Command to start proxy server
 
+java -cp schemes-1.0-SNAPSHOT-jar-with-dependencies.jar proxy.ProxyServer /home/vm_config.csv 
