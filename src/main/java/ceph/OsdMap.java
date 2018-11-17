@@ -142,8 +142,20 @@ public class OsdMap implements Serializable{
     		System.out.println("Files need to moves from Data Node: " + tempNode.nodeId);
     		tempNode = tempNode.nextNode;
     	}
-    	
-    	
+    }
+    
+    public void MoveFileInClusterOnNodeDeleteion(Node headNode, Node excludedNode)
+    {
+    	// Generally the data nodes should contain the local copies of files
+    	// excact file match should run on those Data nodes.
+    	// iterate over the cluster and print which Data nodes need to move data
+    	Node tempNode = headNode;
+    	while(tempNode != null)
+    	{
+    		if(tempNode.nodeId != excludedNode.nodeId)
+    		System.out.println("Files need to moves from Data Node: " + tempNode.nodeId);
+    		tempNode = tempNode.nextNode;
+    	}
     }
     
     public void ShowOsdMap(boolean isShow)
@@ -172,6 +184,10 @@ public class OsdMap implements Serializable{
     public void DeleteNode(int nodeId)
     {
  	   _findNodeInOsdMap(root,nodeId, 1, false);
+ 	   Node headNodeOfCluster = this.findHeadNodeOfTheCluster(nodeId);
+ 	   Node deleteNode = this.FindNodeInOsdMap(nodeId);
+ 	   // We need to check the files to moves from these nodes.
+ 	   this.MoveFileInClusterOnNodeDeleteion(headNodeOfCluster, deleteNode);
     }
     
     // Once we have weight distrubuted for leaf node, then populate weight from leaf to root
@@ -255,7 +271,7 @@ public class OsdMap implements Serializable{
 	   
 	   if(tempNode != null && level < depthofOsdMap)
 		   return _findNodeWithRequestedReplica(tempNode.leftNode,placementGroupId, replicaId, level + 1);
-	   if(tempNode != null && level == depthofOsdMap  && tempNode.isActive)
+	   if(tempNode != null && level == depthofOsdMap && tempNode.isActive)
 		   return tempNode.nodeId;
 	   else
 		   return -2;
