@@ -136,10 +136,10 @@ public class OsdMap implements Serializable{
     	// Generally the data nodes should contain the local copies of files
     	// excact file match should run on those Data nodes.
     	// iterate over the cluster and print which Data nodes need to move data
-    	Node tempNode = newlyAddedNode.nextNode;
+    	Node tempNode = newlyAddedNode;
     	while(tempNode != null)
     	{
-    		System.out.println("Files need to moves from Data Node: " + tempNode.nodeId + " to " + newlyAddedNode.nodeId);
+    		System.out.println("Files need to moves from Data Node: " + tempNode.nodeId);
     		tempNode = tempNode.nextNode;
     	}
     	
