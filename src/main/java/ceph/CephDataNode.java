@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import common.Commons;
@@ -46,7 +48,7 @@ public class CephDataNode  implements IDataNode{
 		//step 1. find the placementGroupId for file
 		int placementGroupId = this.hashGenerator.getPlacementGroupIdFromFileName(fileName, config.PlacementGroupMaxLimit);
 		
-		// Step 2: push the Data to the DataNode
+		// Step 2: push the Data to the DataNode if not present in DataList
 		DataObject obj = new DataObject(placementGroupId, replicaId,fileName);
 		dataList.add(obj);
 		
@@ -81,20 +83,51 @@ public class CephDataNode  implements IDataNode{
     public void MoveFiles(int clusterIdofNewNode,String nodeIp, double newnodeWeight, double clusterWeight)
     {
 
-    	// iterate on local file copy and move the file accordingly
-    	Iterator<DataObject> iter = dataList.iterator();
-    	while(iter.hasNext())
-		{
-    		DataObject obj = iter.next();
-			double hashvalue = HashGenerator.getInstance().generateHashValue(clusterIdofNewNode, obj.placementGroup, obj.replicaId);
+    	// iterate on local file copy and move the file accordingly    	
+    	List<DataObject> filesToremove = new LinkedList<DataObject>();
+    	for(DataObject obj : dataList)
+    	{
+    		double hashvalue = HashGenerator.getInstance().generateHashValue(clusterIdofNewNode, obj.placementGroup, obj.replicaId);
 			double weightFactor = HashGenerator.getInstance().GetWeightFactor(newnodeWeight, clusterWeight);
 			
 			if(hashvalue < weightFactor)
 			{
 				Commons.messageSender.sendMessage(nodeIp, Constants.ADD_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
-				iter.remove();
+				filesToremove.add(obj);
 			}
-		}	
+    	}
+       
+    	// Now remove the files from local copy of data node.
+    	dataList.removeAll(filesToremove);
+    }
+    
+    public void OnDeleteNodeMoveFile()
+    {
+    	// Iterate over their the files and for each file check if the file with filename and replica exist then fine otherwise increment the 
+    	// replica and add the file to ceph system.
+    	for(DataObject obj : dataList)
+    	{
+    		int count = 0;
+    		for(int i = 1; i <= obj.replicaId; i++)
+    		{
+    			int nodeWithrequestFileAndReplica = this.cephRtTable.getNodeId(obj.fileName,i);
+    			// if File present with active node then its good call
+    			if(nodeWithrequestFileAndReplica != -2)
+    			{
+    				count++;
+    			}
+    		}
+    		// if file with some intermediate replica is not present then add the fie with same filename with incremented replicaId
+    		if(count < obj.replicaId)
+    		{
+    			if(this.cephRtTable.getNodeId(obj.fileName,obj.replicaId+1) == -2)
+    			{
+    			 System.out.println("Add file to ceph system with Pgroup : " + obj.placementGroup + " and replica = " + obj.replicaId + 1 );
+    			((CephRoutingTable)this.cephRtTable).mapInstance.AddFileToCephSystem(obj.fileName, obj.replicaId + 1, config.PlacementGroupMaxLimit);
+    		    }
+    		}
+    	}
+    	
     }
     
     public void UpdateRoutingTable(IRoutingTable cephrtTable)
