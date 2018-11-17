@@ -1,14 +1,14 @@
 package schemes.ElasticDHT;
 
 import common.IDataNode;
+import common.IRoutingTable;
 
 public class DataNodeElastic implements IDataNode {
 
 	private int nodeId;
 	public void MoveFiles(int clusterIdofNewNode, String nodeIp, double newnodeWeight, double clusterWeight) {
  	}
- 	@Override
-	public void UpdateRoutingTable(IRoutingTable cephrtTable) {
+ 	public void UpdateRoutingTable(IRoutingTable cephrtTable) {
  	}
 
 	public void writeFile(String fileName, int replicaId) {
