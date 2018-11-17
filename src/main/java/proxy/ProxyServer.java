@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import common.CephPayload;
 import common.Constants;
 import common.IRoutingTable;
+import common.LoadBalance;
 
 import org.apache.commons.lang3.SerializationUtils;
 
@@ -159,24 +160,57 @@ public class ProxyServer {
 		    		
 		    	}
 		    	
-		    	if(message.getType() == Constants.NEW_VERSION) {
+		    	if((message.getType()).equals(Constants.LOAD_BALANCE)) {
 		    		
-		    		if(scheme.equals("CEPH") || scheme.equals("ceph")) {
-		    			
-		    			CephRoutingTable updated_ceph_routing_table = (CephRoutingTable)message.getPayload();
-		    			
-		    			if(ceph_routing_table.VersionNo < updated_ceph_routing_table.VersionNo) {
-		    				ceph_routing_table = updated_ceph_routing_table;
-		    				sendUpdatedDhtToDatanodes(config);
-		    			}
-		    			
-		    		}
+		    		LoadBalance lb = (LoadBalance) message.getPayload();
+		    		int nodeToBeBalanced = lb.nodeId;
+		    		double loadFactor = lb.loadFactor;
+		    		
+		    		System.out.println("DataNode to be loadbalanced "+nodeToBeBalanced);
+		    		System.out.println("Load Factor "+loadFactor);
+		    		
+		    		CephRoutingTable updated_ceph_routing_table = (CephRoutingTable)ceph_routing_table.loadBalance(nodeToBeBalanced, loadFactor);
+		    		
+                    ceph_routing_table = updated_ceph_routing_table;
+                    
+                    Node headNode = ceph_routing_table.mapInstance.findHeadNodeOfTheCluster(nodeToBeBalanced);
+                    
+	                Node temp = headNode;
+	     
+	             	   double sum = 0;
+	             	   while(temp != null)
+	             	   {
+	             		   sum = sum + temp.weight;
+	             		   temp = temp.nextNode;
+	             	   }
+	             	   
+	          
+            		  
+            	      Node ptr = headNode;
+            	    
+	             	   while(ptr != null) {
+	             		   
+	             		   double weight = ptr.weight;
+	             		   int clusterId = ptr.clusterId;
+	             		   String nodeIp = config.nodesMap.get(ptr.nodeId);
+	             		   
+	             		   CephPayload payload = new CephPayload(nodeIp, clusterId, weight, sum, ceph_routing_table);
+	             		   System.out.println("Move file called::" + payload + " to node IP: " + nodeIp);
+	             		   sendMsg.sendMessage(nodeIp, Constants.MOVE_FILE, payload);
+	             		   sum = sum - weight;
+	             		   ptr = ptr.nextNode;
+	             	   }
+                       
+                 
+		    		
+		    	}
+		    	
 		   
 		    		
 		    			//compare epoch number & if greater...update dht and send messages to datanodes
 		    	
 		    	}
-	    	}
+	    	
 		} catch (IOException e) { 
 			// TODO Auto-generated catch block
 			e.printStackTrace();
