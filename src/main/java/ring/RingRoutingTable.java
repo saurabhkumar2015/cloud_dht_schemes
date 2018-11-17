@@ -12,7 +12,8 @@ public class RingRoutingTable implements IRoutingTable {
     public Map<Integer,Integer> routingMap; // HashMap for hashStartIndex to nodeId mapping
     public DHTConfig conf;
     public Map<Integer, String> physicalTable;
-    private static final int MAX_HASH = 2013265907;
+    private static final int MAX_HASH = 65536;
+    //private static final int MAX_HASH = 2013265907;
     public int numNodeIds;
     public byte replicationFactor;
     
@@ -44,15 +45,15 @@ public class RingRoutingTable implements IRoutingTable {
 	{
 		Random r = new Random();
 		int low = 1;
-		int high = 1024;
+		int high = MAX_HASH;
 		int result = r.nextInt(high-low) + low;
 		return result;
 	}
-    
+    /*
     //Hash generator for given string
     public int getHasValueFromIpPort(String ipPort) {
         return Math.abs((ipPort.hashCode())%MAX_HASH);
-    }
+    }*/
 
     //initiating physical table and routing map
     public void populateTables() {
