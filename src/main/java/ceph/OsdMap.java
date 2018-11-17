@@ -255,7 +255,7 @@ public class OsdMap implements Serializable{
 	   
 	   if(tempNode != null && level < depthofOsdMap)
 		   return _findNodeWithRequestedReplica(tempNode.leftNode,placementGroupId, replicaId, level + 1);
-	   if(tempNode != null && level == depthofOsdMap)
+	   if(tempNode != null && level == depthofOsdMap  && tempNode.isActive)
 		   return tempNode.nodeId;
 	   else
 		   return -2;
