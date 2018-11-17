@@ -59,7 +59,7 @@ public class DataNode implements IDataNode {
 	public void deleteFile(String fileName) {
 		
 		System.out.println("\nFileName: "+fileName);
-		int hashVal = (fileName.hashCode())%1024;
+		int hashVal = (fileName.hashCode())%this.routingTableObj.MAX_HASH;
 		System.out.println("FileHash Value:"+hashVal);
 		LinkedList<Integer> listOfAssociatedHashes =  routingTableObj.modifiedBinarySearch(hashVal);
 		if(listOfAssociatedHashes!=null) {

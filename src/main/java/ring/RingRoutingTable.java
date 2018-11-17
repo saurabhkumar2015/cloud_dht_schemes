@@ -12,19 +12,20 @@ public class RingRoutingTable implements IRoutingTable {
     public Map<Integer,Integer> routingMap; // HashMap for hashStartIndex to nodeId mapping
     public DHTConfig conf;
     public Map<Integer, String> physicalTable;
-    private static final int MAX_HASH = 65536;
-    //private static final int MAX_HASH = 2013265907;
+    public int MAX_HASH = 65536;
     public int numNodeIds;
     public byte replicationFactor;
+    public static Random randomGen;
     
     public RingRoutingTable(){
-
+    	
         this.conf = ConfigLoader.config;
     	this.numNodeIds = this.conf.nodeIdEnd-this.conf.nodeIdStart+1;
     	this.version = conf.version;
     	this.routingMap = new TreeMap<Integer,Integer>();
     	this.physicalTable = conf.nodesMap;
     	this.replicationFactor = conf.replicationFactor;
+    	randomGen = new Random(this.conf.seed);
     	this.populateTables(); 
     	//printing Routing table which will be kept with each data node 
     	System.out.print("This is the initial routing table which will be available at every data node\n");
@@ -41,12 +42,11 @@ public class RingRoutingTable implements IRoutingTable {
                 ", routingMap=" + routingMap +
                 '}';
     }
-    public int randomClusterNoGenerator()
+    public int randomHashGenerator()
 	{
-		Random r = new Random();
 		int low = 1;
 		int high = MAX_HASH;
-		int result = r.nextInt(high-low) + low;
+		int result = randomGen.nextInt(high-low);
 		return result;
 	}
     /*
@@ -60,7 +60,7 @@ public class RingRoutingTable implements IRoutingTable {
     	int startNodeId = this.conf.nodeIdStart;
     	int endNodeId = this.conf.nodeIdEnd;
     	for(int s = startNodeId; s<=endNodeId; s++) {
-    		int hashVal = randomClusterNoGenerator();
+    		int hashVal = randomHashGenerator();
     		this.routingMap.put(hashVal, s);
     	}
     	this.version++;
@@ -204,9 +204,9 @@ public class RingRoutingTable implements IRoutingTable {
     //nodeId = ip:port
     public IRoutingTable addNode(int nodeIdInt) {
     	System.out.println("\n");
-    	String nodeId = physicalTable.get(nodeIdInt);
+    	//String nodeId = physicalTable.get(nodeIdInt);
     	System.out.println("Adding new node: "+nodeIdInt);
-    	int newHash = randomClusterNoGenerator();
+    	int newHash = randomHashGenerator();
     	System.out.println("New node's hash value: "+newHash);
     	//int newHash = getHasValueFromIpPort(nodeId);
     	LinkedList<Integer> listOfHashesForNewHash = modifiedBinarySearch(newHash);
