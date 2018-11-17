@@ -124,15 +124,24 @@ public class CephDataNode  implements IDataNode{
 			
 			if(hashvalue < weightFactor)
 			{
-			  // No action need to be taken for that file
+			  System.out.println("File movement is not needed for file: " + obj.fileName + " with replica " + obj.replicaId);
 			}
 			else
 			{
-				int findNodeidToMoveFile = this.cephRtTable.getNodeId(obj.fileName, obj.replicaId);
-				String nodeIp = config.nodesMap.get(findNodeidToMoveFile);
+				int nodeidToMoveFile = this.cephRtTable.getNodeId(obj.fileName, obj.replicaId);
+				if(nodeidToMoveFile != -2)
+				{
+
+				System.out.println("File with pGroup " + obj.placementGroup + " replica " + obj.replicaId + " moves to node " + nodeidToMoveFile);
+				String nodeIp = config.nodesMap.get(nodeidToMoveFile);
 				Commons.messageSender.sendMessage(nodeIp, Constants.WRITE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
 				System.out.println("File with pGroup " + obj.placementGroup + " replica " + obj.replicaId + " moves to node " + nodeIp);
 				filesToremove.add(obj);
+				}
+				else
+				{
+					System.out.println("The file is out of range for Osd Map with fileName " + obj.fileName + " replica " + obj.replicaId);
+				}
 			}
     	}
     	
