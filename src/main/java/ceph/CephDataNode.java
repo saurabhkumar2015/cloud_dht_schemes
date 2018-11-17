@@ -48,6 +48,7 @@ public class CephDataNode  implements IDataNode{
 		//step 1. find the placementGroupId for file
 		int placementGroupId = this.hashGenerator.getPlacementGroupIdFromFileName(fileName, config.PlacementGroupMaxLimit);
 		
+		System.out.println("Write file request received for FileName: " + fileName + " replicaId: " + replicaId );
 		// Step 2: push the Data to the DataNode if not present in DataList
 		DataObject obj = new DataObject(placementGroupId, replicaId,fileName);
 		dataList.add(obj);
@@ -57,6 +58,7 @@ public class CephDataNode  implements IDataNode{
 	public void deleteFile(String fileName) {
 		// TODO Auto-generated method stub				
 				// Step 1: Remove the Data from the DataNode
+		System.out.println("Delete file request received for FileName: " + fileName);
 				for(DataObject obj : dataList)
 				{
 					if(obj.fileName == fileName)
@@ -66,24 +68,26 @@ public class CephDataNode  implements IDataNode{
 
 	public void addNode(int nodeId) {
 		// TODO Auto-generated method stub
+		System.out.println("Add new node request received with nodeId " + nodeId);
 		this.cephRtTable = this.cephRtTable.addNode(nodeId);
 	}
 
 	public void deleteNode(int nodeId) {
 		// On delete set the node Active status to false.
+		System.out.println("Delete node request received with nodeId " + nodeId);
 		this.cephRtTable = this.cephRtTable.deleteNode(nodeId);
 		
 	}
 
 	public void loadBalance(int nodeId, double loadFraction) {
 		// First find the node and change the load on the node by loadfactor
+		System.out.println("Load balance request received at nodeId " + nodeId + " with loadFactor of " + loadFraction);
 		this.cephRtTable = cephRtTable.loadBalance(nodeId, loadFraction);
 	}
     
     public void MoveFiles(int clusterIdofNewNode,String nodeIp, double newnodeWeight, double clusterWeight)
     {
 
-    	System.out.println("Received move files request");
     	// iterate on local file copy and move the file accordingly    	
     	List<DataObject> filesToremove = new LinkedList<DataObject>();
     	for(DataObject obj : dataList)
@@ -93,6 +97,7 @@ public class CephDataNode  implements IDataNode{
 			
 			if(hashvalue < weightFactor)
 			{
+				System.out.println("File with pGroup " + obj.placementGroup + " replica " + obj.replicaId + " moves to new node " + nodeIp);
 				Commons.messageSender.sendMessage(nodeIp, Constants.WRITE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
 				filesToremove.add(obj);
 			}
@@ -101,6 +106,33 @@ public class CephDataNode  implements IDataNode{
     	// Now remove the files from local copy of data node.
     	dataList.removeAll(filesToremove);
     }
+    
+    public void OnLoadBalanceMovement(int clusterId, double nodeWeight, double clusterWeight)
+    {
+    	List<DataObject> filesToremove = new LinkedList<DataObject>();
+    	for(DataObject obj : dataList)
+    	{
+    		double hashvalue = HashGenerator.getInstance().generateHashValue(clusterId, obj.placementGroup, obj.replicaId);
+			double weightFactor = HashGenerator.getInstance().GetWeightFactor(nodeWeight, clusterWeight);
+			
+			if(hashvalue < weightFactor)
+			{
+			  // No action need to be taken for that file
+			}
+			else
+			{
+				int findNodeidToMoveFile = this.cephRtTable.getNodeId(obj.fileName, obj.replicaId);
+				String nodeIp = config.nodesMap.get(findNodeidToMoveFile);
+				Commons.messageSender.sendMessage(nodeIp, Constants.WRITE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
+				System.out.println("File with pGroup " + obj.placementGroup + " replica " + obj.replicaId + " moves to node " + nodeIp);
+				filesToremove.add(obj);
+			}
+    	}
+    	
+    	// Now remove the files from local copy of data node.
+    	dataList.removeAll(filesToremove);
+    }
+    
     
     public void OnDeleteNodeMoveFile()
     {
