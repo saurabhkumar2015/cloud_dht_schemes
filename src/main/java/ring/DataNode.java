@@ -26,15 +26,15 @@ public class DataNode implements IDataNode {
 	public void loadBalance(int nodeId, double loadFraction) {
 		routingTableObj.loadBalance(nodeId, loadFraction);
 	}
-
-	@Override
-	public void MoveFiles(int clusterIdofNewNode, String nodeIp, double newnodeWeight, double clusterWeight) {
-
+	
+	public void MoveFiles(int clusterIdofNewNode,String nodeIp, double newnodeWeight, double clusterWeight, boolean isLoadbalance) {
+		
 	}
 
-	@Override
-	public void UpdateRoutingTable(IRoutingTable cephrtTable) {
-
+	public void UpdateRoutingTable(IRoutingTable ringNewTable) {
+		this.routingTableObj = (RingRoutingTable) ringNewTable;
+		System.out.println("New version: " +this.routingTableObj.version);
+		this.routingTableObj.printRoutingTable();
 	}
 
 	public void writeFile(String fileName, int replicaId) {
@@ -43,9 +43,7 @@ public class DataNode implements IDataNode {
 		int nId = routingTableObj.getNodeId(fileName, replicaId);
 		System.out.println("File written into node id: "+nId+" Replication Id:"+replicaId);
 
-		//Commons.messageSender.sendMessage(routingTableObj.physicalTable.get(nId), Constants.ADD_FILE, Commons.GeneratePayload(fileName, replicaId));
-
-		//Commons.messageSender.sendMessage(routingTableObj.physicalTable.get(nId), Constants.WRITE_FILE, Commons.GeneratePayload(fileName, replicaId));
+		Commons.messageSender.sendMessage(routingTableObj.physicalTable.get(nId), Constants.WRITE_FILE, Commons.GeneratePayload(fileName, replicaId));
 
 		/*
 		LinkedList<Integer> listOfAssociatedHashes =  routingTableObj.modifiedBinarySearch(hashVal);
