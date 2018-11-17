@@ -2,6 +2,8 @@ package ring;
 import java.util.*;
 import java.util.Map.Entry;
 
+import common.Commons;
+import common.Constants;
 import common.IRoutingTable;
 import config.ConfigLoader;
 import config.DHTConfig;
@@ -187,7 +189,7 @@ public class RingRoutingTable implements IRoutingTable {
 
     //Find Node corresponding to given filename
     public int getNodeId(String fileName, int replicationId) {
-        int hashVal = fileName.hashCode()%1024;
+        int hashVal = fileName.hashCode()%this.MAX_HASH;
         LinkedList<Integer> listOfNodesForGivenHash = modifiedBinarySearch(hashVal);
         if (listOfNodesForGivenHash!=null) {
         	if(listOfNodesForGivenHash.size()>=this.replicationFactor) {
@@ -217,10 +219,21 @@ public class RingRoutingTable implements IRoutingTable {
     		System.out.println("NodeId: "+routingMap.get(listOfHashesForNewHash.get(i))+" hashStartValue: "+listOfHashesForNewHash.get(i));
     	}
     	*/
+    	String nodeIp = this.physicalTable.get(routingMap.get(listOfHashesForNewHash.get(0)));
+    	String payload = String.valueOf(newHash)+"-"+String.valueOf(listOfHashesForNewHash.get(1)-1);
     	System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " removed from Node :"+ routingMap.get(listOfHashesForNewHash.get(0)));
+    	Commons.messageSender.sendMessage(nodeIp, Constants.REMOVE_HASH, payload);
+    	
+    	nodeIp = this.physicalTable.get(routingMap.get(listOfHashesForNewHash.get(listOfHashesForNewHash.size()-1)));
+    	payload = String.valueOf(listOfHashesForNewHash.get(0))+"-"+String.valueOf((newHash-1));
     	System.out.println("Hash range "+ listOfHashesForNewHash.get(0)+" - "+(newHash-1)+ " removed from Node :"+ routingMap.get(listOfHashesForNewHash.get(listOfHashesForNewHash.size()-1)));
+    	Commons.messageSender.sendMessage(nodeIp, Constants.REMOVE_HASH, payload);
+    	
     	int newNodeId = ++this.numNodeIds;
+    	nodeIp = this.physicalTable.get(newNodeId);
+    	payload = String.valueOf(newHash)+"-"+ (listOfHashesForNewHash.get(1)-1);
     	System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " added to Node :"+ newNodeId);
+    	Commons.messageSender.sendMessage(nodeIp, Constants.ADD_HASH, payload);
     	
     	//update physical table
     	//this.routingTableObj.physicalTable.put(newNodeId, nodeId);
@@ -267,7 +280,11 @@ public class RingRoutingTable implements IRoutingTable {
     	}*/
     	System.out.println("\n");
     	System.out.println("Deleting node: "+nodeIdInt);
+    	int nid = routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1));
+    	String nodeIp = this.physicalTable.get(nid);
+    	String payload = String.valueOf(predecessors.get(0)) +"-"+String.valueOf((deleteHash-1));
     	System.out.println("Hash range "+ predecessors.get(0)+" - "+ (deleteHash-1) +" added to "+routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
+    	Commons.messageSender.sendMessage(nodeIp, Constants.ADD_HASH, payload);
     	
     	//update routing map
     	this.routingMap.remove(deleteHash);

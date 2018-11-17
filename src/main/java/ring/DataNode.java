@@ -64,7 +64,7 @@ public class DataNode implements IDataNode {
 		for(int start=0; start<routingTableObj.replicationFactor;start++) {
 			int nId = routingTableObj.routingMap.get(listOfAssociatedHashes.get(start));
 			System.out.println("File deleted from node id: "+nId+" Replication Id:"+(start+1));
-			//Commons.messageSender.sendMessage(routingTableObj.physicalTable.get(nId), Constants.DELETE_FILE, Commons.GeneratePayload(fileName, (start+1)));
+			Commons.messageSender.sendMessage(routingTableObj.physicalTable.get(nId), Constants.DELETE_FILE, Commons.GeneratePayload(fileName, (start+1)));
 		}	
 		}
 	}
