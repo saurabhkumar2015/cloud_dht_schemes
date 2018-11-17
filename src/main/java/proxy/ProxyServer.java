@@ -149,9 +149,9 @@ public class ProxyServer {
 	             		   
 	             		   double weight = temp1.weight;
 	             		   String nodeIp = config.nodesMap.get(temp1.nodeId);
-	             		   CephPayload payload = new CephPayload(newNodeStr, newNodeClusterId, newNodeWt, sum, ceph_routing_table);
+	             		   CephPayload payload = new CephPayload(newNodeStr, newNodeClusterId, newNodeWt, sum, false, ceph_routing_table);
 	             		   System.out.println("Move file called::" + payload + " to node IP: " + nodeIp);
-	             		   sendMsg.sendMessage(nodeIp, Constants.MOVE_FILE_ADD_NODE, payload);
+	             		   sendMsg.sendMessage(nodeIp, Constants.MOVE_FILE, payload);
 	             		   sum = sum - weight;
 	             		   temp1 = temp1.nextNode;
 	             	   }
@@ -194,9 +194,9 @@ public class ProxyServer {
 	             		   int clusterId = ptr.clusterId;
 	             		   String nodeIp = config.nodesMap.get(ptr.nodeId);
 	             		   
-	             		   CephPayload payload = new CephPayload(nodeIp, clusterId, weight, sum, ceph_routing_table);
+	             		   CephPayload payload = new CephPayload(nodeIp, clusterId, weight, sum, true, ceph_routing_table);
 	             		   System.out.println("Move file called::" + payload + " to node IP: " + nodeIp);
-	             		   sendMsg.sendMessage(nodeIp, Constants.MOVE_FILE_LOAD_BALANCE, payload);
+	             		   sendMsg.sendMessage(nodeIp, Constants.MOVE_FILE, payload);
 	             		   sum = sum - weight;
 	             		   ptr = ptr.nextNode;
 	             	   }
