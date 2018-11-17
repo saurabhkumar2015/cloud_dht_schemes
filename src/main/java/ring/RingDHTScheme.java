@@ -27,10 +27,11 @@ public class RingDHTScheme implements IDHTScheme {
     	DHTConfig config = new DHTConfig();
         config.scheme = "RING";
         config.dhtType = "Centralized";
-        config.replicationFactor = 4;
+        config.replicationFactor = 3;
         
         //Populate physical node table from csv file
         Map<Integer, String> map = new HashMap<Integer, String>();
+        /*
         BufferedReader br;
 		try {
 			br = new BufferedReader(new FileReader(config.nodeMapLocation));
@@ -48,6 +49,12 @@ public class RingDHTScheme implements IDHTScheme {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
+		*/
+        map.put(1,"127.0.0.1:50000");
+        map.put(2,"127.0.0.1:50001");
+        map.put(3,"127.0.0.1:50002");
+        map.put(4,"127.0.0.1:50003");
+        map.put(5,"127.0.0.1:50005");
 		/*
         map.put(1,"192.168.0.1:2000");
         map.put(2,"192.168.0.1:2010");
@@ -78,12 +85,12 @@ public class RingDHTScheme implements IDHTScheme {
         
         RingDHTScheme ring = new RingDHTScheme();
     	DataNode dNode = new DataNode(ring);
-    	dNode.writeFile("sampleTextFile.txt", config.replicationFactor);
+    	dNode.writeFile("sampleTextFile.txt", 1);
     	dNode.deleteFile("sampleTextFile.txt");
-    	dNode.addNode(21);
-    	dNode.deleteNode(21);
-    	dNode.loadBalance(5,1.2);
-    	dNode.loadBalance(5,0.8);
+    	dNode.addNode(4);
+    	dNode.deleteNode(3);
+    	//dNode.loadBalance(4,1.2);
+    	dNode.loadBalance(4,0.8);
     	scan.close();
     }
 }
