@@ -83,6 +83,7 @@ public class CephDataNode  implements IDataNode{
     public void MoveFiles(int clusterIdofNewNode,String nodeIp, double newnodeWeight, double clusterWeight)
     {
 
+    	System.out.println("Received move files request");
     	// iterate on local file copy and move the file accordingly    	
     	List<DataObject> filesToremove = new LinkedList<DataObject>();
     	for(DataObject obj : dataList)
