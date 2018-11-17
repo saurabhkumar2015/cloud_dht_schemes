@@ -85,14 +85,20 @@ public class CephDataNode  implements IDataNode{
 		this.cephRtTable = cephRtTable.loadBalance(nodeId, loadFraction);
 	}
     
-    public void MoveFiles(int clusterIdofNewNode,String nodeIp, double newnodeWeight, double clusterWeight)
+    public void MoveFiles(int clusterId,String nodeIp, double newnodeWeight, double clusterWeight, boolean isLoadbalance)
     {
 
+    	if(isLoadbalance)
+    	{
+    	   this.OnLoadBalanceMovement(clusterId, newnodeWeight, clusterWeight);	
+    	}
+    	else
+    	{
     	// iterate on local file copy and move the file accordingly    	
     	List<DataObject> filesToremove = new LinkedList<DataObject>();
     	for(DataObject obj : dataList)
     	{
-    		double hashvalue = HashGenerator.getInstance().generateHashValue(clusterIdofNewNode, obj.placementGroup, obj.replicaId);
+    		double hashvalue = HashGenerator.getInstance().generateHashValue(clusterId, obj.placementGroup, obj.replicaId);
 			double weightFactor = HashGenerator.getInstance().GetWeightFactor(newnodeWeight, clusterWeight);
 			
 			if(hashvalue < weightFactor)
@@ -105,9 +111,10 @@ public class CephDataNode  implements IDataNode{
        
     	// Now remove the files from local copy of data node.
     	dataList.removeAll(filesToremove);
+       }
     }
     
-    public void OnLoadBalanceMovement(int clusterId, double nodeWeight, double clusterWeight)
+    private void OnLoadBalanceMovement(int clusterId, double nodeWeight, double clusterWeight)
     {
     	List<DataObject> filesToremove = new LinkedList<DataObject>();
     	for(DataObject obj : dataList)
