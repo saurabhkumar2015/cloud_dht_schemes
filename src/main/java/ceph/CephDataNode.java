@@ -6,7 +6,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import common.*;
+import common.Commons;
+import common.Constants;
+import common.IDataNode;
+import common.IRoutingTable;
 import config.ConfigLoader;
 import config.DHTConfig;
 import socket.IMessageSend;
@@ -65,13 +68,14 @@ public class CephDataNode  implements IDataNode{
 	}
 
 	public void deleteNode(int nodeId) {
-		// TODO Auto-generated method stub
+		// On delete set the node Active status to false.
+		this.cephRtTable = this.cephRtTable.deleteNode(nodeId);
 		
 	}
 
 	public void loadBalance(int nodeId, double loadFraction) {
-		// TODO Auto-generated method stub
-		
+		// First find the node and change the load on the node by loadfactor
+		this.cephRtTable = cephRtTable.loadBalance(nodeId, loadFraction);
 	}
     
     public void MoveFiles(int clusterIdofNewNode,String nodeIp, double newnodeWeight, double clusterWeight)
@@ -87,9 +91,7 @@ public class CephDataNode  implements IDataNode{
 			
 			if(hashvalue < weightFactor)
 			{
-				Payload payload = Commons.GeneratePayload(obj.fileName, obj.replicaId);
-				System.out.println("Add file request sent to "+ nodeIp + "payload: "+ payload);
-				Commons.messageSender.sendMessage(nodeIp, Constants.WRITE_FILE, payload);
+				Commons.messageSender.sendMessage(nodeIp, Constants.ADD_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
 				iter.remove();
 			}
 		}	
