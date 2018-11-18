@@ -1,7 +1,6 @@
 package ring;
 
 import schemes.IDHTScheme;
-import java.io.*;
 import java.util.Map;
 import java.util.*;
 import config.ConfigLoader;

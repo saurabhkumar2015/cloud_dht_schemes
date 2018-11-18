@@ -14,7 +14,7 @@ public class RingRoutingTable implements IRoutingTable {
     public Map<Integer,Integer> routingMap; // HashMap for hashStartIndex to nodeId mapping
     public DHTConfig conf;
     public Map<Integer, String> physicalTable;
-    public int MAX_HASH = 65536;
+    public int MAX_HASH;
     public int numNodeIds;
     public byte replicationFactor;
     public static Random randomGen;
@@ -27,6 +27,7 @@ public class RingRoutingTable implements IRoutingTable {
     	this.routingMap = new TreeMap<Integer,Integer>();
     	this.physicalTable = conf.nodesMap;
     	this.replicationFactor = conf.replicationFactor;
+    	this.MAX_HASH= conf.bucketSize;
     	randomGen = new Random(this.conf.seed);
     	this.populateTables(); 
     	//printing Routing table which will be kept with each data node 
@@ -81,12 +82,7 @@ public class RingRoutingTable implements IRoutingTable {
         }
     }
 
-	@Override
-	public long getVersionNumber() {
-		return 0;
-	}
-
-	public void printPhysicalTable() {
+    public void printPhysicalTable() {
         System.out.println("NodeId\tNodeIp_Port");
         for (Map.Entry<Integer, String> e : this.physicalTable.entrySet()) {
             System.out.print(e.getKey());
@@ -194,7 +190,7 @@ public class RingRoutingTable implements IRoutingTable {
 
     //Find Node corresponding to given filename
     public int getNodeId(String fileName, int replicationId) {
-        int hashVal = fileName.hashCode()%this.MAX_HASH;
+        int hashVal = Math.abs(fileName.hashCode())%this.MAX_HASH;
         LinkedList<Integer> listOfNodesForGivenHash = modifiedBinarySearch(hashVal);
         if (listOfNodesForGivenHash!=null) {
         	if(listOfNodesForGivenHash.size()>=this.replicationFactor) {
@@ -370,8 +366,16 @@ public class RingRoutingTable implements IRoutingTable {
 		return this;
 	}
 
-    @Override
     public List<Integer> getLiveNodes() {
-        return null;
+    	List<Integer> arList = new ArrayList<Integer>();
+    	for(Map.Entry<Integer,Integer> map : this.routingMap.entrySet()){
+    	     arList.add(map.getValue());
+    	}
+        return arList;
     }
+
+	public long getVersionNumber() {
+		return this.version;
+	}
+    
 }

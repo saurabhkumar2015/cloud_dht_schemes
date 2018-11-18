@@ -9,8 +9,7 @@ public interface IDataNode {
 	 * @param fileName
 	 * @param replicaId
 	 */
-	public void writeFile(String fileName, int replicaId);
-
+	public boolean writeFile(String fileName, int replicaId);
 
 	public void deleteFile(String fileName);
 
@@ -25,6 +24,8 @@ public interface IDataNode {
 	public void UpdateRoutingTable(IRoutingTable cephrtTable);
 
 	public IRoutingTable getRoutingTable();
-
+	
+	public void addHashRange(String hashRange);
+	
 }
 

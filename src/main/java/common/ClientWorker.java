@@ -68,6 +68,18 @@ public class ClientWorker {
                     dataNode.UpdateRoutingTable((IRoutingTable)payload.updated_ceph_routing_table);
                     dataNode.MoveFiles(payload.clusterId, payload.nodeIp, payload.nodeWeight, payload.totalWt, payload.isLoadBalance);
                     break;
+                
+                case ADD_HASH:
+                	String hashRangeToBeAdded = (String) request.getPayload();
+                	System.out.println("Received hash range add request: "+ hashRangeToBeAdded);
+                	dataNode.addHashRange(hashRangeToBeAdded);
+                    break;
+                   
+                case REMOVE_HASH:
+                	String hashRangeToBeDeleted = (String) request.getPayload();
+                	System.out.println("Received hash range delete request: "+ hashRangeToBeDeleted);
+                	dataNode.deleteFile(hashRangeToBeDeleted);
+                    break;
                  
        
                 default:
