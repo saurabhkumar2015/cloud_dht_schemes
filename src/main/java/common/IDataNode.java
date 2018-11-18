@@ -26,6 +26,5 @@ public interface IDataNode {
 
 	public IRoutingTable getRoutingTable();
 
-	public void setRoutingTable(IRoutingTable table);
 }
 
