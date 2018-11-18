@@ -46,6 +46,7 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
     public IRoutingTable addNode(int nodeId) {
         int clusterId = randomClusterNoGenerator();
         mapInstance.AddExtraNodeToOsdMap(clusterId, nodeId);
+        mapInstance.PopulateWeightOfInternalNode(mapInstance.root);
         this.VersionNo++;
         return CephRoutingTable.getInstance();
     }
