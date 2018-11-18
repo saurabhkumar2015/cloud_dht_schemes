@@ -21,5 +21,10 @@ java -cp schemes-1.0-SNAPSHOT-jar-with-dependencies.jar clients.RegularClient /h
 5) Command to kill all data nodes on machine
 
 6) Command to start proxy server
+java -cp schemes-1.0-SNAPSHOT-jar-with-dependencies.jar proxy.ProxyServer /home/vm_config.csv
 
-java -cp schemes-1.0-SNAPSHOT-jar-with-dependencies.jar proxy.ProxyServer /home/vm_config.csv 
+7) Universal Test case
+java -cp schemes-1.0-SNAPSHOT-jar-with-dependencies.jar test.UniversalDHTTest C:\cloud\config.conf C:\cloud\directories\full2.txt
+
+
+
