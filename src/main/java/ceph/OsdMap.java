@@ -176,14 +176,19 @@ public class OsdMap implements Serializable{
     public Node FindNodeInOsdMap(int nodeId)
     {
  	   this.foundNode = null;
- 	   _findNodeInOsdMap(root,nodeId, 1, true);
+ 	   _findNodeInOsdMap(root,nodeId, 1);
  	   return this.foundNode;
     }
     
     // Set the activation flag false for given nodeId
     public void DeleteNode(int nodeId)
     {
- 	   _findNodeInOsdMap(root,nodeId, 1, false);
+ 	   _findNodeInOsdMap(root,nodeId, 1);
+ 	   if(this.foundNode != null)
+ 	   {
+ 		   System.out.println("Node with NodeId : " + nodeId + " is deleted");
+ 		   this.foundNode.isActive = false;
+ 	   }
  	   Node headNodeOfCluster = this.findHeadNodeOfTheCluster(nodeId);
  	   Node deleteNode = this.FindNodeInOsdMap(nodeId);
  	   // We need to check the files to moves from these nodes.
@@ -208,7 +213,7 @@ public class OsdMap implements Serializable{
     public Node findHeadNodeOfTheCluster(int nodeId)
     {
  	   this.foundNode = null;
- 	   _findNodeInOsdMap(root,nodeId, 1, true);
+ 	   _findNodeInOsdMap(root,nodeId, 1);
  	   Node tempNode = this.foundNode;
  	   while(tempNode.prevNode != null)
  	   {
@@ -307,7 +312,7 @@ public class OsdMap implements Serializable{
 	   }
 	   return sum;
    }
-   private void _findNodeInOsdMap(OsdNode node, int nodeId, int level, boolean isActive)
+   private void _findNodeInOsdMap(OsdNode node, int nodeId, int level)
    {
 	   if(node == null)
 	   {
@@ -319,27 +324,27 @@ public class OsdMap implements Serializable{
 		   return;
 	   }
 	   // show the current node 
-	   boolean foundNode = _findNodeInOsdMapAtThisLevel(node,nodeId, level, isActive);
+	   boolean foundNode = _findNodeInOsdMapAtThisLevel(node,nodeId, level);
 	   if(foundNode)
 		   return;
 	   // iterate over the next node and show their child
 	   Node tempNode = node.headNode;
 	   while(tempNode != null)
 	   {
-		 _findNodeInOsdMap(tempNode.leftNode,nodeId, level + 1, isActive);
+		 _findNodeInOsdMap(tempNode.leftNode,nodeId, level + 1);
 	     tempNode = tempNode.nextNode;
 	   }
    }
    
-   private boolean _findNodeInOsdMapAtThisLevel(OsdNode node, int nodeId, int level, boolean isActiveStatus)
+   private boolean _findNodeInOsdMapAtThisLevel(OsdNode node, int nodeId, int level)
    {
 	   Node currentNode = node.headNode;
 	   while(currentNode != null)
 	   {
 		   if(currentNode.nodeId == nodeId)
 		   {
-			   currentNode.isActive = isActiveStatus;
-			   System.out.println(String.format("NodeId = %d present at level = %d with Status = %s", nodeId, level, currentNode.isActive));
+			   //currentNode.isActive = isActiveStatus;
+			   //System.out.println(String.format("NodeId = %d present at level = %d with Status = %s", nodeId, level, currentNode.isActive));
 			   this.foundNode = currentNode;
 			   return true;
 		   }
