@@ -52,7 +52,7 @@ public class RegularClient {
                     if(config.verbose.equalsIgnoreCase("debug")) {
                         System.out.println("Write "+ fileName + " to "+ nodeId + " replicaid: " + i);
                     }
-                    Payload payload = new Payload(fileName, i);
+                    Payload payload = new Payload(fileName, i, 0L);
                     messageSender.sendMessage(config.nodesMap.get(nodeId), WRITE_FILE, payload);
                 }
             }
