@@ -90,9 +90,7 @@ public class UniversalDHTTest {
                             String fileName = splits[1].trim();
                             for(int i=1 ; i <= config.replicationFactor;i++) {
                                 Integer wnodeId = routingTable.getNodeId(fileName, i);
-                                if(config.verbose.equalsIgnoreCase("debug")) {
-                                    System.out.println("Write "+ fileName + " to "+ wnodeId + " replicaid: " + i);
-                                }
+                                System.out.println("Write "+ fileName + " to "+ wnodeId + " replicaid: " + i);
                             }
                         }
                         line = bf.readLine();
