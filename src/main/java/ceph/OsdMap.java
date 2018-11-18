@@ -26,7 +26,7 @@ public class OsdMap implements Serializable{
 	
 	public List<Integer> liveNodes = new LinkedList<Integer>();
 	
-	public Queue<OsdNode> Parentqueue = new LinkedList<>();
+	public Queue<OsdNode> Parentqueue = new LinkedList<OsdNode>();
 	
 	public HashGenerator hashGenerator;
 	
@@ -108,7 +108,7 @@ public class OsdMap implements Serializable{
     	if(root.clusterCountInLevel < maxclusterInlevel)
     	{
     			Node newlyAddedNode = root.AddNodeAtStartOfList(hashGenerator.randomWeightGenerator(), clusterId, nodeId,1);
-    			MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
+    			MoveFileInClusterOnNewNodeAddition(newlyAddedNode.nextNode);
     	    	return;
     	}
     	ParentChildPair leftNodePair = findTheClusterNodetoAddIterative(root.headNode.leftNode, root.headNode, 1);
@@ -124,7 +124,7 @@ public class OsdMap implements Serializable{
 				// Now need to set the Osd Map pointer to the newly added node as cluster start point
        			leftNodePair.Parent.leftNode.headNode = newlyAddedNode;
 				// Need to move the files from other node in sub cluster
-				MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
+				MoveFileInClusterOnNewNodeAddition(newlyAddedNode.nextNode);
 			}
 			else
 				internalKey.AddNode(0, clusterId, -1,value);				
