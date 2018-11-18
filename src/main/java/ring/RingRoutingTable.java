@@ -203,7 +203,6 @@ public class RingRoutingTable implements IRoutingTable {
         return -1;
     }
     
-    
     //nodeId = ip:port
     public IRoutingTable addNode(int nodeIdInt) {
     	System.out.println("\n");

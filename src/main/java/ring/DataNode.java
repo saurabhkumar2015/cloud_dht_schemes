@@ -1,7 +1,11 @@
 package ring;
 
+import java.util.LinkedList;
+
 import common.IDataNode;
 import common.IRoutingTable;
+import common.Constants;
+import common.Commons;
 
 public class DataNode implements IDataNode {
 	
@@ -25,10 +29,6 @@ public class DataNode implements IDataNode {
 	
 	public void loadBalance(int nodeId, double loadFraction) {
 		routingTableObj.loadBalance(nodeId, loadFraction);
-	}
-	
-	public void MoveFiles(int clusterIdofNewNode,String nodeIp, double newnodeWeight, double clusterWeight, boolean isLoadbalance) {
-		
 	}
 
 	//Send routing table
@@ -76,8 +76,28 @@ public class DataNode implements IDataNode {
 				//Commons.messageSender.sendMessage(routingTableObj.physicalTable.get(nId), Constants.DELETE_FILE, Commons.GeneratePayload(fileName, (start+1)));
 			}	
 		}
+		else {
+			int hashVal = Math.abs(fileName.hashCode())%this.routingTableObj.MAX_HASH;
+	        LinkedList<Integer> listOfNodesForGivenHash = routingTableObj.modifiedBinarySearch(hashVal);
+	        if (listOfNodesForGivenHash!=null) {
+	        	if(listOfNodesForGivenHash.size()>=this.routingTableObj.replicationFactor) {
+	        		System.out.println(this.routingTableObj.routingMap.get(listOfNodesForGivenHash.get(replicaId-1)));
+	        		nId = routingTableObj.routingMap.get(listOfNodesForGivenHash.get(replicaId-1));
+	        		//When the receiving node is the given replica node for the file
+	        		if(nId == myNodeId) {
+	        			System.out.println("File written with Replication Id:"+replicaId);
+	        			return true;
+	        		}
+	        		else {
+	        			//sending write file request to the corresponding node
+	        			Commons.messageSender.sendMessage(routingTableObj.physicalTable.get(nId), Constants.WRITE_FILE, Commons.GeneratePayload(fileName, replicaId));
+	        			return true;
+	        		}
+	        	}
+	        }
+		}
+		return false;
 	}
-	*/
 	
 	public void addHashRange(String hashRange) {
 		System.out.println("My Node Id: "+ this.myNodeId);
@@ -87,6 +107,10 @@ public class DataNode implements IDataNode {
 	public void deleteFile(String hashRange) {
 		System.out.println("My Node Id: "+ this.myNodeId);
 		System.out.println("Files corresponding to Hash range: "+ hashRange+" deleted\n");
+	}
+	
+	public void MoveFiles(int clusterIdofNewNode,String nodeIp, double newnodeWeight, double clusterWeight, boolean isLoadbalance) {
+		
 	}
 	
 }
