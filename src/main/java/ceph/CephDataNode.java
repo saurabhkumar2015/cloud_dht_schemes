@@ -185,6 +185,16 @@ public class CephDataNode  implements IDataNode{
 		CephRoutingTable rt = (CephRoutingTable)cephrtTable;
     	System.out.println("OSD Routing table is updated::" + rt.VersionNo);
     }
-    
+
+	@Override
+	public IRoutingTable getRoutingTable() {
+		return null;
+	}
+
+	@Override
+	public void setRoutingTable(IRoutingTable table) {
+
+	}
+
 }
 

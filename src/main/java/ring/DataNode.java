@@ -37,6 +37,16 @@ public class DataNode implements IDataNode {
 		this.routingTableObj.printRoutingTable();
 	}
 
+	@Override
+	public IRoutingTable getRoutingTable() {
+		return null;
+	}
+
+	@Override
+	public void setRoutingTable(IRoutingTable table) {
+
+	}
+
 	public void writeFile(String fileName, int replicaId) {
 		
 		System.out.println("\nFileName: "+fileName);
