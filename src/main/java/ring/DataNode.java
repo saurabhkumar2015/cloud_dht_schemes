@@ -80,11 +80,13 @@ public class DataNode implements IDataNode {
 	*/
 	
 	public void addHashRange(String hashRange) {
-		System.out.println("Hash range added: "+ hashRange);
+		System.out.println("My Node Id: "+ this.myNodeId);
+		System.out.println("Files corresponding to Hash range: "+ hashRange+" added\n");
 	}
 	
 	public void deleteFile(String hashRange) {
-		System.out.println("Hash range added: "+ hashRange);
+		System.out.println("My Node Id: "+ this.myNodeId);
+		System.out.println("Files corresponding to Hash range: "+ hashRange+" deleted\n");
 	}
 	
 }

@@ -327,6 +327,11 @@ public class RingRoutingTable implements IRoutingTable {
 			routingMap.put(newStartHash, nodeIdInt);
 	    	//What all nodes will be updates
 	    	System.out.println("Hash range "+ newStartHash +" - "+ (nodeHash-1) +" added to "+routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
+	    	
+	    	String nodeIp = this.physicalTable.get(routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
+	    	String payload = String.valueOf(newStartHash) +"-"+String.valueOf((nodeHash-1));
+	    	Commons.messageSender.sendMessage(nodeIp, Constants.ADD_HASH, payload);
+	    	
 	    	this.version++;
 			System.out.println("\n");
 			System.out.println("Routing Table version: "+this.version);
@@ -349,7 +354,16 @@ public class RingRoutingTable implements IRoutingTable {
 			
 	    	//What all nodes will be updates
 	    	System.out.println("Hash range "+ nodeHash + " - "+ (newStartHash-1) +" added to NodeId "+routingMap.get(listOfAssociatedHashes.get(0)));
+	    	
+	    	String nodeIp = this.physicalTable.get(routingMap.get(listOfAssociatedHashes.get(0)));
+	    	String payload = String.valueOf(nodeHash) +"-"+String.valueOf((newStartHash-1));
+	    	Commons.messageSender.sendMessage(nodeIp, Constants.ADD_HASH, payload);
+	    	
 	    	System.out.println("Hash range "+ nodeHash + " - "+ (newStartHash-1) +" removed from NodeId "+routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
+	    	nodeIp = this.physicalTable.get(routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
+	    	payload = String.valueOf(nodeHash) +"-"+String.valueOf((newStartHash-1));
+	    	Commons.messageSender.sendMessage(nodeIp, Constants.REMOVE_HASH, payload);
+	    	
 	    	this.version++;
 			System.out.println("\n");
 			System.out.println("Routing Table version: "+this.version);
