@@ -231,6 +231,5 @@ public class RoutingTable implements IRoutingTable {
 			ElasticRoutingTableInstance bucket = elasticTable[i];
 			System.out.println(bucket.hashIndex + ":" + bucket.nodeId);
 		}
-
 	}
 }

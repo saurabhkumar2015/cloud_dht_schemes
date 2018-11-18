@@ -23,9 +23,11 @@ public class RegularClient {
     private static Scanner sc = new Scanner(System.in);
 
 
+
     public static void main(String[] args) throws Exception {
 
-        if(args.length != 2) throw new Exception("Please specify Two arguments. \n 1) Config file absolute path \n 2) File containing list of files to write in DHT.");
+        if(args.length != 2) throw new Exception("Please specify Two arguments. \n 1) Config file absolute path " +
+                "\n 2) File containing list of files to write in DHT.");
 
         ConfigLoader.init(args[0]);
         DHTConfig config = ConfigLoader.config;
