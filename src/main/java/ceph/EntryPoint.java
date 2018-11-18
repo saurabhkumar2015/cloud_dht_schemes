@@ -12,10 +12,10 @@ public class EntryPoint {
      // Step 1 : using no of nodes and cluster size from configuration find the depth of Osd Map
      DHTConfig config = ConfigLoader.config;
      int depth = FindDepthOfOsdMap(config.nodeIdEnd - config.nodeIdStart + 1, config.cephMaxClusterSize);
-     System.out.println("Osd Depth is :" + depth);
+     System.out.println("Osd Depth is :" + 3);
      // Step 2 : create the Osd Map with Leaf node with weight 
      // Populate the osd map from Configuration
-      OsdMap mapInstance = OsdMap.getInstance(config.cephMaxClusterSize,depth);
+      OsdMap mapInstance = OsdMap.getInstance(config.cephMaxClusterSize,3);
      
       // 
      // Step 3: populate the internal node weight using the commutative weight of child node
@@ -26,7 +26,7 @@ public class EntryPoint {
       mapInstance.PopulateWeightOfInternalNode(mapInstance.root);
      // Till this Point Osd Map is populated and build properly.
      // Find the node containing PG = 5 & replication 2 I can change the name to add file : TODO : Refactor this code
-      AddFilesToCephSystem();
+     // AddFilesToCephSystem();
       
 	}
 	
@@ -48,7 +48,7 @@ public class EntryPoint {
 	
 	public void PopulateOsdMap(OsdMap mapInstance, int nodeIds, int depth, int clusterSize)
 	{
-		for(int i = 1; i < depth;i++)
+		for(int i = 1; i < 3;i++)
 		{
 			// populate internal node
 			for(int j = 0; j< Math.pow(clusterSize,i); j++)
