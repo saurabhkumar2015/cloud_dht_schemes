@@ -52,6 +52,7 @@ public class Node implements Serializable {
     		}
     		else
     		{
+    			if(temp.weight != 0)
     		System.out.println(String.format("weight= %f ClusterId= %d nodeId = %d IsActive = %s at level = %d", temp.weight,temp.clusterId, temp.nodeId,temp.isActive,temp.level));
     		}
     		temp = temp.nextNode;
