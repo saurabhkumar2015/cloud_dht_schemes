@@ -49,7 +49,6 @@ public class UniversalDHTTest {
             System.out.println("Enter \"X\" to exit");
             String input = sc.next();
             List<Integer> liveNodes = routingTable.getLiveNodes();
-            int nodeId = liveNodes.get(r.nextInt(liveNodes.size()));
 
             switch (input.toUpperCase().trim()){
                 case "A":
@@ -82,8 +81,10 @@ public class UniversalDHTTest {
                     routingTable.printRoutingTable();
                     break;
                 case "F":
-                    System.out.println("::Writing 10 more files in our DHT::");
-                    for(int j =0; j<10 ;j++) {
+                    System.out.println("::Writing more files in our DHT::");
+                    System.out.println("::Please Enter how many files you want to write::");
+                    int k = sc.nextInt();
+                    for(int j =0; j<k ;j++) {
                         String [] splits = line.split("]");
                         if(splits.length > 1 && splits[1].trim().length() > 0) {
                             String fileName = splits[1].trim();
