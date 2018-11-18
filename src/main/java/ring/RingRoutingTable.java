@@ -316,7 +316,15 @@ public class RingRoutingTable implements IRoutingTable {
 		if(loadFraction>1.0 && loadFraction<2.0) {
 			System.out.println("\n");
 			System.out.println("Moving node's start hash range to left side - increasing the load");
-			int initialTotalHashRang = listOfAssociatedHashes.get(1)-listOfAssociatedHashes.get(0);
+			int predecessorHashVal = listOfAssociatedHashes.get(0);
+			int myHashVal = listOfAssociatedHashes.get(1);
+			int initialTotalHashRang = 0;
+			if (myHashVal < predecessorHashVal){
+				initialTotalHashRang = (this.MAX_HASH - predecessorHashVal)+myHashVal;
+			}
+			else {
+				initialTotalHashRang = listOfAssociatedHashes.get(1)-listOfAssociatedHashes.get(0);
+			}
 	    	System.out.println("Total number of hashes handled so far, by predecessor: "+initialTotalHashRang);
 			int numOfHashesToBeAdded = (int) Math.ceil(initialTotalHashRang*(loadFraction-1.0));
 			int newStartHash = listOfAssociatedHashes.get(1)-numOfHashesToBeAdded;
@@ -342,8 +350,16 @@ public class RingRoutingTable implements IRoutingTable {
 		else if(loadFraction<1.0) {
 			System.out.println("\n");
 			System.out.println("Moving node's start hash range to right side - decreaseing the load");
-			int initialTotalHashRang = listOfAssociatedHashes.get(2)-listOfAssociatedHashes.get(1);
-	    	System.out.println("Total number of hashes handled so far, by predecessor: "+initialTotalHashRang);
+			int initialTotalHashRang = 0;
+			int succHashVal = listOfAssociatedHashes.get(2);
+			int myHashVal = listOfAssociatedHashes.get(1);
+			if (myHashVal > succHashVal){
+				initialTotalHashRang = (this.MAX_HASH - myHashVal)+ succHashVal;
+			}
+			else {
+				initialTotalHashRang = listOfAssociatedHashes.get(2)-listOfAssociatedHashes.get(1);
+			}
+	    	System.out.println("Total number of hashes handled so far, by this node is: "+initialTotalHashRang);
 			int numOfHashesToBeRemoved = (int) Math.ceil(initialTotalHashRang*(1.0-loadFraction));
 			int newStartHash = listOfAssociatedHashes.get(1)+numOfHashesToBeRemoved;
 			System.out.println("newStartHash Value will be: "+newStartHash);
