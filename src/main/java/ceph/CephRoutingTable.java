@@ -92,18 +92,19 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
 		return this;
 	}
 
-    @Override
     public List<Integer> getLiveNodes() {
         return mapInstance.GetLiveNodes();
     }
 
-    @Override
     public void printRoutingTable() {
 
+    	this.mapInstance.ShowOsdMap(true);
     }
 
-    @Override
-    public long getVersionNumber(){
-        return VersionNo;
-    }
+
+	public long getVersionNumber() {
+		return this.VersionNo;
+	}
+    
+    
 }

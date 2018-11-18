@@ -1,12 +1,8 @@
 package ceph;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import common.Commons;
 import common.Constants;
@@ -14,7 +10,6 @@ import common.IDataNode;
 import common.IRoutingTable;
 import config.ConfigLoader;
 import config.DHTConfig;
-import socket.IMessageSend;
 
 public class CephDataNode  implements IDataNode{
     public ArrayList<DataObject> dataList = new ArrayList<DataObject>();
@@ -185,17 +180,16 @@ public class CephDataNode  implements IDataNode{
 		CephRoutingTable rt = (CephRoutingTable)cephrtTable;
     	System.out.println("OSD Routing table is updated::" + rt.VersionNo);
     }
-
-	@Override
+  
 	public IRoutingTable getRoutingTable() {
-		return cephRtTable;
+		// return the routing table Instance of the Data Node
+		return this.cephRtTable;
 	}
 
-	@Override
 	public void setRoutingTable(IRoutingTable table) {
-		synchronized (this) {
-			this.cephRtTable = table;
-		}
+		// set the routing table Instance for the Data node.
+		this.cephRtTable = table;
+		
 	}
 
 }
