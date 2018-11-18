@@ -29,6 +29,8 @@ public class CephDataNode  implements IDataNode{
     	this.hashGenerator = HashGenerator.getInstance();
     	this.config = ConfigLoader.config;
     	this.NodeId = nodeId;
+    	EntryPoint entryPoint = new EntryPoint();
+        entryPoint.BootStrapCeph();
     	cephRtTable = CephRoutingTable.getInstance();
     }
     
@@ -39,15 +41,21 @@ public class CephDataNode  implements IDataNode{
         return single_instance;
     }
     
-	public void writeFile(String fileName, int replicaId) {
+	public boolean writeFile(String fileName, int replicaId) {
 		//step 1. find the placementGroupId for file
 		int placementGroupId = this.hashGenerator.getPlacementGroupIdFromFileName(fileName, config.PlacementGroupMaxLimit);
 		
 		System.out.println("Write file request received for FileName: " + fileName + " replicaId: " + replicaId );
+		
+		// Find the node on which it should go.
+		int destinationNodeId = this.cephRtTable.getNodeId(fileName, replicaId);
+		
+		if(destinationNodeId != this.NodeId)
+			return false;
 		// Step 2: push the Data to the DataNode if not present in DataList
 		DataObject obj = new DataObject(placementGroupId, replicaId,fileName);
 		dataList.add(obj);
-		
+		return true;
 	}
 
 	public void deleteFile(String fileName) {
