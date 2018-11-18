@@ -232,4 +232,9 @@ public class RoutingTable implements IRoutingTable {
 			System.out.println(bucket.hashIndex + ":" + bucket.nodeId);
 		}
 	}
+
+	@Override
+	public long getVersionNumber() {
+		return 0;
+	}
 }

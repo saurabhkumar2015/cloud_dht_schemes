@@ -10,5 +10,7 @@ public interface IRoutingTable {
     IRoutingTable loadBalance(int nodeId, double loadFactor);
     List<Integer> getLiveNodes();
     void printRoutingTable();
+    long getVersionNumber();
+
 
 }

@@ -81,7 +81,12 @@ public class RingRoutingTable implements IRoutingTable {
         }
     }
 
-    public void printPhysicalTable() {
+	@Override
+	public long getVersionNumber() {
+		return 0;
+	}
+
+	public void printPhysicalTable() {
         System.out.println("NodeId\tNodeIp_Port");
         for (Map.Entry<Integer, String> e : this.physicalTable.entrySet()) {
             System.out.print(e.getKey());

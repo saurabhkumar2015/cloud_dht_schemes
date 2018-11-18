@@ -101,4 +101,9 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
     public void printRoutingTable() {
 
     }
+
+    @Override
+    public long getVersionNumber(){
+        return VersionNo;
+    }
 }
