@@ -139,6 +139,7 @@ public class OsdMap implements Serializable{
     	Node tempNode = newlyAddedNode;
     	while(tempNode != null)
     	{
+    		if(tempNode.isActive)
     		System.out.println("Files need to moves from Data Node: " + tempNode.nodeId);
     		tempNode = tempNode.nextNode;
     	}
@@ -152,7 +153,7 @@ public class OsdMap implements Serializable{
     	Node tempNode = headNode;
     	while(tempNode != null)
     	{
-    		if(tempNode.nodeId != excludedNode.nodeId)
+    		if(tempNode.nodeId != excludedNode.nodeId && tempNode.isActive)
     		System.out.println("Files need to moves from Data Node: " + tempNode.nodeId);
     		tempNode = tempNode.nextNode;
     	}
