@@ -188,12 +188,14 @@ public class CephDataNode  implements IDataNode{
 
 	@Override
 	public IRoutingTable getRoutingTable() {
-		return null;
+		return cephRtTable;
 	}
 
 	@Override
 	public void setRoutingTable(IRoutingTable table) {
-
+		synchronized (this) {
+			this.cephRtTable = table;
+		}
 	}
 
 }
