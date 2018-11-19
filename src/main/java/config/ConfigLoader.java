@@ -36,7 +36,7 @@ public class ConfigLoader {
         config.PlacementGroupMaxLimit  = Integer.parseInt(map.get("PlacementGroupMaxLimit").toString());
         config.nodesMap = getNodeMap(config.nodeMapLocation);
         if(!config.verbose.equalsIgnoreCase("error")) {
-            System.out.println("Config is::" + config.toString());
+//            System.out.println("Config is::" + config.toString());
             System.out.println("DHT Config Loaded Successfully!!!!");
         }
     }

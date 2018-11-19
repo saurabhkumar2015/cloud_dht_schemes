@@ -9,5 +9,6 @@ public interface IRoutingTable {
     IRoutingTable deleteNode(int nodeId);
     IRoutingTable loadBalance(int nodeId, double loadFactor);
     List<Integer> getLiveNodes();
+    void printRoutingTable();
 
 }

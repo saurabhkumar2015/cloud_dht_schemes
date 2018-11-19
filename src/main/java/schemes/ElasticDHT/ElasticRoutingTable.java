@@ -1,8 +1,10 @@
 package schemes.ElasticDHT;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import config.ConfigLoader;
 import config.DHTConfig;
@@ -27,20 +29,23 @@ public class ElasticRoutingTable {
 		// i is the hashbucket
 		// config.replicationFactor
 		rno = new Random(config.seed);
+		int range = config.nodeIdEnd-config.nodeIdStart +1;
 		for(int k = 0;k<size;k++) {
 			 l = new ArrayList<Integer>();
 
-			rint = rno.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
-			
+			rint = rno.nextInt(range)+config.nodeIdStart;
+			Set<Integer> ids = new HashSet<Integer>();
 			l.add(rint);
+			ids.add(rint);
 			for(int i = 1;i<r;i++) {
 				boolean b= false;
-				while(b== false) {
-					rno = new Random();
-					rint = rno.nextInt(config.nodeIdEnd-config.nodeIdStart)+config.nodeIdStart;
-					b = check(rint);
+				while(b == false ) {
+					rno  = new Random();
+					rint = rno.nextInt(range)+config.nodeIdStart;
+					b = !ids.contains(rint);
 				}
 				l.add(rint);
+				ids.add(rint);
 				
 			}
 			
