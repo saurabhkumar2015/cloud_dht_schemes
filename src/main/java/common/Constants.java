@@ -13,6 +13,7 @@ public class Constants {
     public final static String ADD_FILES = "ADD_FILES";
     public final static String REMOVE_HASH = "REMOVE_HASH";
     public final static String ADD_HASH = "ADD_HASH";
+    public final static String MOVE_ON_DELETE = "MOVE_ON_DELETE";
     
     //Payload Keywords here
     public final static String FILE_NAME = "FILE_NAME";

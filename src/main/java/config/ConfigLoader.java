@@ -37,6 +37,7 @@ public class ConfigLoader {
         config.nodeMapLocation  = map.get("nodeMapLocation").toString();
         config.PlacementGroupMaxLimit  = Integer.parseInt(map.get("PlacementGroupMaxLimit").toString());
         config.nodesMap = getNodeMap(config.nodeMapLocation);
+        config.resizeFactor = Integer.parseInt(map.get("resizeFactor").toString());
         config.gossipList = getGossipList((Map<String, String>) map.get("gossipList"));
 
         if(!config.verbose.equalsIgnoreCase("error")) {

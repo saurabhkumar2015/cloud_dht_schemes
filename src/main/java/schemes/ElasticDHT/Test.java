@@ -2,6 +2,7 @@ package schemes.ElasticDHT;
 
 import java.io.IOException;
 
+import common.Commons;
 import config.ConfigLoader;
 
 public class Test {

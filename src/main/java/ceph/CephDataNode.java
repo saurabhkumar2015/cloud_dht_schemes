@@ -45,10 +45,10 @@ public class CephDataNode  implements IDataNode{
 		//step 1. find the placementGroupId for file
 		int placementGroupId = this.hashGenerator.getPlacementGroupIdFromFileName(fileName, config.PlacementGroupMaxLimit);
 		
-		System.out.println("Write file request received for FileName: " + fileName + " replicaId: " + replicaId );
-		
 		// Find the node on which it should go.
 		int destinationNodeId = this.cephRtTable.getNodeId(fileName, replicaId);
+		
+		System.out.println("Write file request received for FileName: " + fileName + " replicaId: " + replicaId + " on node " + (destinationNodeId) );
 		
 		if(destinationNodeId != this.NodeId)
 			return false;
@@ -157,9 +157,10 @@ public class CephDataNode  implements IDataNode{
     {
     	// Iterate over their the files and for each file check if the file with filename and replica exist then fine otherwise increment the 
     	// replica and add the file to ceph system.
+    	System.out.println("Moves files on Node Deletion");
     	for(DataObject obj : dataList)
     	{
-    		int count = 0;
+    		int count = 0; 
     		for(int i = 1; i <= obj.replicaId; i++)
     		{
     			int nodeWithrequestFileAndReplica = this.cephRtTable.getNodeId(obj.fileName,i);
@@ -172,11 +173,25 @@ public class CephDataNode  implements IDataNode{
     		// if file with some intermediate replica is not present then add the fie with same filename with incremented replicaId
     		if(count < obj.replicaId)
     		{
-    			if(this.cephRtTable.getNodeId(obj.fileName,obj.replicaId+1) == -2)
-    			{
-    			 System.out.println("Add file to ceph system with Pgroup : " + obj.placementGroup + " and replica = " + obj.replicaId + 1 );
-    			((CephRoutingTable)this.cephRtTable).mapInstance.AddFileToCephSystem(obj.fileName, obj.replicaId + 1, config.PlacementGroupMaxLimit);
-    		    }
+    			 int replicaAddedBy = 1;
+    			 int nodeidToMoveFile = this.cephRtTable.getNodeId(obj.fileName, obj.replicaId + replicaAddedBy);
+    			 while(nodeidToMoveFile == -2)
+    			 {
+    				 replicaAddedBy++;
+    				 nodeidToMoveFile = this.cephRtTable.getNodeId(obj.fileName, obj.replicaId + replicaAddedBy);
+    				 
+    			 }
+    			 if(nodeidToMoveFile != -2)
+    			 {
+    			 // send write request to the destination node
+    			String nodeIp = config.nodesMap.get(nodeidToMoveFile);
+    			System.out.println("Add file to ceph system with Pgroup : " + obj.placementGroup + " and replica = " + (obj.replicaId + 1) + " to node " + (nodeidToMoveFile));
+ 				//Commons.messageSender.sendMessage(nodeIp, Constants.WRITE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
+    			 }
+    			 else
+    			 {
+    				 System.out.println("The file to ceph system with Pgroup : " + obj.placementGroup + " and replica = " + (obj.replicaId + 1) + " mapping to Deleted node!!");
+    			 }
     		}
     	}
     	
@@ -199,7 +214,7 @@ public class CephDataNode  implements IDataNode{
 		this.cephRtTable = table;
 		
 	}
-	
+
 	@Override
 	public void addHashRange(String hashRange) {
 		// TODO Auto-generated method stub

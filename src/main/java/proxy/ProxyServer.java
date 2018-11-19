@@ -128,7 +128,7 @@ public class ProxyServer {
 		                   Node temp = headNode;
 		                   Node temp1 = headNode.nextNode;
 		             	   double sum = 0;
-		             	   while(temp != null)
+		             	   while(temp != null && temp.isActive)
 		             	   {
 		             		   sum = sum + temp.weight;
 		             		   temp = temp.nextNode;
@@ -138,7 +138,7 @@ public class ProxyServer {
 	            		  int newNodeClusterId = headNode.clusterId;
 	            		  double newNodeWt = headNode.weight;
 	            		  
-		             	   while(temp1 != null) {
+		             	   while(temp1 != null && temp1.isActive) {
 		             		   
 		             		   double weight = temp1.weight;
 		             		   String nodeIp = config.nodesMap.get(temp1.nodeId);
@@ -171,7 +171,7 @@ public class ProxyServer {
 			                Node temp = headNode;
 			     
 			             	   double sum = 0;
-			             	   while(temp != null)
+			             	   while(temp != null && temp.isActive)
 			             	   {
 			             		   sum = sum + temp.weight;
 			             		   temp = temp.nextNode;
@@ -181,7 +181,7 @@ public class ProxyServer {
 		            		  
 		            	      Node ptr = headNode;
 		            	    
-			             	   while(ptr != null) {
+			             	   while(ptr != null && ptr.isActive) {
 			             		   
 			             		   double weight = ptr.weight;
 			             		   int clusterId = ptr.clusterId;
@@ -195,6 +195,38 @@ public class ProxyServer {
 			             	   }
 		                      
 			             	   sendUpdatedDHT();
+		                }
+				    	
+				    	
+				    	if((message.getType()).equals(Constants.DELETE_NODE)) {
+				    		
+				    		int nodeIdToDelete = (Integer)message.getPayload();
+				    		
+				    		
+				    		System.out.println("DataNode to be deleted "+nodeIdToDelete);
+				    		
+				    		CephRoutingTable updated_ceph_routing_table = (CephRoutingTable)ceph_routing_table.deleteNode(nodeIdToDelete);
+				    		
+		                    ceph_routing_table = updated_ceph_routing_table;
+		                    
+		                    sendUpdatedDHT();
+		                    
+		                    Node headNode = ceph_routing_table.mapInstance.findHeadNodeOfTheCluster(nodeIdToDelete);
+		                    Node ptr = headNode;
+		            	    
+			             	   while(ptr != null && ptr.isActive) {
+			             		   
+			             		   double weight = ptr.weight;
+			             		   String nodeIp = config.nodesMap.get(ptr.nodeId);
+			             		   
+			             		   System.out.println("Send move on delete to "+nodeIp);
+				             	   CephPayload payload = null;
+				             	   sendMsg.sendMessage(nodeIp, Constants.MOVE_ON_DELETE, payload);
+			             		   
+			             		   ptr = ptr.nextNode;
+			             	   }
+		                      
+			             	  
 		                }
 		        	}	
 		    	

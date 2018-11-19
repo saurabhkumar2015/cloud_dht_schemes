@@ -62,7 +62,7 @@ public class DataNode implements IDataNode {
 		return false;
 	}
 
-	/*delete hash range - Not file
+	//delete hash range - Not file
 	public void deleteFile(String fileName) {
 		
 		System.out.println("\nFileName: "+fileName);

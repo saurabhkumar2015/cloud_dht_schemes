@@ -308,7 +308,7 @@ public class OsdMap implements Serializable{
 	   double sum = 0;
 	   while(temp != null)
 	   {
-		   if(temp.isActive)
+		  // if(temp.isActive)
 		   sum = sum + temp.weight;
 		   temp = temp.nextNode;
 	   }
