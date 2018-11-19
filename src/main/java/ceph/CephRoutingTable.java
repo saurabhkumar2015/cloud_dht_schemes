@@ -1,19 +1,13 @@
 package ceph;
 
-import common.IRoutingTable;
-import config.ConfigLoader;
-import config.DHTConfig;
-
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Random;
 
+import common.IRoutingTable;
+import config.ConfigLoader;
+
 public class CephRoutingTable implements IRoutingTable, Serializable {
-
-    private DHTConfig config;
-
-    private int depth;
 
     public OsdMap mapInstance;
 
@@ -22,13 +16,9 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
     public int VersionNo;
 
     public CephRoutingTable() {
-        this.config = ConfigLoader.config;
-        this.depth = FindDepthOfOsdMap(config.nodeIdEnd - config.nodeIdStart, config.cephMaxClusterSize);
-        this.mapInstance = OsdMap.getInstance(config.cephMaxClusterSize, depth);
+        this.mapInstance = OsdMap.getInstance(ConfigLoader.config.cephMaxClusterSize, 3);
         this.VersionNo = 1;
         // BootStrap the table here or not need to think
-
-
     }
 
 
@@ -54,13 +44,7 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
 
     public int getNodeId(String fileName, int replicaId) {
         return mapInstance.findNodeWithRequestedReplica(replicaId,
-                HashGenerator.getInstance().getPlacementGroupIdFromFileName(fileName, config.PlacementGroupMaxLimit));
-    }
-
-
-    private int FindDepthOfOsdMap(int countOfNodes, int nodePerCluster) {
-        // depth should be log base nodeperCluster (countOfNodes) ceiling value
-        return (int) Math.ceil((Math.log(countOfNodes) / Math.log(nodePerCluster)));
+                HashGenerator.getInstance().getPlacementGroupIdFromFileName(fileName, ConfigLoader.config.PlacementGroupMaxLimit));
     }
 
     private int randomClusterNoGenerator() {
