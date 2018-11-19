@@ -25,6 +25,7 @@ public class DHTConfig implements Serializable{
     public int seed = 32;
     public int PlacementGroupMaxLimit = 10;
     public Map<Integer, String> nodesMap; // Node Id --> Ip:port for a datanode
+	public int resizeFactor = 100;
 
     @Override
     public String toString() {
@@ -42,7 +43,8 @@ public class DHTConfig implements Serializable{
                 ", nodeMapLocation='" + nodeMapLocation + '\'' +
                 ", seed=" + seed +
                 ", nodesMap Size=" + nodesMap.size() +
-                ", nodesMap=" + nodesMap +
+                ", nodesMap=" + nodesMap + 
+                ", resize Factor = " +resizeFactor +
                 "}\n\n";
     }
 }

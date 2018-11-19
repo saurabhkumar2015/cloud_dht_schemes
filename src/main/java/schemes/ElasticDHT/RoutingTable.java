@@ -5,6 +5,8 @@ import common.IRoutingTable;
 
 
 import config.ConfigLoader;
+import socket.MockMessageSender;
+
 import java.util.*;
 import java.util.Map.Entry;
 import static common.Constants.*;
@@ -14,6 +16,17 @@ public class RoutingTable implements IRoutingTable {
 
 	int bucketSize = ConfigLoader.config.bucketSize;
 	int rFactor = ConfigLoader.config.replicationFactor;
+	long versionNumber;
+	
+
+	@Override
+	public String toString() {
+		return "RoutingTable [bucketSize=" + bucketSize + ", rFactor=" + rFactor + ", versionNumber=" + versionNumber
+				+ ", hashReplicaNodeId=" + hashReplicaNodeId + ", getRoutingTable()="
+				+ Arrays.toString(getRoutingTable()) + ", getVersionNumber()=" + getVersionNumber() + "]";
+	}
+
+
 
 	public static ElasticRoutingTableInstance[] elasticTable;
 	public static ElasticRoutingTable elasticTable1 = new ElasticRoutingTable();
@@ -44,6 +57,7 @@ public class RoutingTable implements IRoutingTable {
 	public IRoutingTable deleteNode(int nodeId) {
 
 		System.out.println("Entering delete functions");
+		Commons.messageSender = new MockMessageSender();
 
 		Random rn = new Random();
 		List<Integer> liveNodes = getLiveNodes();
@@ -85,12 +99,19 @@ public class RoutingTable implements IRoutingTable {
 		return this;
 	}
 
-	public boolean Resize() {
-		// Create new elasticTbaletemp and reassign to it.
-		// Ratio based resize factor hashbuckets/live nodes> read the resize factor
-		// config.
-		// Implement this
-		return false;
+	public ElasticRoutingTableInstance [] Resize() {
+		ElasticRoutingTableInstance[] resizeElasticTable = new ElasticRoutingTableInstance[elasticTable.length*2];
+
+		for(int i = 0;i<elasticTable.length;i++) {
+			resizeElasticTable[i] = new ElasticRoutingTableInstance(elasticTable[i].hashIndex,elasticTable[i].nodeId);
+		}
+		//Exapnded
+		int newLength = elasticTable.length*2;
+		for(int j = elasticTable.length;j<newLength;j++) {
+			resizeElasticTable[j] = new ElasticRoutingTableInstance(j,elasticTable[j%elasticTable.length].nodeId);
+		}
+		System.out.println("Hash table resized");
+		return resizeElasticTable;
 	}
 
 	public int getNodeId(String filename, int replicaId) {
@@ -120,6 +141,8 @@ public class RoutingTable implements IRoutingTable {
 		// Get strength of current nodeId
 		// Randomly choose replaceNodeId
 		//
+		Commons.messageSender = new MockMessageSender();
+
 		List<Integer> liveNodes = getLiveNodes();
 		int maxLiveNodes = liveNodes.size();
 		System.out.println(maxLiveNodes);
@@ -222,6 +245,8 @@ public class RoutingTable implements IRoutingTable {
 	}
 
 	public IRoutingTable addNode(int nodeId) {
+		Commons.messageSender = new MockMessageSender();
+
 		
 		List<Integer> liveNodes = getLiveNodes();
 		if(liveNodes.contains((Integer) nodeId)) {
@@ -256,6 +281,13 @@ public class RoutingTable implements IRoutingTable {
 						+ elasticTable[index].nodeId.get(subIndex));
 			}
 		}
+		liveNodes = getLiveNodes();
+		range = liveNodes.size();
+		int ratio = elasticTable.length/range;
+		if(ratio<config.ConfigLoader.config.resizeFactor) {
+			elasticTable = Resize();
+		}
+		
 
 		// TODO Auto-generated method stub
 		return this;
@@ -308,7 +340,7 @@ public class RoutingTable implements IRoutingTable {
 	
 
 	public long getVersionNumber() {
-		return 0;
+		return this.versionNumber;
 	}
 
 

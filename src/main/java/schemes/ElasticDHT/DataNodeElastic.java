@@ -2,22 +2,38 @@ package schemes.ElasticDHT;
 
 import common.IDataNode;
 import common.IRoutingTable;
+import config.ConfigLoader;
+import config.DHTConfig;
 
 public class DataNodeElastic implements IDataNode {
 
 	private int nodeId;
+	public IRoutingTable elasticTable;
+	private static DataNodeElastic single_instance = null;
+    private DHTConfig config;
+    public DataNodeElastic(int nodeId) {
+    	this.config = ConfigLoader.config;
+    	this.nodeId = nodeId;
+    	elasticTable  = new RoutingTable();
+    	
+    }
+    public static DataNodeElastic getInstance(int nodeId) {
+    	if(single_instance==null) {
+    		single_instance = new DataNodeElastic(nodeId);
+    	}
+    	return single_instance;
+    }
 	public void MoveFiles(int clusterIdofNewNode, String nodeIp, double newnodeWeight, double clusterWeight) {
  	}
- 	public void UpdateRoutingTable(IRoutingTable cephrtTable) {
+ 	public void UpdateRoutingTable(IRoutingTable elasticTable) {
+ 		this.elasticTable = elasticTable;
+ 		RoutingTable rt = (RoutingTable)elasticTable;
+ 		System.out.println("New elastic table with version number : "+rt.versionNumber);
+ 	
  	}
 
-	@Override
-	public void setRoutingTable(IRoutingTable table) {
-
-	}
-
-	public void writeFile(String fileName, int replicaId) {
-		int hashcode = fileName.hashCode()%1024;
+	public boolean writeFile(String fileName, int replicaId) {
+		int hashcode = fileName.hashCode()%config.bucketSize;
 		nodeId = 0;
 		for(int i = 0; i<schemes.ElasticDHT.RoutingTable.elasticTable.length;i++) {
 			if(schemes.ElasticDHT.RoutingTable.elasticTable[i].hashIndex==hashcode) {
@@ -25,8 +41,13 @@ public class DataNodeElastic implements IDataNode {
 				break;
 			}
 		}
-		System.out.println("FIle written to "+nodeId);
-		// TODO Auto-generated method stub
+		int writeNodeId = this.elasticTable.getNodeId(fileName, replicaId-1);
+		if(writeNodeId!=nodeId) {
+			return false;
+		}
+		System.out.println("File written to "+nodeId);
+		return true;
+		
 		
 	}
 
@@ -61,13 +82,21 @@ public class DataNodeElastic implements IDataNode {
 		
 	}
 
-	@Override
 	public void MoveFiles(int clusterIdofNewNode, String nodeIp, double newnodeWeight, double clusterWeight, boolean isLoadbalance) {
 
 	}
 
-	@Override
 	public IRoutingTable getRoutingTable() {
-		return null;
+		return this.elasticTable;
+	}
+	
+	@Override
+	public String toString() {
+		return "DataNodeElastic [nodeId=" + nodeId + ", elasticTable=" + elasticTable + ", config=" + config
+				+ ", getRoutingTable()=" + getRoutingTable() + "]";
+	}
+	public void addHashRange(String hashRange) {
+		// TODO Auto-generated method stub
+		
 	}
 }
