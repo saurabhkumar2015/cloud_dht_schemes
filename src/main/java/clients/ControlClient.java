@@ -18,6 +18,7 @@ public class ControlClient {
 
     private static Scanner sc = new Scanner(System.in);
     private static IMessageSend messageSender = new MessageSendImpl();
+    public static IRoutingTable routingTable;
 
     public static void main(String[] args) throws Exception {
 
@@ -25,7 +26,7 @@ public class ControlClient {
         DHTConfig config = ConfigLoader.config;
         boolean exit = true;
         boolean distributed = !"Centralized".equalsIgnoreCase(config.dhtType);
-        IRoutingTable routingTable = Commons.initRoutingTable(config);
+        routingTable = Commons.initRoutingTable(config);
         Random r = new Random(config.seed);
 
         while(exit) {
@@ -35,7 +36,7 @@ public class ControlClient {
             System.out.println("Enter \"X\" to exit");
             String input = sc.next();
             List<Integer> liveNodes = routingTable.getLiveNodes();
-            int nodeId = liveNodes.get(r.nextInt(liveNodes.size()));
+            int nodeId = getRandomNode(r, liveNodes);
 
             switch (input.toUpperCase().trim()){
                 case "A":
@@ -62,6 +63,9 @@ public class ControlClient {
                     ids = input.split(",");
                     for (String id : ids) {
                         int i = Integer.parseInt(id.trim());
+                        while( i == nodeId){
+                            nodeId = getRandomNode(r, liveNodes);
+                        }
                         if(distributed) {
                             String node = config.nodesMap.get(nodeId);
                             System.out.print("Delete Node "+ id +" sent to DataNode:"+node);
@@ -93,5 +97,9 @@ public class ControlClient {
                     exit = false;
             }
         }
+    }
+
+    private static Integer getRandomNode(Random r, List<Integer> liveNodes) {
+        return liveNodes.get(r.nextInt(liveNodes.size()));
     }
 }

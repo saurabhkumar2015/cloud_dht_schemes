@@ -71,7 +71,6 @@ public class RegularClient {
                     	// no version id field in elastic
                         break;
                     case "CEPH":
-                    	System.out.println("Version No on Regular Client while sending write request : "+((CephRoutingTable)routingTable).VersionNo);
                         payload = new Payload(fileName, i, ((CephRoutingTable)routingTable).VersionNo);
                         messageSender.sendMessage(config.nodesMap.get(nodeId), WRITE_FILE, payload);
                         break;

@@ -64,6 +64,8 @@ public abstract class GossipManager {
     private final Clock clock;
     private final ScheduledExecutorService scheduledServiced;
     private final MetricRegistry registry;
+    private final RingStatePersister ringState;
+    private final UserDataPersister userDataState;
     private final ObjectMapper objectMapper;
 
     private final MessageInvoker messageInvoker;
@@ -77,7 +79,7 @@ public abstract class GossipManager {
         clock = new SystemClock();
         me = new LocalGossipMember(cluster, uri, id, clock.nanoTime(), properties,
                 settings.getWindowSize(), settings.getMinimumSamples(), settings.getDistribution());
-        gossipCore = new GossipCore(this, DataNodeLoader.dataNode);
+        gossipCore = new GossipCore(this);
         dataReaper = new DataReaper(gossipCore, clock);
         members = new ConcurrentSkipListMap<>();
         for (GossipMember startupMember : gossipMembers) {
@@ -95,6 +97,8 @@ public abstract class GossipManager {
         this.listener = listener;
         this.scheduledServiced = Executors.newScheduledThreadPool(1);
         this.registry = registry;
+        this.ringState = new RingStatePersister(this);
+        this.userDataState = new UserDataPersister(this, this.gossipCore);
         this.objectMapper = objectMapper;
         readSavedRingState();
         readSavedDataState();
@@ -158,6 +162,8 @@ public abstract class GossipManager {
         activeGossipThread = constructActiveGossiper();
         activeGossipThread.init();
         dataReaper.init();
+        scheduledServiced.scheduleAtFixedRate(ringState, 60, 60, TimeUnit.SECONDS);
+        scheduledServiced.scheduleAtFixedRate(userDataState, 60, 60, TimeUnit.SECONDS);
         scheduledServiced.scheduleAtFixedRate(() -> {
             try {
                 for (Entry<LocalGossipMember, GossipState> entry : members.entrySet()) {
@@ -220,9 +226,24 @@ public abstract class GossipManager {
     }
 
     private void readSavedRingState() {
+        for (LocalGossipMember l : ringState.readFromDisk()){
+            LocalGossipMember member = new LocalGossipMember(l.getClusterName(),
+                    l.getUri(), l.getId(),
+                    clock.nanoTime(), l.getProperties(), settings.getWindowSize(),
+                    settings.getMinimumSamples(), settings.getDistribution());
+            members.putIfAbsent(member, GossipState.DOWN);
+        }
     }
 
     private void readSavedDataState() {
+        for (Entry<String, ConcurrentHashMap<String, GossipDataMessage>> l : userDataState.readPerNodeFromDisk().entrySet()){
+            for (Entry<String, GossipDataMessage> j : l.getValue().entrySet()){
+                gossipCore.addPerNodeData(j.getValue());
+            }
+        }
+        for (Entry<String, SharedGossipDataMessage> l: userDataState.readSharedDataFromDisk().entrySet()){
+            gossipCore.addSharedData(l.getValue());
+        }
     }
 
     /**
@@ -317,6 +338,7 @@ public abstract class GossipManager {
 
     public SharedGossipDataMessage findSharedGossipData(String key){
         SharedGossipDataMessage l = gossipCore.getSharedData().get(key);
+        System.out.println("Shared size is :" + gossipCore.getSharedData().size());
         if (l == null){
             return null;
         }
@@ -329,6 +351,14 @@ public abstract class GossipManager {
 
     public DataReaper getDataReaper() {
         return dataReaper;
+    }
+
+    public RingStatePersister getRingState() {
+        return ringState;
+    }
+
+    public UserDataPersister getUserDataState() {
+        return userDataState;
     }
 
     public Clock getClock() {

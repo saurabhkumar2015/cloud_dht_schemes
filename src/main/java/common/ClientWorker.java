@@ -19,7 +19,6 @@ public class ClientWorker {
     private static boolean debug = true;
     private static boolean distributed = false;
 
-
     public ClientWorker(IDataNode node) {
         dataNode = node;
         debug = "debug".equalsIgnoreCase(ConfigLoader.config.verbose);
@@ -29,7 +28,6 @@ public class ClientWorker {
     public void run(Socket client) {
 
         try {
-
         	DataOutputStream out = null;
             out = new DataOutputStream(client.getOutputStream());
 
@@ -58,10 +56,8 @@ public class ClientWorker {
 	                    	oos.writeObject(payload);
 	                        stream = baos.toByteArray();
 	                        out.write(stream);
-
 	                    }
 	                    else {
-	                    	System.out.println("Sender's routing table up to date");
 	                    	dataNode.writeFile(p.fileName, p.replicaId);
 	                    	EpochPayload payload = new EpochPayload("success", null);
 	                    	oos.writeObject(payload);
@@ -79,19 +75,31 @@ public class ClientWorker {
                     Integer nodeId = (Integer) request.getPayload();
                     System.out.println("Add node " + nodeId);
                     dataNode.addNode(nodeId);
-                    if(distributed) gossipNow();
+                    if(distributed) {
+                        gossipNow();
+                        System.out.println("Sender's routing table needs to be updated");
+                        sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
+                    }
                     break;
                 case DELETE_NODE:
                     Integer nodeId1 = (Integer) request.getPayload();
                     System.out.println("Delete node " + nodeId1);
                     dataNode.deleteNode(nodeId1);
-                    if(distributed) gossipNow();
+                    if(distributed) {
+                        gossipNow();
+                        System.out.println("Sender's routing table needs to be updated");
+                        sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
+                    }
                     break;
                 case LOAD_BALANCE:
                     LoadBalance lb = (LoadBalance) request.getPayload();
                     System.out.println("Load Balance    " + lb);
                     dataNode.loadBalance(lb.nodeId, lb.loadFactor);
-                    if(distributed) gossipNow();
+                    if(distributed) {
+                        gossipNow();
+                        System.out.println("Sender's routing table needs to be updated");
+                        sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
+                    }
                     break;
                     
                 case MOVE_FILE:
@@ -119,23 +127,30 @@ public class ClientWorker {
 	                dataNode.UpdateRoutingTable((IRoutingTable)payld.newRoutingTable);
                     if(distributed) gossipNow();
 	                break;
-       
                 default:
                     throw new Exception("Unsupported message type");
             }
-            //Append data to text area
         } catch (Exception e) {
             exceptionCount++;
         }
     }
 
-    private void gossipNow() {
+    private void sendRoutingTable(DataOutputStream out, ByteArrayOutputStream baos, ObjectOutputStream oos, String success, IRoutingTable routingTable) throws IOException {
+        byte[] stream;
+        EpochPayload payload = new EpochPayload(success, routingTable);
+        oos.writeObject(payload);
+        stream = baos.toByteArray();
+        out.write(stream);
+    }
 
+    private void gossipNow() {
         SharedGossipDataMessage message = new SharedGossipDataMessage();
-        message.setExpireAt(System.currentTimeMillis()+60000);
+        message.setExpireAt(System.currentTimeMillis()+120000);
         message.setTimestamp(System.currentTimeMillis());
         message.setKey(Constants.ROUTING_TABLE);
+        message.setNodeId(Integer.toString(Commons.nodeId));
         message.setPayload(dataNode.getRoutingTable());
         Commons.gossip.gossipSharedData(message);
+        System.out.println("Yes Updated Share data");
     }
 }

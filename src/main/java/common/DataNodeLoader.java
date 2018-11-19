@@ -26,6 +26,7 @@ public class DataNodeLoader {
         ConfigLoader.init(args[0]);
 
         int nodeId = Integer.parseInt(args[1]);
+        Commons.nodeId = nodeId;
         String nodeInfo = ConfigLoader.config.nodesMap.get(nodeId);
         String type = ConfigLoader.config.dhtType;
         boolean distributed = "distributed".equalsIgnoreCase(type);
@@ -48,10 +49,12 @@ public class DataNodeLoader {
             }
             List<GossipMember> startupMembers = new ArrayList<>();
             for (Integer member: members) {
-                String[] splits = ConfigLoader.config.nodesMap.get(member).split(":");
-                String port1 = Integer.toString(Integer.parseInt(splits[1])+1000);
-                URI uri = new URI("udp://" +  splits[0]+":"+port1);
-                startupMembers.add(new RemoteGossipMember("dht", uri, Integer.toString(member)));
+                if(member != nodeId) {
+                    String[] splits = ConfigLoader.config.nodesMap.get(member).split(":");
+                    String port1 = Integer.toString(Integer.parseInt(splits[1])+1000);
+                    URI uri = new URI("udp://" +  splits[0]+":"+port1);
+                    startupMembers.add(new RemoteGossipMember("dht", uri, Integer.toString(member)));
+                }
             }
             GossipSettings settings = new GossipSettings();
             settings.setGossipInterval(100);
@@ -65,9 +68,12 @@ public class DataNodeLoader {
             URI uri = new URI("udp://" + splits[0] + ":" + ( port1));
             GossipService gossipService = new GossipService("dht", uri, Integer.toString(nodeId) + "",
                     new HashMap<String, String>(), startupMembers, settings, null, new MetricRegistry());
+            Commons.gossip = gossipService;
             gossipService.start();
         }
 
+        Thread gsThread = new GossipThread(dataNode);
+        gsThread.start();
         while(true) {
             Socket clientSocket = server.accept();
             w.run(clientSocket);

@@ -1,10 +1,12 @@
 package socket;
 
+import clients.ControlClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import clients.RegularClient;
 import common.Constants;
 import common.EpochPayload;
+import config.ConfigLoader;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,17 +62,22 @@ public class MessageSendImpl implements IMessageSend {
 	            if((p.status).trim().equals("fail"))
 	            		RegularClient.routingTable = p.newRoutingTable;
             }
-          
-        } catch (IOException e) {
+            else if(Arrays.asList(Constants.ADD_NODE, Constants.DELETE_NODE, Constants.LOAD_BALANCE ).contains(type)) {
+                if(ConfigLoader.config.dhtType.equalsIgnoreCase("distributed")) {
+                    input = new DataInputStream(socket.getInputStream());
+                    ObjectInputStream ois = new ObjectInputStream(input);
+                    EpochPayload p = (EpochPayload) ois.readObject();
+
+                    System.out.println("received ack " + p.status);
+                    ControlClient.routingTable = p.newRoutingTable;
+                }
+            }
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}finally {
+        } finally {
 			   try {
 				socket.close();
 			} catch (IOException e) {
-
 			}
 		}
     }

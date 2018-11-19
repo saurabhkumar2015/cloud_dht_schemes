@@ -17,9 +17,6 @@
  */
 package org.apache.gossip.manager;
 
-import common.Constants;
-import common.IDataNode;
-import common.IRoutingTable;
 import org.apache.gossip.GossipMember;
 import org.apache.gossip.LocalGossipMember;
 import org.apache.gossip.RemoteGossipMember;
@@ -47,7 +44,6 @@ public class GossipCore implements GossipCoreConstants {
 
     public static final Logger LOGGER = Logger.getLogger(GossipCore.class);
     private final GossipManager gossipManager;
-    public final IDataNode dataNode;
     private ConcurrentHashMap<String, Base> requests;
     private ThreadPoolExecutor service;
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, GossipDataMessage>> perNodeData;
@@ -56,14 +52,13 @@ public class GossipCore implements GossipCoreConstants {
     private final PKCS8EncodedKeySpec privKeySpec;
     private final PrivateKey privKey;
 
-    public GossipCore(GossipManager manager, IDataNode dataNode) {
+    public GossipCore(GossipManager manager) {
         this.gossipManager = manager;
         requests = new ConcurrentHashMap<>();
         workQueue = new ArrayBlockingQueue<>(1024);
         service = new ThreadPoolExecutor(1, 5, 1, TimeUnit.SECONDS, workQueue, new ThreadPoolExecutor.DiscardOldestPolicy());
         perNodeData = new ConcurrentHashMap<>();
         sharedData = new ConcurrentHashMap<>();
-        this.dataNode = dataNode;
 
         if (manager.getSettings().isSignMessages()) {
             File privateKey = new File(manager.getSettings().getPathToKeyStore(), manager.getMyself().getId());
@@ -109,16 +104,27 @@ public class GossipCore implements GossipCoreConstants {
             if (previous == null) {
                 return;
             }
-            if (previous.getTimestamp() < message.getTimestamp()) {
-                boolean result = sharedData.replace(message.getKey(), previous, message);
-                if (Constants.ROUTING_TABLE.equals(message.getKey())) {
-                    dataNode.UpdateRoutingTable((IRoutingTable) message.getPayload());
-                }
-                if (result) {
+            if (message.getPayload() instanceof Crdt){
+                SharedGossipDataMessage merged = new SharedGossipDataMessage();
+                merged.setExpireAt(message.getExpireAt());
+                merged.setKey(message.getKey());
+                merged.setNodeId(message.getNodeId());
+                merged.setTimestamp(message.getTimestamp());
+                Crdt mergedCrdt = ((Crdt) previous.getPayload()).merge((Crdt) message.getPayload());
+                merged.setPayload(mergedCrdt);
+                boolean replaced = sharedData.replace(message.getKey(), previous, merged);
+                if (replaced){
                     return;
                 }
             } else {
-                return;
+                if (previous.getTimestamp() < message.getTimestamp()){
+                    boolean result = sharedData.replace(message.getKey(), previous, message);
+                    if (result){
+                        return;
+                    }
+                } else {
+                    return;
+                }
             }
         }
     }
@@ -199,7 +205,6 @@ public class GossipCore implements GossipCoreConstants {
             LOGGER.debug("Sending " + message);
             LOGGER.debug("Current request queue " + requests);
         }
-
         final Trackable t;
         if (message instanceof Trackable) {
             t = (Trackable) message;
@@ -354,6 +359,7 @@ public class GossipCore implements GossipCoreConstants {
             copy.setKey(message.getKey());
             copy.setNodeId(message.getNodeId());
             copy.setTimestamp(message.getTimestamp());
+            @SuppressWarnings("unchecked")
             Crdt merged = ((Crdt) previous.getPayload()).merge((Crdt) message.getPayload());
             copy.setPayload(merged);
             boolean replaced = sharedData.replace(message.getKey(), previous, copy);
