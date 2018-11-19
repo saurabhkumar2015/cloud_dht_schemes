@@ -175,7 +175,7 @@ public class CephDataNode  implements IDataNode{
 			int nodeidToMoveFile = this.cephRtTable.getNodeId(obj.fileName, obj.replicaId + 1);
 			if(nodeidToMoveFile != -2)
 			{
-			System.out.println("Add file to ceph system with Pgroup : " + obj.placementGroup + " and replica = " + (obj.replicaId + 1) );
+ System.out.println("Add file to ceph system with Pgroup : " + obj.placementGroup + " and replica = " + (obj.replicaId + 1) + " to node " + nodeidToMoveFile);
     			 
     			 // send write request to the destination node
     			String nodeIp = config.nodesMap.get(nodeidToMoveFile);
