@@ -199,6 +199,12 @@ public class CephDataNode  implements IDataNode{
 		this.cephRtTable = table;
 		
 	}
+	
+	@Override
+	public void addHashRange(String hashRange) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }
 
