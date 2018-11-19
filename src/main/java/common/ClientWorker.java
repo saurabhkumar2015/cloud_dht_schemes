@@ -94,12 +94,21 @@ public class ClientWorker {
                     if(distributed) gossipNow();
                     break;
                     
-                case MOVE_FILE:
-                	CephPayload payload = (CephPayload) request.getPayload();
-                	System.out.println("Received move file request from proxy: "+ payload);
-                    dataNode.UpdateRoutingTable((IRoutingTable)payload.updated_ceph_routing_table);
-                    dataNode.MoveFiles(payload.clusterId, payload.nodeIp, payload.nodeWeight, payload.totalWt, payload.isLoadBalance);
+                 case MOVE_FILE:
+                	
+                	if((ConfigLoader.config.scheme).toUpperCase().equals("CEPH")) {
+	                	CephPayload payload = (CephPayload) request.getPayload();
+	                	System.out.println("Received move file request from proxy: "+ payload);
+	                    dataNode.UpdateRoutingTable((IRoutingTable)payload.updated_ceph_routing_table);
+	                    dataNode.MoveFiles(payload.clusterId, payload.nodeIp, payload.nodeWeight, payload.totalWt, payload.isLoadBalance);
+                	}
                     break;
+                    
+                case MOVE_ON_DELETE:
+                	System.out.println("inside client worker move on delete");
+                	CephPayload payload = (CephPayload) request.getPayload();
+                	((CephDataNode)dataNode).OnDeleteNodeMoveFile();
+                	break;
 
                 case ADD_HASH:
                 	String hashRangeToBeAdded = (String) request.getPayload();
