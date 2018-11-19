@@ -32,8 +32,9 @@ public class DataNodeElastic implements IDataNode {
  	
  	}
 
+	
 	public boolean writeFile(String fileName, int replicaId) {
-		int hashcode = fileName.hashCode()%config.bucketSize;
+		int hashcode = fileName.hashCode()%1024;
 		nodeId = 0;
 		for(int i = 0; i<schemes.ElasticDHT.RoutingTable.elasticTable.length;i++) {
 			if(schemes.ElasticDHT.RoutingTable.elasticTable[i].hashIndex==hashcode) {

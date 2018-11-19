@@ -1,5 +1,6 @@
 package config;
 
+import java.util.List;
 import java.util.Map;
 import java.io.Serializable;
 
@@ -26,6 +27,7 @@ public class DHTConfig implements Serializable{
     public int PlacementGroupMaxLimit = 10;
     public Map<Integer, String> nodesMap; // Node Id --> Ip:port for a datanode
 	public int resizeFactor = 100;
+    public Map<Integer, List<Integer>> gossipList;
 
     @Override
     public String toString() {

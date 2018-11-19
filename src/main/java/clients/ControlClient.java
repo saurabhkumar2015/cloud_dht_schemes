@@ -36,7 +36,6 @@ public class ControlClient {
             String input = sc.next();
             List<Integer> liveNodes = routingTable.getLiveNodes();
             int nodeId = liveNodes.get(r.nextInt(liveNodes.size()));
-            nodeId = nodeId %(config.nodeIdEnd - config.nodeIdStart);
 
             switch (input.toUpperCase().trim()){
                 case "A":

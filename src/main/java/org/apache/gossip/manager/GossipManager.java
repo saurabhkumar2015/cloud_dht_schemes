@@ -19,6 +19,7 @@ package org.apache.gossip.manager;
 
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import common.DataNodeLoader;
 import common.IDataNode;
 import org.apache.gossip.GossipMember;
 import org.apache.gossip.GossipSettings;
@@ -70,13 +71,13 @@ public abstract class GossipManager {
     public GossipManager(String cluster,
                          URI uri, String id, Map<String, String> properties, GossipSettings settings,
                          List<GossipMember> gossipMembers, GossipListener listener, MetricRegistry registry,
-                         ObjectMapper objectMapper, MessageInvoker messageInvoker, IDataNode dataNode) {
+                         ObjectMapper objectMapper, MessageInvoker messageInvoker) {
         this.settings = settings;
         this.messageInvoker = messageInvoker;
         clock = new SystemClock();
         me = new LocalGossipMember(cluster, uri, id, clock.nanoTime(), properties,
                 settings.getWindowSize(), settings.getMinimumSamples(), settings.getDistribution());
-        gossipCore = new GossipCore(this, dataNode);
+        gossipCore = new GossipCore(this, DataNodeLoader.dataNode);
         dataReaper = new DataReaper(gossipCore, clock);
         members = new ConcurrentSkipListMap<>();
         for (GossipMember startupMember : gossipMembers) {

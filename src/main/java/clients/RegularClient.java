@@ -64,7 +64,6 @@ public class RegularClient {
                     Payload payload;
                     switch (config.scheme.toUpperCase().trim()) {
                     case "RING":
-                    	System.out.println("Version No on Regular Client while sending write request : "+((RingRoutingTable)routingTable).version);
                         payload = new Payload(fileName, i, ((RingRoutingTable)routingTable).version);
                         messageSender.sendMessage(config.nodesMap.get(nodeId), WRITE_FILE, payload);
                         break;
@@ -79,7 +78,6 @@ public class RegularClient {
                     default:
                         throw new Exception("Incompatible DHT schema found!");
                 }
-                    
               }
             }
             line = bf.readLine();

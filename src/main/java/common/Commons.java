@@ -4,6 +4,7 @@ import ceph.CephDataNode;
 import ceph.CephRoutingTable;
 import ceph.EntryPoint;
 import config.DHTConfig;
+import org.apache.gossip.GossipService;
 import ring.DataNode;
 import ring.RingDHTScheme;
 import ring.RingRoutingTable;
@@ -80,6 +81,7 @@ public class Commons {
     
     // Message Sender
     public static IMessageSend messageSender;
+    public static GossipService gossip;
     public static Payload GeneratePayload(String fileName, int replica)
     {
     	return new Payload(fileName, replica, 0L);
