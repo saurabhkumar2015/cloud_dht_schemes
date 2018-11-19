@@ -83,8 +83,8 @@ public class Commons {
     public static IMessageSend messageSender;
     public static GossipService gossip;
     public static int nodeId;
-    public static Payload GeneratePayload(String fileName, int replica)
+    public static Payload GeneratePayload(String fileName, int replica, long versionNo)
     {
-    	return new Payload(fileName, replica, 0L);
+    	return new Payload(fileName, replica, versionNo);
     }
 }
