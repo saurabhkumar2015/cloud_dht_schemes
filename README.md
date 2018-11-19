@@ -28,3 +28,5 @@ java -cp schemes-1.0-SNAPSHOT-shaded.jar test.UniversalDHTTest C:\cloud\config.c
 
 
 
+Command to compile::
+mvn install shade:shade
