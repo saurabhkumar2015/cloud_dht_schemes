@@ -56,7 +56,6 @@ public class RoutingTable implements IRoutingTable {
 
 	public IRoutingTable deleteNode(int nodeId) {
 
-		System.out.println("Entering delete functions");
 		Commons.messageSender = new MockMessageSender();
 
 		Random rn = new Random();
@@ -65,11 +64,10 @@ public class RoutingTable implements IRoutingTable {
 			System.out.print("Node id " + nodeId + "is not present in routing table.");
 			return this;
 		}
-		System.out.println("Delete Node Request" + nodeId+":"+liveNodes);
-		System.out.println("Delet Node Request" + nodeId+":"+liveNodes);
+		
 		int l = liveNodes.size();
 
-		for (int i = 0; i < bucketSize; i++) {
+		for (int i = 0; i < elasticTable.length; i++) {
 			int k = check(i, nodeId);
 			if (k != -1) {
 				int replaceNodeId = liveNodes.get(rn.nextInt(l));
@@ -84,17 +82,15 @@ public class RoutingTable implements IRoutingTable {
 				hashNodeIdReplicaAdd = createSendMapforAddNode(replaceNodeId);
 
 				Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(replaceNodeId), ADD_FILES, hashNodeIdReplicaAdd);
-				System.out.println("Files of the hash bucket "+elasticTable[i].hashIndex + "were added to "+replaceNodeId);
-				System.out.println("The node with nodeId "+nodeId+" was deleted");
 				
-				
-				System.out.println("Deleting and replacing " + elasticTable[i].hashIndex + ":" + nodeId + " with : "
-						+ replaceNodeId + " " + elasticTable[i].nodeId);
 				elasticTable[i].nodeId.set(k, replaceNodeId);
+				System.out.println("The nodeId "+nodeId+" which was in hash bucket "+elasticTable[i].hashIndex + "now has "+replaceNodeId);
 			}
 
 			// check if nodeId is in hash and get that index
 		}
+		System.out.println("Node Id "+nodeId+" was deleted");
+
 
 		return this;
 	}
@@ -115,7 +111,7 @@ public class RoutingTable implements IRoutingTable {
 	}
 
 	public int getNodeId(String filename, int replicaId) {
-		int code = filename.hashCode() % 1024;
+		int code = filename.hashCode() % elasticTable.length;
 		System.out.println(code);
 		// May not be the temporary hash code I have
 		int nodeId = 0;
@@ -178,7 +174,7 @@ public class RoutingTable implements IRoutingTable {
 
 			Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(liveNodes.get(nodeIndex)), ADD_FILES,hashNodeIdNewNodePayload );
 			elasticTable[key].nodeId.set(e.getValue(), liveNodes.get(nodeIndex));
-			System.out.println(key + ":File moved from " + nodeId + "to " + liveNodes.get(nodeIndex));
+			System.out.println(key + " was the hash value. It  moved from " + nodeId + "to " + liveNodes.get(nodeIndex));
 			// System.out.println(elasticTable[e.getKey().intValue()]+ " :"+
 			// elasticTable[e.getKey().intValue()].nodeId.get(e.getValue()));
 			deleteNodes--;
@@ -197,7 +193,7 @@ public class RoutingTable implements IRoutingTable {
 		int tempNode;
 
 		Set<Integer> liveNodes = new HashSet<Integer>();
-		for (int i = 0; i < ConfigLoader.config.bucketSize; i++) {
+		for (int i = 0; i < elasticTable.length; i++) {
 			for (int j = 0; j < 3; j++) {
 				tempNode = elasticTable[i].nodeId.get(j);
 				if (tempNode == 3) {
@@ -211,8 +207,8 @@ public class RoutingTable implements IRoutingTable {
 	}
 
 	public Map<Integer, Integer> createMapforNodeId(int nodeId, ElasticRoutingTableInstance rt[]) {
-		for (int i = 0; i < ConfigLoader.config.bucketSize; i++) {
-			for (int j = 0; j < 3; j++) {
+		for (int i = 0; i < elasticTable.length; i++) {
+			for (int j = 0; j < rFactor; j++) {
 				if (nodeId == rt[i].nodeId.get(j)) {
 					hashReplicaNodeId.put(rt[i].hashIndex, j);
 				}
@@ -230,7 +226,7 @@ public class RoutingTable implements IRoutingTable {
 			System.out.println("");
 		}
 
-		for (i = 0; i < 3; i++) {
+		for (i = 0; i < rFactor; i++) {
 			if (elasticTable[index].nodeId.get(i) == nodeId) {
 				b = true;
 				break;
@@ -269,7 +265,7 @@ public class RoutingTable implements IRoutingTable {
 			int subIndex = rno1.nextInt(rFactor);
 			if (nodeId != elasticTable[index].nodeId.get(subIndex)) {
 				int previous = elasticTable[index].nodeId.get(subIndex);
-				System.out.println("File with hash bucket : "+elasticTable[index].hashIndex + "with replica id: "+subIndex + "with node id : "+previous);
+				System.out.println("File with hash bucket : "+elasticTable[index].hashIndex + "with replica id: "+subIndex + "is currently in node id : "+previous);
 				elasticTable[index].nodeId.set(subIndex, nodeId);
 				hashNodeIdReplicaAdd = createSendMapforAddNode(nodeId);
 				Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(previous), DELETE_FILE, hashNodeIdReplicaAdd);
@@ -277,7 +273,7 @@ public class RoutingTable implements IRoutingTable {
 						+ nodeId);
 				Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(nodeId), ADD_FILES, hashNodeIdReplicaAdd);
 				elasticTable[index].nodeId.set(subIndex, nodeId);
-				System.out.println("After Add node : " + elasticTable[index].hashIndex + ":" + previous + ","
+				System.out.println("After Add node  in this hash " + elasticTable[index].hashIndex + "which had" + previous + ", now has"
 						+ elasticTable[index].nodeId.get(subIndex));
 			}
 		}
