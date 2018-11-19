@@ -354,7 +354,6 @@ public class GossipCore implements GossipCoreConstants {
             copy.setKey(message.getKey());
             copy.setNodeId(message.getNodeId());
             copy.setTimestamp(message.getTimestamp());
-            @SuppressWarnings("unchecked")
             Crdt merged = ((Crdt) previous.getPayload()).merge((Crdt) message.getPayload());
             copy.setPayload(merged);
             boolean replaced = sharedData.replace(message.getKey(), previous, copy);

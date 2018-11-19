@@ -11,11 +11,6 @@ public class DataNodeElastic implements IDataNode {
  	public void UpdateRoutingTable(IRoutingTable cephrtTable) {
  	}
 
-	@Override
-	public void setRoutingTable(IRoutingTable table) {
-
-	}
-
 	public void writeFile(String fileName, int replicaId) {
 		int hashcode = fileName.hashCode()%1024;
 		nodeId = 0;

@@ -104,6 +104,9 @@
                                         <exlude>
                                             org/apache/gossip/manager/GossipCore.class
                                         </exlude>
+                                        <exlude>
+                                            org/apache/gossip/GossipService.class
+                                        </exlude>
                                     </excludes>
                                 </filter>
                             </filters>

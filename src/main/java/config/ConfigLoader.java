@@ -6,7 +6,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,11 +37,28 @@ public class ConfigLoader {
         config.nodeMapLocation  = map.get("nodeMapLocation").toString();
         config.PlacementGroupMaxLimit  = Integer.parseInt(map.get("PlacementGroupMaxLimit").toString());
         config.nodesMap = getNodeMap(config.nodeMapLocation);
+        config.gossipList = getGossipList((Map<String, String>) map.get("gossipList"));
+
         if(!config.verbose.equalsIgnoreCase("error")) {
 //            System.out.println("Config is::" + config.toString());
             System.out.println("DHT Config Loaded Successfully!!!!");
         }
     }
+
+    private static Map<Integer,List<Integer>> getGossipList(Map<String, String> gossipList) {
+
+        Map<Integer, List<Integer>> map = new HashMap<Integer, List<Integer>>();
+        for(Map.Entry<String, String> e: gossipList.entrySet()) {
+            Integer gossipId = Integer.parseInt(e.getKey());
+            String[] ids = e.getValue().split(",");
+            List<Integer> list = new ArrayList<Integer>();
+            for(String id : ids) {
+                list.add(Integer.parseInt(id));
+            }
+            map.put(gossipId, list);
+        }
+        return map;
+        }
 
     private static Map getConfigMap(String configFile) throws IOException {
 
