@@ -112,14 +112,15 @@ public class RoutingTable implements IRoutingTable {
 
 	public int getNodeId(String filename, int replicaId) {
 		int code = filename.hashCode() % elasticTable.length;
-		System.out.println(code);
 		// May not be the temporary hash code I have
 		int nodeId = 0;
+		if(code<0) {
+			code = Math.abs(code);
+		}
 
 		for (int k = 0; k < elasticTable.length; k++) {
 			if (elasticTable[k].hashIndex == code) {
 				nodeId = elasticTable[k].nodeId.get(replicaId - 1);
-				System.out.println("In function");
 			}
 		}
 		return nodeId;
