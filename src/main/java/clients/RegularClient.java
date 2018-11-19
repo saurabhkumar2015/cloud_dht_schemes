@@ -5,11 +5,19 @@ import common.IRoutingTable;
 import common.Payload;
 import config.ConfigLoader;
 import config.DHTConfig;
+import ring.DataNode;
+import ring.RingDHTScheme;
+import ring.RingRoutingTable;
+import schemes.ElasticDHT.ElasticRoutingTable;
+import schemes.ElasticDHT.RoutingTable;
 import socket.MessageSendImpl;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Scanner;
+
+import ceph.CephRoutingTable;
+import ceph.EntryPoint;
 
 import static common.Constants.*;
 
@@ -18,14 +26,16 @@ import static common.Constants.*;
  */
 public class RegularClient {
 
-    private static IRoutingTable routingTable;
+    public static IRoutingTable routingTable;
     private static MessageSendImpl messageSender = new MessageSendImpl();
     private static Scanner sc = new Scanner(System.in);
 
 
+
     public static void main(String[] args) throws Exception {
 
-        if(args.length != 2) throw new Exception("Please specify Two arguments. \n 1) Config file absolute path \n 2) File containing list of files to write in DHT.");
+        if(args.length != 2) throw new Exception("Please specify Two arguments. \n 1) Config file absolute path " +
+                "\n 2) File containing list of files to write in DHT.");
 
         ConfigLoader.init(args[0]);
         DHTConfig config = ConfigLoader.config;
@@ -50,9 +60,27 @@ public class RegularClient {
                     if(config.verbose.equalsIgnoreCase("debug")) {
                         System.out.println("Write "+ fileName + " to "+ nodeId + " replicaid: " + i);
                     }
-                    Payload payload = new Payload(fileName, i);
-                    messageSender.sendMessage(config.nodesMap.get(nodeId), WRITE_FILE, payload);
+                    
+                    Payload payload;
+                    switch (config.scheme.toUpperCase().trim()) {
+                    case "RING":
+                    	System.out.println("Version No on Regular Client while sending write request : "+((RingRoutingTable)routingTable).version);
+                        payload = new Payload(fileName, i, ((RingRoutingTable)routingTable).version);
+                        messageSender.sendMessage(config.nodesMap.get(nodeId), WRITE_FILE, payload);
+                        break;
+                    case "ELASTIC":
+                    	// no version id field in elastic
+                        break;
+                    case "CEPH":
+                    	System.out.println("Version No on Regular Client while sending write request : "+((CephRoutingTable)routingTable).VersionNo);
+                        payload = new Payload(fileName, i, ((CephRoutingTable)routingTable).VersionNo);
+                        messageSender.sendMessage(config.nodesMap.get(nodeId), WRITE_FILE, payload);
+                        break;
+                    default:
+                        throw new Exception("Incompatible DHT schema found!");
                 }
+                    
+              }
             }
             line = bf.readLine();
         }

@@ -8,6 +8,7 @@ import config.DHTConfig;
 import socket.IMessageSend;
 import socket.MessageSendImpl;
 
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -33,7 +34,8 @@ public class ControlClient {
             System.out.println("Enter \"L\" to load Balance for a node in DHT scheme " + config.scheme);
             System.out.println("Enter \"X\" to exit");
             String input = sc.next();
-            int nodeId = r.nextInt(config.nodeIdEnd - config.nodeIdStart);
+            List<Integer> liveNodes = routingTable.getLiveNodes();
+            int nodeId = liveNodes.get(r.nextInt(liveNodes.size()));
             nodeId = nodeId %(config.nodeIdEnd - config.nodeIdStart);
 
             switch (input.toUpperCase().trim()){

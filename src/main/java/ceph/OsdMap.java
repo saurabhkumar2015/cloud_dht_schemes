@@ -26,7 +26,7 @@ public class OsdMap implements Serializable{
 	
 	public List<Integer> liveNodes = new LinkedList<Integer>();
 	
-	public Queue<OsdNode> Parentqueue = new LinkedList<>();
+	public Queue<OsdNode> Parentqueue = new LinkedList<OsdNode>();
 	
 	public HashGenerator hashGenerator;
 	
@@ -108,7 +108,7 @@ public class OsdMap implements Serializable{
     	if(root.clusterCountInLevel < maxclusterInlevel)
     	{
     			Node newlyAddedNode = root.AddNodeAtStartOfList(hashGenerator.randomWeightGenerator(), clusterId, nodeId,1);
-    			MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
+    			MoveFileInClusterOnNewNodeAddition(newlyAddedNode.nextNode);
     	    	return;
     	}
     	ParentChildPair leftNodePair = findTheClusterNodetoAddIterative(root.headNode.leftNode, root.headNode, 1);
@@ -124,7 +124,7 @@ public class OsdMap implements Serializable{
 				// Now need to set the Osd Map pointer to the newly added node as cluster start point
        			leftNodePair.Parent.leftNode.headNode = newlyAddedNode;
 				// Need to move the files from other node in sub cluster
-				MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
+				MoveFileInClusterOnNewNodeAddition(newlyAddedNode.nextNode);
 			}
 			else
 				internalKey.AddNode(0, clusterId, -1,value);				
@@ -136,14 +136,27 @@ public class OsdMap implements Serializable{
     	// Generally the data nodes should contain the local copies of files
     	// excact file match should run on those Data nodes.
     	// iterate over the cluster and print which Data nodes need to move data
-    	Node tempNode = newlyAddedNode.nextNode;
+    	Node tempNode = newlyAddedNode;
     	while(tempNode != null)
     	{
-    		System.out.println("Files need to moves from Data Node: " + tempNode.nodeId + " to " + newlyAddedNode.nodeId);
+    		if(tempNode.isActive)
+    		System.out.println("Files need to moves from Data Node: " + tempNode.nodeId);
     		tempNode = tempNode.nextNode;
     	}
-    	
-    	
+    }
+    
+    public void MoveFileInClusterOnNodeDeleteion(Node headNode, Node excludedNode)
+    {
+    	// Generally the data nodes should contain the local copies of files
+    	// excact file match should run on those Data nodes.
+    	// iterate over the cluster and print which Data nodes need to move data
+    	Node tempNode = headNode;
+    	while(tempNode != null)
+    	{
+    		if(tempNode.nodeId != excludedNode.nodeId && tempNode.isActive)
+    		System.out.println("Files need to moves from Data Node: " + tempNode.nodeId);
+    		tempNode = tempNode.nextNode;
+    	}
     }
     
     public void ShowOsdMap(boolean isShow)
@@ -164,14 +177,23 @@ public class OsdMap implements Serializable{
     public Node FindNodeInOsdMap(int nodeId)
     {
  	   this.foundNode = null;
- 	   _findNodeInOsdMap(root,nodeId, 1, true);
+ 	   _findNodeInOsdMap(root,nodeId, 1);
  	   return this.foundNode;
     }
     
     // Set the activation flag false for given nodeId
     public void DeleteNode(int nodeId)
     {
- 	   _findNodeInOsdMap(root,nodeId, 1, false);
+ 	   _findNodeInOsdMap(root,nodeId, 1);
+ 	   if(this.foundNode != null)
+ 	   {
+ 		   System.out.println("Node with NodeId : " + nodeId + " is deleted");
+ 		   this.foundNode.isActive = false;
+ 	   }
+ 	   Node headNodeOfCluster = this.findHeadNodeOfTheCluster(nodeId);
+ 	   Node deleteNode = this.FindNodeInOsdMap(nodeId);
+ 	   // We need to check the files to moves from these nodes.
+ 	   this.MoveFileInClusterOnNodeDeleteion(headNodeOfCluster, deleteNode);
     }
     
     // Once we have weight distrubuted for leaf node, then populate weight from leaf to root
@@ -192,7 +214,7 @@ public class OsdMap implements Serializable{
     public Node findHeadNodeOfTheCluster(int nodeId)
     {
  	   this.foundNode = null;
- 	   _findNodeInOsdMap(root,nodeId, 1, true);
+ 	   _findNodeInOsdMap(root,nodeId, 1);
  	   Node tempNode = this.foundNode;
  	   while(tempNode.prevNode != null)
  	   {
@@ -255,7 +277,7 @@ public class OsdMap implements Serializable{
 	   
 	   if(tempNode != null && level < depthofOsdMap)
 		   return _findNodeWithRequestedReplica(tempNode.leftNode,placementGroupId, replicaId, level + 1);
-	   if(tempNode != null && level == depthofOsdMap)
+	   if(tempNode != null && level == depthofOsdMap && tempNode.isActive)
 		   return tempNode.nodeId;
 	   else
 		   return -2;
@@ -286,12 +308,13 @@ public class OsdMap implements Serializable{
 	   double sum = 0;
 	   while(temp != null)
 	   {
+		   if(temp.isActive)
 		   sum = sum + temp.weight;
 		   temp = temp.nextNode;
 	   }
 	   return sum;
    }
-   private void _findNodeInOsdMap(OsdNode node, int nodeId, int level, boolean isActive)
+   private void _findNodeInOsdMap(OsdNode node, int nodeId, int level)
    {
 	   if(node == null)
 	   {
@@ -303,27 +326,27 @@ public class OsdMap implements Serializable{
 		   return;
 	   }
 	   // show the current node 
-	   boolean foundNode = _findNodeInOsdMapAtThisLevel(node,nodeId, level, isActive);
+	   boolean foundNode = _findNodeInOsdMapAtThisLevel(node,nodeId, level);
 	   if(foundNode)
 		   return;
 	   // iterate over the next node and show their child
 	   Node tempNode = node.headNode;
 	   while(tempNode != null)
 	   {
-		 _findNodeInOsdMap(tempNode.leftNode,nodeId, level + 1, isActive);
+		 _findNodeInOsdMap(tempNode.leftNode,nodeId, level + 1);
 	     tempNode = tempNode.nextNode;
 	   }
    }
    
-   private boolean _findNodeInOsdMapAtThisLevel(OsdNode node, int nodeId, int level, boolean isActiveStatus)
+   private boolean _findNodeInOsdMapAtThisLevel(OsdNode node, int nodeId, int level)
    {
 	   Node currentNode = node.headNode;
 	   while(currentNode != null)
 	   {
 		   if(currentNode.nodeId == nodeId)
 		   {
-			   currentNode.isActive = isActiveStatus;
-			   System.out.println(String.format("NodeId = %d present at level = %d with Status = %s", nodeId, level, currentNode.isActive));
+			   //currentNode.isActive = isActiveStatus;
+			   //System.out.println(String.format("NodeId = %d present at level = %d with Status = %s", nodeId, level, currentNode.isActive));
 			   this.foundNode = currentNode;
 			   return true;
 		   }

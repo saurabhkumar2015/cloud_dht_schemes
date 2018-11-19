@@ -9,8 +9,7 @@ public interface IDataNode {
 	 * @param fileName
 	 * @param replicaId
 	 */
-	public void writeFile(String fileName, int replicaId);
-
+	public boolean writeFile(String fileName, int replicaId);
 
 	public void deleteFile(String fileName);
 
@@ -20,9 +19,13 @@ public interface IDataNode {
 	
 	public void loadBalance(int nodeId, double loadFraction);
 	
-	public void MoveFiles(int clusterIdofNewNode,String nodeIp, double newnodeWeight, double clusterWeight);
+	public void MoveFiles(int clusterIdofNewNode,String nodeIp, double newnodeWeight, double clusterWeight, boolean isLoadbalance);
 	
 	public void UpdateRoutingTable(IRoutingTable cephrtTable);
+
+	public IRoutingTable getRoutingTable();
+	
+	public void addHashRange(String hashRange);
 	
 }
 

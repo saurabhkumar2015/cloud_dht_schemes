@@ -5,8 +5,6 @@ import common.IRoutingTable;
 
 
 import config.ConfigLoader;
-import config.DHTConfig;
-
 import java.util.*;
 import java.util.Map.Entry;
 import static common.Constants.*;
@@ -54,6 +52,7 @@ public class RoutingTable implements IRoutingTable {
 			return this;
 		}
 		System.out.println("Delete Node Request" + nodeId+":"+liveNodes);
+		System.out.println("Delet Node Request" + nodeId+":"+liveNodes);
 		int l = liveNodes.size();
 
 		for (int i = 0; i < bucketSize; i++) {
@@ -75,6 +74,9 @@ public class RoutingTable implements IRoutingTable {
 				System.out.println("The node with nodeId "+nodeId+" was deleted");
 				
 				
+				System.out.println("Deleting and replacing " + elasticTable[i].hashIndex + ":" + nodeId + " with : "
+						+ replaceNodeId + " " + elasticTable[i].nodeId);
+				elasticTable[i].nodeId.set(k, replaceNodeId);
 			}
 
 			// check if nodeId is in hash and get that index
@@ -130,6 +132,8 @@ public class RoutingTable implements IRoutingTable {
 		Random rn = new Random();
 		int deleteNodes = currentstrength - newStrength;
 		
+
+
 		for (Entry<Integer, Integer> e : hashReplicaNodeId.entrySet()) {
 			if (deleteNodes <= 0)
 				break;
@@ -150,6 +154,8 @@ public class RoutingTable implements IRoutingTable {
 			hashNodeIdNewNodePayload.put(key, liveNodes.get(nodeIndex));
 
 			Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(liveNodes.get(nodeIndex)), ADD_FILES,hashNodeIdNewNodePayload );
+			elasticTable[key].nodeId.set(e.getValue(), liveNodes.get(nodeIndex));
+			System.out.println(key + ":File moved from " + nodeId + "to " + liveNodes.get(nodeIndex));
 			// System.out.println(elasticTable[e.getKey().intValue()]+ " :"+
 			// elasticTable[e.getKey().intValue()].nodeId.get(e.getValue()));
 			deleteNodes--;
@@ -245,6 +251,9 @@ public class RoutingTable implements IRoutingTable {
 				System.out.println("File with hash bucket : " + elasticTable[index].hashIndex + " with replicaId" + subIndex + " is now in nodeId"
 						+ nodeId);
 				Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(nodeId), ADD_FILES, hashNodeIdReplicaAdd);
+				elasticTable[index].nodeId.set(subIndex, nodeId);
+				System.out.println("After Add node : " + elasticTable[index].hashIndex + ":" + previous + ","
+						+ elasticTable[index].nodeId.get(subIndex));
 			}
 		}
 
@@ -296,4 +305,11 @@ public class RoutingTable implements IRoutingTable {
 		return tempMap;
 	}
 	
+	
+
+	public long getVersionNumber() {
+		return 0;
+	}
+
+
 }

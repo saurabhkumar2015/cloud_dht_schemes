@@ -46,6 +46,7 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
     public IRoutingTable addNode(int nodeId) {
         int clusterId = randomClusterNoGenerator();
         mapInstance.AddExtraNodeToOsdMap(clusterId, nodeId);
+        mapInstance.PopulateWeightOfInternalNode(mapInstance.root);
         this.VersionNo++;
         return CephRoutingTable.getInstance();
     }
@@ -71,19 +72,40 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
 
 
 	public IRoutingTable deleteNode(int nodeId) {
-	        mapInstance.DeleteNode(nodeId);
+		// TODO Auto-generated method stub
+		mapInstance.DeleteNode(nodeId);
 		this.VersionNo++;
-                return CephRoutingTable.getInstance();
+        return this;
 	}
 
 
 	public IRoutingTable loadBalance(int nodeId, double loadFactor) {
-		// TODO Auto-generated method stub
-		return null;
+		// First find the node and change the load on the node by loadfactor
+		Node nodeToBeBalance = mapInstance.FindNodeInOsdMap(nodeId);
+		double initialWeight = nodeToBeBalance.weight;
+		nodeToBeBalance.weight = nodeToBeBalance.weight * loadFactor;
+		System.out.println("The load of node with nodeId " + nodeId + " changed from " + initialWeight + " to " + nodeToBeBalance.weight);
+
+		// File movement will be handle by Proxy node to send request to each data node for checking their local file.
+		Node headNodeOfCluster = mapInstance.findHeadNodeOfTheCluster(nodeId);
+		mapInstance.MoveFileInClusterOnNewNodeAddition(headNodeOfCluster);
+		this.VersionNo++;
+		return this;
 	}
 
-    @Override
     public List<Integer> getLiveNodes() {
         return mapInstance.GetLiveNodes();
     }
+
+    public void printRoutingTable() {
+
+    	this.mapInstance.ShowOsdMap(true);
+    }
+
+
+	public long getVersionNumber() {
+		return this.VersionNo;
+	}
+    
+    
 }

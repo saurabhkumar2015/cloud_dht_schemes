@@ -80,9 +80,8 @@ public class Commons {
     
     // Message Sender
     public static IMessageSend messageSender;
-    
     public static Payload GeneratePayload(String fileName, int replica)
     {
-    	return new Payload(fileName, replica);
+    	return new Payload(fileName, replica, 0L);
     }
 }

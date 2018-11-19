@@ -11,6 +11,11 @@ public class DataNodeElastic implements IDataNode {
  	public void UpdateRoutingTable(IRoutingTable cephrtTable) {
  	}
 
+	@Override
+	public void setRoutingTable(IRoutingTable table) {
+
+	}
+
 	public void writeFile(String fileName, int replicaId) {
 		int hashcode = fileName.hashCode()%1024;
 		nodeId = 0;
@@ -56,6 +61,13 @@ public class DataNodeElastic implements IDataNode {
 		
 	}
 
-	
+	@Override
+	public void MoveFiles(int clusterIdofNewNode, String nodeIp, double newnodeWeight, double clusterWeight, boolean isLoadbalance) {
 
+	}
+
+	@Override
+	public IRoutingTable getRoutingTable() {
+		return null;
+	}
 }
