@@ -70,10 +70,11 @@ public class DataNodeLoader {
                     new HashMap<String, String>(), startupMembers, settings, null, new MetricRegistry());
             Commons.gossip = gossipService;
             gossipService.start();
+            Thread gsThread = new GossipThread(dataNode);
+            gsThread.start();
         }
 
-        Thread gsThread = new GossipThread(dataNode);
-        gsThread.start();
+
         while(true) {
             Socket clientSocket = server.accept();
             w.run(clientSocket);
