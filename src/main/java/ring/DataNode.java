@@ -45,36 +45,12 @@ public class DataNode implements IDataNode {
 
 	//write file request handling
 	public boolean writeFile(String fileName, int replicaId) {
-		
-		System.out.println("\nFileName: "+fileName);
-		
-		//int nId = routingTableObj.getNodeId(fileName, replicaId);
-		System.out.println("File written with Replication Id:"+replicaId);
-
-		//Commons.messageSender.sendMessage(routingTableObj.physicalTable.get(nId), Constants.WRITE_FILE, Commons.GeneratePayload(fileName, replicaId));
-		/*
-		LinkedList<Integer> listOfAssociatedHashes =  routingTableObj.modifiedBinarySearch(hashVal);
-		for(int start=0; start<routingTableObj.replicationFactor;start++) {
-			int nId = routingTableObj.routingMap.get(listOfAssociatedHashes.get(start));
-			System.out.println("File written into node id: "+nId+" Replication Id:"+(start+1));
-			Commons.messageSender.sendMessage(routingTableObj.physicalTable.get(nId), Constants.ADD_FILE, Commons.GeneratePayload(fileName, (start+1)));
-		}*/
-		return false;
-	}
-
-	//delete hash range - Not file
-	public void deleteFile(String fileName) {
-		
-		System.out.println("\nFileName: "+fileName);
-		int hashVal = (fileName.hashCode())%this.routingTableObj.MAX_HASH;
-		System.out.println("FileHash Value:"+hashVal);
-		LinkedList<Integer> listOfAssociatedHashes =  routingTableObj.modifiedBinarySearch(hashVal);
-		if(listOfAssociatedHashes!=null) {
-			for(int start=0; start<routingTableObj.replicationFactor;start++) {
-				int nId = routingTableObj.routingMap.get(listOfAssociatedHashes.get(start));
-				System.out.println("File deleted from node id: "+nId+" Replication Id:"+(start+1));
-				//Commons.messageSender.sendMessage(routingTableObj.physicalTable.get(nId), Constants.DELETE_FILE, Commons.GeneratePayload(fileName, (start+1)));
-			}	
+		//System.out.println("\nFileName: "+fileName);
+		//When the receiving node is primary node for the given file
+		int nId = routingTableObj.getNodeId(fileName, replicaId);
+		if(nId == myNodeId) {
+			System.out.println("File written with Replication Id:"+replicaId);
+			return true;
 		}
 		else {
 			int hashVal = Math.abs(fileName.hashCode())%this.routingTableObj.MAX_HASH;
@@ -90,7 +66,7 @@ public class DataNode implements IDataNode {
 	        		}
 	        		else {
 	        			//sending write file request to the corresponding node
-	        			Commons.messageSender.sendMessage(routingTableObj.physicalTable.get(nId), Constants.WRITE_FILE, Commons.GeneratePayload(fileName, replicaId));
+	        			Commons.messageSender.sendMessage(routingTableObj.physicalTable.get(nId), Constants.WRITE_FILE, Commons.GeneratePayload(fileName, replicaId, this.routingTableObj.version));
 	        			return true;
 	        		}
 	        	}
