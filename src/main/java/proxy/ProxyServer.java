@@ -1,6 +1,7 @@
 package proxy;
 
 import java.io.IOException;
+
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
@@ -25,6 +26,8 @@ import config.DHTConfig;
 import socket.MessageSendImpl;
 import ring.RingRoutingTable;
 import schemes.ElasticDHT.ElasticRoutingTable;
+import schemes.ElasticDHT.ElasticRoutingTableInstance;
+import schemes.ElasticDHT.RoutingTable;
 import socket.IMessageSend;
 import socket.Request;
 import sun.misc.IOUtils;
@@ -35,7 +38,7 @@ public class ProxyServer {
 	private static DHTConfig config;
 	private static CephRoutingTable ceph_routing_table;
 	private static RingRoutingTable ring_routing_table;
-	private static ElasticRoutingTable elastic_routing_table;
+	private static ElasticRoutingTableInstance [] elastic_routing_table;
 	private static IMessageSend sendMsg = new MessageSendImpl();
 	
 	/* Bootstrapping the DHT table according to scheme */
@@ -51,6 +54,7 @@ public class ProxyServer {
                 break;
             case "ELASTIC":
             case "elastic":
+            	elastic_routing_table = RoutingTable.GetInstance().getRoutingTable();
                 break;
             case "CEPH":
             case "ceph":
@@ -128,7 +132,7 @@ public class ProxyServer {
 		                   Node temp = headNode;
 		                   Node temp1 = headNode.nextNode;
 		             	   double sum = 0;
-		             	   while(temp != null && temp.isActive)
+		             	   while(temp != null)
 		             	   {
 		             		   sum = sum + temp.weight;
 		             		   temp = temp.nextNode;
@@ -138,7 +142,7 @@ public class ProxyServer {
 	            		  int newNodeClusterId = headNode.clusterId;
 	            		  double newNodeWt = headNode.weight;
 	            		  
-		             	   while(temp1 != null && temp1.isActive) {
+		             	   while(temp1 != null) {
 		             		   
 		             		   double weight = temp1.weight;
 		             		   String nodeIp = config.nodesMap.get(temp1.nodeId);
@@ -171,7 +175,7 @@ public class ProxyServer {
 			                Node temp = headNode;
 			     
 			             	   double sum = 0;
-			             	   while(temp != null && temp.isActive)
+			             	   while(temp != null)
 			             	   {
 			             		   sum = sum + temp.weight;
 			             		   temp = temp.nextNode;
@@ -181,7 +185,7 @@ public class ProxyServer {
 		            		  
 		            	      Node ptr = headNode;
 		            	    
-			             	   while(ptr != null && ptr.isActive) {
+			             	   while(ptr != null) {
 			             		   
 			             		   double weight = ptr.weight;
 			             		   int clusterId = ptr.clusterId;
@@ -195,38 +199,6 @@ public class ProxyServer {
 			             	   }
 		                      
 			             	   sendUpdatedDHT();
-		                }
-				    	
-				    	
-				    	if((message.getType()).equals(Constants.DELETE_NODE)) {
-				    		
-				    		int nodeIdToDelete = (Integer)message.getPayload();
-				    		
-				    		
-				    		System.out.println("DataNode to be deleted "+nodeIdToDelete);
-				    		
-				    		CephRoutingTable updated_ceph_routing_table = (CephRoutingTable)ceph_routing_table.deleteNode(nodeIdToDelete);
-				    		
-		                    ceph_routing_table = updated_ceph_routing_table;
-		                    
-		                    sendUpdatedDHT();
-		                    
-		                    Node headNode = ceph_routing_table.mapInstance.findHeadNodeOfTheCluster(nodeIdToDelete);
-		                    Node ptr = headNode;
-		            	    
-			             	   while(ptr != null && ptr.isActive) {
-			             		   
-			             		   double weight = ptr.weight;
-			             		   String nodeIp = config.nodesMap.get(ptr.nodeId);
-			             		   
-			             		   System.out.println("Send move on delete to "+nodeIp);
-				             	   CephPayload payload = null;
-				             	   sendMsg.sendMessage(nodeIp, Constants.MOVE_ON_DELETE, payload);
-			             		   
-			             		   ptr = ptr.nextNode;
-			             	   }
-		                      
-			             	  
 		                }
 		        	}	
 		    	
