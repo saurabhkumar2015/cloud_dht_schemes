@@ -172,15 +172,16 @@ public class CephDataNode  implements IDataNode{
     		// if file with some intermediate replica is not present then add the fie with same filename with incremented replicaId
     		if(count < obj.replicaId)
     		{
-    			if(this.cephRtTable.getNodeId(obj.fileName,obj.replicaId+1) == -2)
-    			{
-    			 System.out.println("Add file to ceph system with Pgroup : " + obj.placementGroup + " and replica = " + obj.replicaId + 1 );
-    			 int nodeidToMoveFile = this.cephRtTable.getNodeId(obj.fileName, obj.replicaId + 1);
+			int nodeidToMoveFile = this.cephRtTable.getNodeId(obj.fileName, obj.replicaId + 1);
+			if(nodeidToMoveFile != -2)
+			{
+			System.out.println("Add file to ceph system with Pgroup : " + obj.placementGroup + " and replica = " + (obj.replicaId + 1) );
+    			 
     			 // send write request to the destination node
     			String nodeIp = config.nodesMap.get(nodeidToMoveFile);
- 				Commons.messageSender.sendMessage(nodeIp, Constants.WRITE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
-    		    }
+ 			Commons.messageSender.sendMessage(nodeIp, Constants.WRITE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
     		}
+		}
     	}
     	
     }
