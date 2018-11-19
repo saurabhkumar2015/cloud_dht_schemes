@@ -12,6 +12,7 @@
 	"seed": 32,
 	"PlacementGroupMaxLimit":10,
 	"nodeMapLocation":"/home/vm_nodes.csv",
+	"resizeFactor":75,
 	"gossipList":{
     		"1": "1,2,3,4,5,6,7,8",
     		"2": "5,6,7,8,9,10,11,12",
