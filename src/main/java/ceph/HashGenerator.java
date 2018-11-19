@@ -13,11 +13,8 @@ public class HashGenerator implements Serializable{
     private final long MAX_VALUE = 0xFFFFFFFFL;
     private final double MAX_NODE = 15359.0;
     
-    private DHTConfig config;
-    
     private HashGenerator()
     {
-    	this.config = ConfigLoader.config;
     }
     
 	// we can pass the configuration here
@@ -31,7 +28,7 @@ public class HashGenerator implements Serializable{
 	
 	public double randomWeightGenerator()
 	{
-		int seed = config.seed;
+		int seed = ConfigLoader.config.seed;
 		Random rand = new Random(seed);
 		return rand.nextDouble();
 	}
@@ -44,7 +41,7 @@ public class HashGenerator implements Serializable{
 		//double resultHash = hashCode / Math.pow(2, 31);
 		
 		// use well defined hashing for fair distribution of Files
-		double resultHash = rushHash(Integer.toString(PlacementGroupId), replicaId, Integer.toString(clusterId));
+		double resultHash = rHash(Integer.toString(PlacementGroupId), replicaId, Integer.toString(clusterId));
 		return resultHash;
 	}
 	
@@ -58,7 +55,7 @@ public class HashGenerator implements Serializable{
 		return fileName.hashCode() % PlacementGroupLimit;
 	}
 	
-	private double rushHash(String s1,int r,String cid){
+	private double rHash(String s1,int r,String cid){
 
         long a = s1.hashCode();
         long b = r & MAX_VALUE;
