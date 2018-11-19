@@ -2,10 +2,15 @@ package socket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import clients.RegularClient;
+import common.Constants;
+import common.EpochPayload;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.HashMap;
@@ -22,11 +27,10 @@ public class MessageSendImpl implements IMessageSend {
         Request request = new Request();
         request.setType(type);
         request.setPayload(payload);
-
-
+        
         Socket socket = null;
-        DataInputStream input = null;
         DataOutputStream out = null;
+        DataInputStream input = null;
 
         // Extracting address and port from NodeId
         String[] arr = nodeAddress.split(":");
@@ -36,7 +40,6 @@ public class MessageSendImpl implements IMessageSend {
         try {
             socket = new Socket(address, port);
             out = new DataOutputStream(socket.getOutputStream());
-            input = new DataInputStream(socket.getInputStream());
 
             byte[] stream = null;
             // ObjectOutputStream is used to convert a Java object into OutputStream
@@ -45,9 +48,30 @@ public class MessageSendImpl implements IMessageSend {
             oos.writeObject(request);
             stream = baos.toByteArray();
             out.write(stream);
-            socket.close();
+            
+            if(type.equals(Constants.WRITE_FILE)) {
+	            input = new DataInputStream(socket.getInputStream());
+	            ObjectInputStream ois = new ObjectInputStream(input);
+	            EpochPayload p = (EpochPayload) ois.readObject();
+	          
+	            System.out.println("received ack "+p.status);
+	            
+	            if((p.status).trim().equals("fail"))
+	            		RegularClient.routingTable = p.newRoutingTable;
+            }
+          
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        } catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			   try {
+				socket.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
     }
 }
