@@ -175,7 +175,10 @@ public class CephDataNode  implements IDataNode{
     			if(this.cephRtTable.getNodeId(obj.fileName,obj.replicaId+1) == -2)
     			{
     			 System.out.println("Add file to ceph system with Pgroup : " + obj.placementGroup + " and replica = " + obj.replicaId + 1 );
-    			((CephRoutingTable)this.cephRtTable).mapInstance.AddFileToCephSystem(obj.fileName, obj.replicaId + 1, config.PlacementGroupMaxLimit);
+    			 int nodeidToMoveFile = this.cephRtTable.getNodeId(obj.fileName, obj.replicaId + 1);
+    			 // send write request to the destination node
+    			String nodeIp = config.nodesMap.get(nodeidToMoveFile);
+ 				Commons.messageSender.sendMessage(nodeIp, Constants.WRITE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId));
     		    }
     		}
     	}
@@ -199,7 +202,7 @@ public class CephDataNode  implements IDataNode{
 		this.cephRtTable = table;
 		
 	}
-	
+
 	@Override
 	public void addHashRange(String hashRange) {
 		// TODO Auto-generated method stub
