@@ -1,8 +1,11 @@
 package ceph;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import common.Commons;
 import common.Constants;
@@ -14,20 +17,22 @@ import config.DHTConfig;
 public class CephDataNode  implements IDataNode{
     public ArrayList<DataObject> dataList = new ArrayList<DataObject>();
 
-    private HashGenerator hashGenerator;
-    
-    private DHTConfig config;
-    
+    public HashGenerator hashGenerator;
+
     public int NodeId;
     
     public IRoutingTable cephRtTable;
     
     private static CephDataNode single_instance = null;
     
+    public CephDataNode()
+    {
+    	
+    }
+    
     public CephDataNode(int nodeId)
     {
     	this.hashGenerator = HashGenerator.getInstance();
-    	this.config = ConfigLoader.config;
     	this.NodeId = nodeId;
     	EntryPoint entryPoint = new EntryPoint();
         entryPoint.BootStrapCeph();
@@ -43,7 +48,7 @@ public class CephDataNode  implements IDataNode{
     
 	public boolean writeFile(String fileName, int replicaId) {
 		//step 1. find the placementGroupId for file
-		int placementGroupId = this.hashGenerator.getPlacementGroupIdFromFileName(fileName, config.PlacementGroupMaxLimit);
+		int placementGroupId = this.hashGenerator.getPlacementGroupIdFromFileName(fileName, ConfigLoader.config.PlacementGroupMaxLimit);
 		
 		// Find the node on which it should go.
 		int destinationNodeId = this.cephRtTable.getNodeId(fileName, replicaId);
@@ -124,22 +129,28 @@ public class CephDataNode  implements IDataNode{
 	
 	private void MoveFilesOnWeightChangeInOsdMap()
 	{
-
+		Map<Integer, List<DataObject>> addMap = new HashMap<>();
 		for(DataObject obj : this.dataList)
 		{
             int destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(obj.replicaId, obj.placementGroup);
-            if(destinationNodeId != -2)
+            if(destinationNodeId != -2 && this.NodeId != destinationNodeId)
             {
-			System.out.println("file need to move from node " + this.NodeId + " to node " + destinationNodeId);
-			 // TODO: code to send message on message broker
+            	List<DataObject> list = addMap.get(destinationNodeId);
+        		if(list == null) list = new ArrayList<>();
+        		list.add(obj);
             }
             
 		}
+		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
+    		System.out.println("file need to move from " +  this.NodeId + " to node " + e.getKey() + " with replication Factor: " + e.getValue() );
+    	}
+		
 	}
 	
 	private void MoveFilesOnNodeDeletion()
 	{
-		int replicaFactor = this.config.replicationFactor;
+		int replicaFactor = ConfigLoader.config.replicationFactor;
+		Map<Integer, List<DataObject>> addMap = new HashMap<>();
 		for(DataObject obj : this.dataList)
 		{
             int noOfReplicaPresent = 0;
@@ -160,12 +171,20 @@ public class CephDataNode  implements IDataNode{
             {
             	// need to add file with current replica value
             	int destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(currentreplicaValue, obj.placementGroup);
-            	if(destinationNodeId != -2)
-                {
-    			System.out.println("file need to added to node " + destinationNodeId + " with replication Factor: " + currentreplicaValue);
-    			
-    			 // TODO: code to send message on message broker
+            	while(destinationNodeId == -2)
+            	{
+            		destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(currentreplicaValue++, obj.placementGroup);	
+            	}
+            	if(this.NodeId != destinationNodeId )
+            	{
+            		List<DataObject> list = addMap.get(destinationNodeId);
+            		if(list == null) list = new ArrayList<>();
+            		list.add(obj);
+            		
                 }
+            	for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
+            		System.out.println("file need to added to node " + e.getKey() + " with replication Factor: " + e.getValue() );
+            	}
             }
 		}
 	}
