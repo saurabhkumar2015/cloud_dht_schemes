@@ -111,12 +111,11 @@ public class CephDataNode  implements IDataNode{
 		
 	}
 
-	@Override
 	public void addHashRange(String hashRange) {
 		// TODO Auto-generated method stub
 		
 	}
-	@Override
+
 	public void MoveFiles(int clusterIdofNewNode, String nodeIp, double newnodeWeight, double clusterWeight,
 			boolean isLoadbalance) {
 		// TODO Auto-generated method stub
@@ -135,6 +134,39 @@ public class CephDataNode  implements IDataNode{
 			 // TODO: code to send message on message broker
             }
             
+		}
+	}
+	
+	private void MoveFilesOnNodeDeletion()
+	{
+		int replicaFactor = this.config.replicationFactor;
+		for(DataObject obj : this.dataList)
+		{
+            int noOfReplicaPresent = 0;
+            int currentreplicaValue = 1;
+            while(noOfReplicaPresent != replicaFactor)
+            {
+            	int destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(currentreplicaValue, obj.placementGroup);
+            	if(destinationNodeId != -2)
+            	{
+            		noOfReplicaPresent++;
+            	}
+
+        		currentreplicaValue++;
+            }
+            
+            // If replicationFactor value == currentReplicaValue then no file need to be written otherwise need to write file with replica equal to currentreplicaValue;
+            if(replicaFactor + 1 < currentreplicaValue )
+            {
+            	// need to add file with current replica value
+            	int destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(currentreplicaValue, obj.placementGroup);
+            	if(destinationNodeId != -2)
+                {
+    			System.out.println("file need to added to node " + destinationNodeId + " with replication Factor: " + currentreplicaValue);
+    			
+    			 // TODO: code to send message on message broker
+                }
+            }
 		}
 	}
 }
