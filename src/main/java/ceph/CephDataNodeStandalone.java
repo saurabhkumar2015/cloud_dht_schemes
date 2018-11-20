@@ -190,7 +190,6 @@ public class CephDataNodeStandalone {
     		{
     			System.out.println(" Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
     		}
-    		
     	}
 		
 	}
