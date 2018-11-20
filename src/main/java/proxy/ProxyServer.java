@@ -169,36 +169,8 @@ public class ProxyServer {
 				    		CephRoutingTable updated_ceph_routing_table = (CephRoutingTable)ceph_routing_table.loadBalance(nodeToBeBalanced, loadFactor);
 				    		
 		                    ceph_routing_table = updated_ceph_routing_table;
-		                    
-		                    Node headNode = ceph_routing_table.mapInstance.findHeadNodeOfTheCluster(nodeToBeBalanced);
-		                    
-			                Node temp = headNode;
-			     
-			             	   double sum = 0;
-			             	   while(temp != null)
-			             	   {
-			             		   sum = sum + temp.weight;
-			             		   temp = temp.nextNode;
-			             	   }
-			             	   
-			          
-		            		  
-		            	      Node ptr = headNode;
-		            	    
-			             	   while(ptr != null) {
-			             		   
-			             		   double weight = ptr.weight;
-			             		   int clusterId = ptr.clusterId;
-			             		   String nodeIp = config.nodesMap.get(ptr.nodeId);
-			             		   
-			             		   CephPayload payload = new CephPayload(nodeIp, clusterId, weight, sum, true, ceph_routing_table);
-			             		   System.out.println("Move file called::" + payload + " to node IP: " + nodeIp);
-			             		   sendMsg.sendMessage(nodeIp, Constants.MOVE_FILE, payload);
-			             		   sum = sum - weight;
-			             		   ptr = ptr.nextNode;
-			             	   }
-		                      
-			             	   sendUpdatedDHT();
+		                
+			           	   sendUpdatedDHT();
 		                }
 		        	}	
 		    	
