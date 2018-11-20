@@ -88,121 +88,16 @@ public class CephDataNode  implements IDataNode{
 		this.cephRtTable = cephRtTable.loadBalance(nodeId, loadFraction);
 	}
     
-    public void MoveFiles(int clusterId,String nodeIp, double newnodeWeight, double clusterWeight, boolean isLoadbalance)
-    {
-
-    	if(isLoadbalance)
-    	{
-    	   this.OnLoadBalanceMovement(clusterId, newnodeWeight, clusterWeight);	
-    	}
-    	else
-    	{
-    	// iterate on local file copy and move the file accordingly    	
-    	List<DataObject> filesToremove = new LinkedList<DataObject>();
-    	for(DataObject obj : dataList)
-    	{
-    		double hashvalue = HashGenerator.getInstance().generateHashValue(clusterId, obj.placementGroup, obj.replicaId);
-			double weightFactor = HashGenerator.getInstance().GetWeightFactor(newnodeWeight, clusterWeight);
-			
-			if(hashvalue < weightFactor)
-			{
-				System.out.println("File with Pgroup " + obj.placementGroup + " replica " + obj.replicaId + " moves to new node " + nodeIp);
-				Commons.messageSender.sendMessage(nodeIp, Constants.WRITE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
-				filesToremove.add(obj);
-			}
-    	}
        
-    	// Now remove the files from local copy of data node.
-    	dataList.removeAll(filesToremove);
-       }
-    }
-    
-    private void OnLoadBalanceMovement(int clusterId, double nodeWeight, double clusterWeight)
-    {
-    	List<DataObject> filesToremove = new LinkedList<DataObject>();
-    	for(DataObject obj : dataList)
-    	{
-    		double hashvalue = HashGenerator.getInstance().generateHashValue(clusterId, obj.placementGroup, obj.replicaId);
-			double weightFactor = HashGenerator.getInstance().GetWeightFactor(nodeWeight, clusterWeight);
-			
-			if(hashvalue < weightFactor)
-			{
-			  System.out.println("File movement is not needed for file: " + obj.fileName + " with replica " + obj.replicaId);
-			}
-			else
-			{
-				int nodeidToMoveFile = this.cephRtTable.getNodeId(obj.fileName, obj.replicaId);
-				if(nodeidToMoveFile != -2)
-				{
-
-				System.out.println("File with pGroup " + obj.placementGroup + " replica " + obj.replicaId + " moves to node " + nodeidToMoveFile);
-				String nodeIp = config.nodesMap.get(nodeidToMoveFile);
-				Commons.messageSender.sendMessage(nodeIp, Constants.WRITE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
-				System.out.println("File with pGroup " + obj.placementGroup + " replica " + obj.replicaId + " moves to node " + nodeIp);
-				filesToremove.add(obj);
-				}
-				else
-				{
-					System.out.println("The file is out of range for Osd Map with fileName " + obj.fileName + " replica " + obj.replicaId);
-				}
-			}
-    	}
-    	
-    	// Now remove the files from local copy of data node.
-    	dataList.removeAll(filesToremove);
-    }
-    
-    
-    public void OnDeleteNodeMoveFile()
-    {
-    	// Iterate over their the files and for each file check if the file with filename and replica exist then fine otherwise increment the 
-    	// replica and add the file to ceph system.
-    	System.out.println("Moves files on Node Deletion at Node " + this.NodeId);
-    	for(DataObject obj : dataList)
-    	{
-    		int count = 0; 
-    		for(int i = 1; i <= obj.replicaId; i++)
-    		{
-    			int nodeWithrequestFileAndReplica = this.cephRtTable.getNodeId(obj.fileName,i);
-    			// if File present with active node then its good call
-    			if(nodeWithrequestFileAndReplica != -2)
-    			{
-    				count++;
-    			}
-    		}
-    		// if file with some intermediate replica is not present then add the fie with same filename with incremented replicaId
-    		if(count < obj.replicaId)
-    		{
-    			 int replicaAddedBy = 1;
-    			 int nodeidToMoveFile = this.cephRtTable.getNodeId(obj.fileName, obj.replicaId + replicaAddedBy);
-    			 while(nodeidToMoveFile == -2)
-    			 {
-    				 System.out.println("Checking for valid live node");
-    				 replicaAddedBy++;
-    				 nodeidToMoveFile = this.cephRtTable.getNodeId(obj.fileName, obj.replicaId + replicaAddedBy);
-    				 
-    			 }
-    			 if(nodeidToMoveFile != -2)
-    			 {
-    			 // send write request to the destination node
-    			String nodeIp = config.nodesMap.get(nodeidToMoveFile);
-    			System.out.println("Add file to ceph system with Pgroup : " + obj.placementGroup + " and replica = " + (obj.replicaId + 1) + " to node " + (nodeidToMoveFile));
- 				Commons.messageSender.sendMessage(nodeIp, Constants.WRITE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
-    			 }
-    			 else
-    			 {
-    				 System.out.println("The file to ceph system with Pgroup : " + obj.placementGroup + " and replica = " + (obj.replicaId + 1) + " mapping to Deleted node!!");
-    			 }
-    		}
-    	}
-    	
-    }
-    
     public void UpdateRoutingTable(IRoutingTable cephrtTable)
     {
     	this.cephRtTable = cephrtTable;
 		CephRoutingTable rt = (CephRoutingTable)cephrtTable;
     	System.out.println("OSD Routing table is updated::" + rt.VersionNo);
+    	
+    	// Trigger file movement on this DataNode
+    	System.out.println("File Movement has been triggered at node: " + this.NodeId);
+    	this.MoveFilesOnWeightChangeInOsdMap();
     }
   
 	public IRoutingTable getRoutingTable() {
@@ -221,6 +116,26 @@ public class CephDataNode  implements IDataNode{
 		// TODO Auto-generated method stub
 		
 	}
+	@Override
+	public void MoveFiles(int clusterIdofNewNode, String nodeIp, double newnodeWeight, double clusterWeight,
+			boolean isLoadbalance) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	private void MoveFilesOnWeightChangeInOsdMap()
+	{
 
+		for(DataObject obj : this.dataList)
+		{
+            int destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(obj.replicaId, obj.placementGroup);
+            if(destinationNodeId != -2)
+            {
+			System.out.println("file need to move from node " + this.NodeId + " to node " + destinationNodeId);
+			 // TODO: code to send message on message broker
+            }
+            
+		}
+	}
 }
 
