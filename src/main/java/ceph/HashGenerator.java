@@ -13,7 +13,7 @@ public class HashGenerator implements Serializable{
     private final long MAX_VALUE = 0xFFFFFFFFL;
     private final double MAX_NODE = 15359.0;
     
-    private HashGenerator()
+    public HashGenerator()
     {
     }
     
