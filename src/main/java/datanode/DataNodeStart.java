@@ -11,7 +11,6 @@ import java.util.List;
 public class DataNodeStart {
 	
 		public static void main(String args[]) throws Exception{
-			
 			if(args.length!=3) throw new Exception("Please specify Two arguments. \n 1) Config file absolute path " +
 					"\n 2) Jar file location " +
 					"\n 3)Nodes.csv location"
