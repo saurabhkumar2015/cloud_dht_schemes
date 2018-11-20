@@ -2,8 +2,6 @@ package ceph;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Random;
-
 import common.IRoutingTable;
 import config.ConfigLoader;
 
@@ -34,9 +32,8 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
     }
 
     public IRoutingTable addNode(int nodeId) {
-        int clusterId = randomClusterNoGenerator();
-        mapInstance.AddExtraNodeToOsdMap(clusterId, nodeId);
-        mapInstance.PopulateWeightOfInternalNode(mapInstance.root);
+        mapInstance.AddExtraNodeToOsdMap(nodeId);
+        mapInstance.PopulateWeightOfInternalNode();
         this.VersionNo++;
         return CephRoutingTable.getInstance();
     }
@@ -46,14 +43,6 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
         return mapInstance.findNodeWithRequestedReplica(replicaId,
                 HashGenerator.getInstance().getPlacementGroupIdFromFileName(fileName, ConfigLoader.config.PlacementGroupMaxLimit));
     }
-
-    private int randomClusterNoGenerator() {
-        Random r = new Random();
-        int low = 1;
-        int high = 21;
-        return r.nextInt(high - low) + low;
-    }
-
 
 	public IRoutingTable deleteNode(int nodeId) {
 		// TODO Auto-generated method stub
@@ -69,11 +58,10 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
 		double initialWeight = nodeToBeBalance.weight;
 		nodeToBeBalance.weight = nodeToBeBalance.weight * loadFactor;
 		System.out.println("The load of node with nodeId " + nodeId + " changed from " + initialWeight + " to " + nodeToBeBalance.weight);
-
-		// File movement will be handle by Proxy node to send request to each data node for checking their local file.
-		Node headNodeOfCluster = mapInstance.findHeadNodeOfTheCluster(nodeId);
-		mapInstance.MoveFileInClusterOnNewNodeAddition(headNodeOfCluster);
+		
 		this.VersionNo++;
+		// Populate the internalNode weight
+		mapInstance.PopulateWeightOfInternalNode();
 		return this;
 	}
 
@@ -83,7 +71,7 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
 
     public void printRoutingTable() {
 
-    	this.mapInstance.ShowOsdMap(true);
+    	this.mapInstance.ShowOsdMap();
     }
 
 
