@@ -5,26 +5,23 @@ import java.util.List;
 import common.IRoutingTable;
 import config.ConfigLoader;
 
+import static common.Commons.cephRoutingTable;
+
 public class CephRoutingTable implements IRoutingTable, Serializable {
 
     public OsdMap mapInstance;
 
-    private static CephRoutingTable single_instance = null;
+    public int versionNumber;
 
-    public int VersionNo;
+    public CephRoutingTable() {}
 
-    public CephRoutingTable() {
-        this.mapInstance = OsdMap.getInstance(ConfigLoader.config.cephMaxClusterSize, 3);
-        this.VersionNo = 1;
-        // BootStrap the table here or not need to think
-    }
-
-
-    public static CephRoutingTable getInstance() {
-        if (single_instance == null)
-            single_instance = new CephRoutingTable();
-
-        return single_instance;
+    public static CephRoutingTable giveInstance() {
+        if (cephRoutingTable == null) {
+            cephRoutingTable = new CephRoutingTable();
+            cephRoutingTable.mapInstance = OsdMap.giveInstance(ConfigLoader.config.cephMaxClusterSize, 3);
+            cephRoutingTable.versionNumber = 1;
+        }
+        return cephRoutingTable;
     }
 
     public OsdMap GetCephRoutingTable() {
@@ -34,20 +31,20 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
     public IRoutingTable addNode(int nodeId) {
         mapInstance.AddExtraNodeToOsdMap(nodeId);
         mapInstance.PopulateWeightOfInternalNode();
-        this.VersionNo++;
-        return CephRoutingTable.getInstance();
+        this.versionNumber++;
+        return CephRoutingTable.giveInstance();
     }
 
 
-    public int getNodeId(String fileName, int replicaId) {
+    public int giveNodeId(String fileName, int replicaId) {
         return mapInstance.findNodeWithRequestedReplica(replicaId,
-                HashGenerator.getInstance().getPlacementGroupIdFromFileName(fileName, ConfigLoader.config.PlacementGroupMaxLimit));
+                HashGenerator.giveInstance().givePlacementGroupIdFromFileName(fileName, ConfigLoader.config.PlacementGroupMaxLimit));
     }
 
 	public IRoutingTable deleteNode(int nodeId) {
 		// TODO Auto-generated method stub
 		mapInstance.DeleteNode(nodeId);
-		this.VersionNo++;
+		this.versionNumber++;
         return this;
 	}
 
@@ -59,14 +56,14 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
 		nodeToBeBalance.weight = nodeToBeBalance.weight * loadFactor;
 		System.out.println("The load of node with nodeId " + nodeId + " changed from " + initialWeight + " to " + nodeToBeBalance.weight);
 		
-		this.VersionNo++;
+		this.versionNumber++;
 		// Populate the internalNode weight
 		mapInstance.PopulateWeightOfInternalNode();
 		return this;
 	}
 
-    public List<Integer> getLiveNodes() {
-        return mapInstance.GetLiveNodes();
+    public List<Integer> giveLiveNodes() {
+        return mapInstance.giveLiveNodes();
     }
 
     public void printRoutingTable() {
@@ -76,8 +73,15 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
 
 
 	public long getVersionNumber() {
-		return this.VersionNo;
+		return this.versionNumber;
 	}
-    
-    
+
+
+    @Override
+    public String toString() {
+        return "CephRoutingTable{" +
+                "mapInstance=" + mapInstance +
+                ", versionNumber=" + versionNumber +
+                '}';
+    }
 }

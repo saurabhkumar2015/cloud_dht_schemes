@@ -1,7 +1,5 @@
 package ceph;
 
-import java.util.Random;
-
 import config.ConfigLoader;
 import config.DHTConfig;
 
@@ -15,7 +13,7 @@ public class EntryPoint {
      System.out.println("Osd Depth is :" + 3);
      // Step 2 : create the Osd Map with Leaf node with weight 
      // Populate the osd map from Configuration
-      OsdMap mapInstance = OsdMap.getInstance(config.cephMaxClusterSize,3);
+      OsdMap mapInstance = OsdMap.giveInstance(config.cephMaxClusterSize,3);
      
       // 
      // Step 3: populate the internal node weight using the commutative weight of child node

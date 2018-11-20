@@ -2,8 +2,6 @@ package test;
 
 import common.Commons;
 import common.IRoutingTable;
-import common.LoadBalance;
-import common.Payload;
 import config.ConfigLoader;
 import config.DHTConfig;
 import socket.IMessageSend;
@@ -14,8 +12,6 @@ import java.io.FileReader;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
-
-import static common.Constants.*;
 
 public class UniversalDHTTest {
 
@@ -48,7 +44,7 @@ public class UniversalDHTTest {
             System.out.println("Enter \"F\" to print write of files ");
             System.out.println("Enter \"X\" to exit");
             String input = sc.next();
-            List<Integer> liveNodes = routingTable.getLiveNodes();
+            List<Integer> liveNodes = routingTable.giveLiveNodes();
 
             switch (input.toUpperCase().trim()){
                 case "A":
@@ -89,7 +85,7 @@ public class UniversalDHTTest {
                         if(splits.length > 1 && splits[1].trim().length() > 0) {
                             String fileName = splits[1].trim();
                             for(int i=1 ; i <= config.replicationFactor;i++) {
-                                Integer wnodeId = routingTable.getNodeId(fileName, i);
+                                Integer wnodeId = routingTable.giveNodeId(fileName, i);
                                 System.out.println("Write "+ fileName + " to "+ wnodeId + " replicaid: " + i);
                             }
                         }

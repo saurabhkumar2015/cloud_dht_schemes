@@ -189,7 +189,7 @@ public class RingRoutingTable implements IRoutingTable {
     }
 
     //Find Node corresponding to given filename
-    public int getNodeId(String fileName, int replicationId) {
+    public int giveNodeId(String fileName, int replicationId) {
         int hashVal = Math.abs(fileName.hashCode())%this.MAX_HASH;
         LinkedList<Integer> listOfNodesForGivenHash = modifiedBinarySearch(hashVal);
         if (listOfNodesForGivenHash!=null) {
@@ -395,7 +395,7 @@ public class RingRoutingTable implements IRoutingTable {
 		return this;
 	}
 
-    public List<Integer> getLiveNodes() {
+    public List<Integer> giveLiveNodes() {
     	List<Integer> arList = new ArrayList<Integer>();
     	for(Map.Entry<Integer,Integer> map : this.routingMap.entrySet()){
     	     arList.add(map.getValue());

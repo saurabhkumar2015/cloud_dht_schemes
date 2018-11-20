@@ -47,7 +47,7 @@ public class DataNode implements IDataNode {
 	public boolean writeFile(String fileName, int replicaId) {
 		//System.out.println("\nFileName: "+fileName);
 		//When the receiving node is primary node for the given file
-		int nId = routingTableObj.getNodeId(fileName, replicaId);
+		int nId = routingTableObj.giveNodeId(fileName, replicaId);
 		if(nId == myNodeId) {
 			System.out.println("File written with Replication Id:"+replicaId);
 			return true;

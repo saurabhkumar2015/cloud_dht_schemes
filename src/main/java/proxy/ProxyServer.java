@@ -7,16 +7,11 @@ import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import common.CephPayload;
 import common.Constants;
 import common.EpochPayload;
-import common.IRoutingTable;
 import common.LoadBalance;
-
-import org.apache.commons.lang3.SerializationUtils;
 
 import ceph.CephRoutingTable;
 import ceph.EntryPoint;
@@ -25,12 +20,10 @@ import config.ConfigLoader;
 import config.DHTConfig;
 import socket.MessageSendImpl;
 import ring.RingRoutingTable;
-import schemes.ElasticDHT.ElasticRoutingTable;
 import schemes.ElasticDHT.ElasticRoutingTableInstance;
 import schemes.ElasticDHT.RoutingTable;
 import socket.IMessageSend;
 import socket.Request;
-import sun.misc.IOUtils;
 
 public class ProxyServer {
 	
@@ -60,7 +53,7 @@ public class ProxyServer {
             case "ceph":
                 EntryPoint entryPoint = new EntryPoint();
                 entryPoint.BootStrapCeph();
-                ceph_routing_table = CephRoutingTable.getInstance();
+                ceph_routing_table = CephRoutingTable.giveInstance();
                 break;
             default:
                 throw new Exception("Incompatible DHT schema found!");
@@ -81,7 +74,7 @@ public class ProxyServer {
             break;
         case "CEPH":
         case "ceph":
-            List<Integer> liveNodes = ceph_routing_table.getLiveNodes();
+            List<Integer> liveNodes = ceph_routing_table.giveLiveNodes();
             for(int id: liveNodes) {
             	System.out.println("Live node "+id);
             	EpochPayload payload = new EpochPayload("true", ceph_routing_table);

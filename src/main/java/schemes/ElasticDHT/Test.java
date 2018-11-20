@@ -2,7 +2,6 @@ package schemes.ElasticDHT;
 
 import java.io.IOException;
 
-import common.Commons;
 import config.ConfigLoader;
 
 public class Test {
@@ -45,7 +44,7 @@ public class Test {
 //		r.GetInstance().addNode(3);
 //		r.GetInstance().addNode(7);
 
-		System.out.println(r.GetInstance().getLiveNodes());
+		System.out.println(r.GetInstance().giveLiveNodes());
 
 		System.out.println("Exiting add and entering delete");
 		//r.GetInstance().deleteNode(7);

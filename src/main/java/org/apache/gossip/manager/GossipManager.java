@@ -19,6 +19,8 @@ package org.apache.gossip.manager;
 
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import common.DataNodeLoader;
 import common.IDataNode;
 import org.apache.gossip.GossipMember;
@@ -100,6 +102,8 @@ public abstract class GossipManager {
         this.ringState = new RingStatePersister(this);
         this.userDataState = new UserDataPersister(this, this.gossipCore);
         this.objectMapper = objectMapper;
+        this.objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+
         readSavedRingState();
         readSavedDataState();
     }
@@ -162,8 +166,8 @@ public abstract class GossipManager {
         activeGossipThread = constructActiveGossiper();
         activeGossipThread.init();
         dataReaper.init();
-        scheduledServiced.scheduleAtFixedRate(ringState, 60, 60, TimeUnit.SECONDS);
-        scheduledServiced.scheduleAtFixedRate(userDataState, 60, 60, TimeUnit.SECONDS);
+        scheduledServiced.scheduleAtFixedRate(ringState, 600, 600, TimeUnit.SECONDS);
+        scheduledServiced.scheduleAtFixedRate(userDataState, 600, 600, TimeUnit.SECONDS);
         scheduledServiced.scheduleAtFixedRate(() -> {
             try {
                 for (Entry<LocalGossipMember, GossipState> entry : members.entrySet()) {
@@ -287,9 +291,6 @@ public abstract class GossipManager {
     }
 
     public void gossipSharedData(SharedGossipDataMessage message){
-        Objects.nonNull(message.getKey());
-        Objects.nonNull(message.getTimestamp());
-        Objects.nonNull(message.getPayload());
         message.setNodeId(me.getId());
         gossipCore.addSharedData(message);
     }
@@ -338,7 +339,6 @@ public abstract class GossipManager {
 
     public SharedGossipDataMessage findSharedGossipData(String key){
         SharedGossipDataMessage l = gossipCore.getSharedData().get(key);
-        System.out.println("Shared size is :" + gossipCore.getSharedData().size());
         if (l == null){
             return null;
         }

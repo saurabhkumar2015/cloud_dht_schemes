@@ -5,9 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import static common.Commons.osdMap;
+
 public class OsdMap implements Serializable{
-	
-	private static OsdMap single_instance = null;
 	
 	public OsdNode root= null;
 	
@@ -28,17 +28,17 @@ public class OsdMap implements Serializable{
 		this.maxclusterInlevel = maxclusterInaNode;
 		this.depthofOsdMap = depth;
 		this.clusterMaxValue = 1;
-		hashGenerator = HashGenerator.getInstance();
+		hashGenerator = HashGenerator.giveInstance();
 	}
-	
+	public OsdMap(){}
 	
 	// we can pass the configuration here
-	public static OsdMap getInstance(int maxclusterInaNode, int depth) 
+	public static OsdMap giveInstance(int maxclusterInaNode, int depth)
     { 
-        if (single_instance == null) 
-            single_instance = new OsdMap(maxclusterInaNode, depth); 
+        if (osdMap == null)
+			osdMap = new OsdMap(maxclusterInaNode, depth);
   
-        return single_instance; 
+        return osdMap;
     } 
 	
 	// Input to populate the osd map need to think
@@ -128,7 +128,7 @@ public class OsdMap implements Serializable{
     
     public void MoveFileInClusterOnNewNodeAddition(Node newlyAddedNode)
     {
-    	List<Integer> liveNodes = GetLiveNodes();
+    	List<Integer> liveNodes = giveLiveNodes();
     	
     	for(int nodeId : liveNodes)
     	{
@@ -139,7 +139,7 @@ public class OsdMap implements Serializable{
     
     public void MoveFileInClusterOnNodeDeleteion()
     {
-        List<Integer> liveNodes = GetLiveNodes();
+        List<Integer> liveNodes = giveLiveNodes();
     	
     	for(int nodeId : liveNodes)
     	{
@@ -153,7 +153,7 @@ public class OsdMap implements Serializable{
     	_showOsdMap(root, true, liveNodes);
     }
     
-    public List<Integer> GetLiveNodes()
+    public List<Integer> giveLiveNodes()
     {
     	List<Integer> liveNodes = new LinkedList<Integer>();
     	_showOsdMap(root, false, liveNodes);
@@ -233,7 +233,7 @@ public class OsdMap implements Serializable{
 	   while(tempNode != null)
 	   {
 		   double hashval = hashGenerator.generateHashValue(tempNode.clusterId, placementGroupId, replicaId);
-		   double weightFactor = hashGenerator.GetWeightFactor(tempNode.weight, subClusterSum);
+		   double weightFactor = hashGenerator.giveWeightFactor(tempNode.weight, subClusterSum);
 		   if(hashval < weightFactor)
 			   break;
 		   subClusterSum = subClusterSum - tempNode.weight;
@@ -402,4 +402,16 @@ public class OsdMap implements Serializable{
 	   return null;
 	   
    }
-   }
+
+	@Override
+	public String toString() {
+		return "OsdMap{" +
+				"root=" + root +
+				", foundNode=" + foundNode +
+				", maxclusterInlevel=" + maxclusterInlevel +
+				", depthofOsdMap=" + depthofOsdMap +
+				", hashGenerator=" + hashGenerator +
+				", clusterMaxValue=" + clusterMaxValue +
+				'}';
+	}
+}

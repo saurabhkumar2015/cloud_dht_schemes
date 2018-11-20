@@ -25,11 +25,11 @@ public class CephDataNodeStandalone {
     
     public CephDataNodeStandalone()
     {
-    	this.hashGenerator = HashGenerator.getInstance();
+    	this.hashGenerator = HashGenerator.giveInstance();
     	this.config = ConfigLoader.config;
     	EntryPoint entryPoint = new EntryPoint();
         entryPoint.BootStrapCeph();
-    	cephRtTable = CephRoutingTable.getInstance();
+    	cephRtTable = CephRoutingTable.giveInstance();
     }
     
     public static CephDataNode getInstance(int nodeId) {
@@ -41,10 +41,10 @@ public class CephDataNodeStandalone {
     
 	public boolean writeFile(String fileName, int replicaId) {
 		//step 1. find the placementGroupId for file
-		int placementGroupId = this.hashGenerator.getPlacementGroupIdFromFileName(fileName, config.PlacementGroupMaxLimit);
+		int placementGroupId = this.hashGenerator.givePlacementGroupIdFromFileName(fileName, config.PlacementGroupMaxLimit);
 		
 		// Find the node on which it should go.
-		int destinationNodeId = this.cephRtTable.getNodeId(fileName, replicaId);
+		int destinationNodeId = this.cephRtTable.giveNodeId(fileName, replicaId);
 		
 		System.out.println("Write file request received for FileName: " + fileName + " replicaId: " + replicaId + " on node " + (destinationNodeId) );
 
@@ -94,7 +94,7 @@ public class CephDataNodeStandalone {
     {
     	this.cephRtTable = cephrtTable;
 		CephRoutingTable rt = (CephRoutingTable)cephrtTable;
-    	System.out.println("OSD Routing table is updated::" + rt.VersionNo);
+    	System.out.println("OSD Routing table is updated::" + rt.versionNumber);
     	
     	// Trigger file movement on this DataNode
     	System.out.println("File Movement has been triggered at node: " + this.NodeId);

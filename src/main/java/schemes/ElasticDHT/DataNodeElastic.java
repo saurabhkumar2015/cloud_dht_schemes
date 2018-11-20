@@ -42,7 +42,7 @@ public class DataNodeElastic implements IDataNode {
 				break;
 			}
 		}
-		int writeNodeId = this.elasticTable.getNodeId(fileName, replicaId-1);
+		int writeNodeId = this.elasticTable.giveNodeId(fileName, replicaId-1);
 		if(writeNodeId!=nodeId) {
 			return false;
 		}

@@ -1,8 +1,6 @@
 package common;
 
-import ceph.CephDataNode;
-import ceph.CephRoutingTable;
-import ceph.EntryPoint;
+import ceph.*;
 import config.DHTConfig;
 import org.apache.gossip.GossipService;
 import ring.DataNode;
@@ -71,7 +69,7 @@ public class Commons {
             case "CEPH":
                 EntryPoint entryPoint = new EntryPoint();
                 entryPoint.BootStrapCeph();
-                routingTable = CephRoutingTable.getInstance();
+                routingTable = CephRoutingTable.giveInstance();
                 break;
             default:
                 throw new Exception("Incompatible DHT schema found!");
@@ -83,6 +81,9 @@ public class Commons {
     public static IMessageSend messageSender;
     public static GossipService gossip;
     public static int nodeId;
+    public static CephRoutingTable cephRoutingTable = null;
+    public static OsdMap osdMap = null;
+    public static HashGenerator hashGenerator = null;
     public static Payload GeneratePayload(String fileName, int replica, long versionNo)
     {
     	return new Payload(fileName, replica, versionNo);

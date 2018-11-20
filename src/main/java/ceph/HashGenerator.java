@@ -6,24 +6,22 @@ import config.ConfigLoader;
 import config.DHTConfig;
 import java.io.Serializable;
 
+import static common.Commons.hashGenerator;
+
 public class HashGenerator implements Serializable{
-	
-    private static HashGenerator single_instance = null;
-	
+
     private final long MAX_VALUE = 0xFFFFFFFFL;
     private final double MAX_NODE = 15359.0;
     
-    public HashGenerator()
-    {
-    }
+    public HashGenerator() {}
     
 	// we can pass the configuration here
-	public static HashGenerator getInstance() 
+	public static HashGenerator giveInstance()
     { 
-        if (single_instance == null) 
-            single_instance = new HashGenerator(); 
+        if (hashGenerator == null)
+			hashGenerator = new HashGenerator();
   
-        return single_instance; 
+        return hashGenerator;
     } 
 	
 	public double randomWeightGenerator()
@@ -45,12 +43,12 @@ public class HashGenerator implements Serializable{
 		return resultHash;
 	}
 	
-	public double GetWeightFactor(double currentNodeWeight, double subClusterWeight)
+	public double giveWeightFactor(double currentNodeWeight, double subClusterWeight)
 	{
 		return currentNodeWeight / subClusterWeight;
 	}
 	
-	public int getPlacementGroupIdFromFileName(String fileName, int PlacementGroupLimit)
+	public int givePlacementGroupIdFromFileName(String fileName, int PlacementGroupLimit)
 	{
 		return fileName.hashCode() % PlacementGroupLimit;
 	}
