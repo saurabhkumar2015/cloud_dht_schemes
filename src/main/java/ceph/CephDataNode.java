@@ -138,13 +138,20 @@ public class CephDataNode  implements IDataNode{
             	List<DataObject> list = addMap.get(destinationNodeId);
         		if(list == null) list = new ArrayList<>();
         		list.add(obj);
+        		addMap.put(destinationNodeId, list);
             }
             
 		}
-		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
-    		System.out.println("file need to move from " +  this.NodeId + " to node " + e.getKey() + " with replication Factor: " + e.getValue() );
-    	}
 		
+		
+		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
+    		System.out.println("file need to move from " +  this.NodeId + " to node " + e.getKey());
+    		for(DataObject obj : e.getValue())
+    		{
+    			System.out.println(" Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
+    		}
+    		
+    	}		
 	}
 	
 	private void MoveFilesOnNodeDeletion()
@@ -179,14 +186,20 @@ public class CephDataNode  implements IDataNode{
             	{
             		List<DataObject> list = addMap.get(destinationNodeId);
             		if(list == null) list = new ArrayList<>();
-            		list.add(obj);
+            		list.add(new DataObject(obj.placementGroup, currentreplicaValue, obj.fileName));
+            		addMap.put(destinationNodeId, list);
             		
                 }
-            	for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
-            		System.out.println("file need to added to node " + e.getKey() + " with replication Factor: " + e.getValue() );
-            	}
             }
 		}
+		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
+    		System.out.println("file need to added to node " + e.getKey());
+    		for(DataObject obj : e.getValue())
+    		{
+    			System.out.println(" Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
+    		}
+    		
+    	}
 	}
 }
 
