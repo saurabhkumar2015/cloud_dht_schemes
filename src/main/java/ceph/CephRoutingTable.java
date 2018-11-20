@@ -2,31 +2,26 @@ package ceph;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Random;
-
 import common.IRoutingTable;
 import config.ConfigLoader;
+
+import static common.Commons.cephRoutingTable;
 
 public class CephRoutingTable implements IRoutingTable, Serializable {
 
     public OsdMap mapInstance;
 
-    private static CephRoutingTable single_instance = null;
+    public int versionNumber;
 
-    public int VersionNo;
+    public CephRoutingTable() {}
 
-    public CephRoutingTable() {
-        this.mapInstance = OsdMap.getInstance(ConfigLoader.config.cephMaxClusterSize, 3);
-        this.VersionNo = 1;
-        // BootStrap the table here or not need to think
-    }
-
-
-    public static CephRoutingTable getInstance() {
-        if (single_instance == null)
-            single_instance = new CephRoutingTable();
-
-        return single_instance;
+    public static CephRoutingTable giveInstance() {
+        if (cephRoutingTable == null) {
+            cephRoutingTable = new CephRoutingTable();
+            cephRoutingTable.mapInstance = OsdMap.giveInstance(ConfigLoader.config.cephMaxClusterSize, 3);
+            cephRoutingTable.versionNumber = 1;
+        }
+        return cephRoutingTable;
     }
 
     public OsdMap GetCephRoutingTable() {
@@ -34,31 +29,22 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
     }
 
     public IRoutingTable addNode(int nodeId) {
-        int clusterId = randomClusterNoGenerator();
-        mapInstance.AddExtraNodeToOsdMap(clusterId, nodeId);
-        mapInstance.PopulateWeightOfInternalNode(mapInstance.root);
-        this.VersionNo++;
-        return CephRoutingTable.getInstance();
+        mapInstance.AddExtraNodeToOsdMap(nodeId);
+        mapInstance.PopulateWeightOfInternalNode();
+        this.versionNumber++;
+        return CephRoutingTable.giveInstance();
     }
 
 
-    public int getNodeId(String fileName, int replicaId) {
+    public int giveNodeId(String fileName, int replicaId) {
         return mapInstance.findNodeWithRequestedReplica(replicaId,
-                HashGenerator.getInstance().getPlacementGroupIdFromFileName(fileName, ConfigLoader.config.PlacementGroupMaxLimit));
+                HashGenerator.giveInstance().givePlacementGroupIdFromFileName(fileName, ConfigLoader.config.PlacementGroupMaxLimit));
     }
-
-    private int randomClusterNoGenerator() {
-        Random r = new Random();
-        int low = 1;
-        int high = 21;
-        return r.nextInt(high - low) + low;
-    }
-
 
 	public IRoutingTable deleteNode(int nodeId) {
 		// TODO Auto-generated method stub
 		mapInstance.DeleteNode(nodeId);
-		this.VersionNo++;
+		this.versionNumber++;
         return this;
 	}
 
@@ -69,27 +55,33 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
 		double initialWeight = nodeToBeBalance.weight;
 		nodeToBeBalance.weight = nodeToBeBalance.weight * loadFactor;
 		System.out.println("The load of node with nodeId " + nodeId + " changed from " + initialWeight + " to " + nodeToBeBalance.weight);
-
-		// File movement will be handle by Proxy node to send request to each data node for checking their local file.
-		Node headNodeOfCluster = mapInstance.findHeadNodeOfTheCluster(nodeId);
-		mapInstance.MoveFileInClusterOnNewNodeAddition(headNodeOfCluster);
-		this.VersionNo++;
+		
+		this.versionNumber++;
+		// Populate the internalNode weight
+		mapInstance.PopulateWeightOfInternalNode();
 		return this;
 	}
 
-    public List<Integer> getLiveNodes() {
-        return mapInstance.GetLiveNodes();
+    public List<Integer> giveLiveNodes() {
+        return mapInstance.giveLiveNodes();
     }
 
     public void printRoutingTable() {
 
-    	this.mapInstance.ShowOsdMap(true);
+    	this.mapInstance.ShowOsdMap();
     }
 
 
 	public long getVersionNumber() {
-		return this.VersionNo;
+		return this.versionNumber;
 	}
-    
-    
+
+
+    @Override
+    public String toString() {
+        return "CephRoutingTable{" +
+                "mapInstance=" + mapInstance +
+                ", versionNumber=" + versionNumber +
+                '}';
+    }
 }

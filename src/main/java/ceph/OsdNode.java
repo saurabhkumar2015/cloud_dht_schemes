@@ -29,7 +29,6 @@ public class OsdNode implements Serializable {
 			 tempNode = tempNode.nextNode;
 		 Node newNode = new Node(weight,clusterId, nodeid, level);
 		 tempNode.nextNode = newNode;
-		 newNode.prevNode = tempNode;
 		 
 		 return newNode;
 		}
@@ -54,7 +53,6 @@ public class OsdNode implements Serializable {
 				 Node tempNode = headNode;
 				 Node newNode = new Node(weight,clusterId, nodeid, level);
 				 newNode.nextNode = headNode;
-				 headNode.prevNode = newNode;
 				 headNode = newNode;
 				 return newNode;
 				}
@@ -65,7 +63,7 @@ public class OsdNode implements Serializable {
 		
 	}
 		
-	public int GetOsdNodeCount()
+	public int giveOsdNodeCount()
 	{
 		return this.clusterCountInLevel;
 	}
@@ -76,6 +74,13 @@ public class OsdNode implements Serializable {
 			return;
 		currentNode.headNode.iterateNodeList(currentNode.headNode, liveNodes, isshow);
 	}
-	
+
+    @Override
+    public String toString() {
+        return "OsdNode{" +
+                "headNode=" + headNode +
+                ", clusterCountInLevel=" + clusterCountInLevel +
+                '}';
+    }
 }
 

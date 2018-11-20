@@ -1,17 +1,21 @@
 package testgossip;
 
+import ceph.CephRoutingTable;
 import com.codahale.metrics.MetricRegistry;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import config.ConfigLoader;
 import org.apache.gossip.*;
 import org.apache.gossip.model.SharedGossipDataMessage;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.util.*;
 
 public class TestGossip {
 
-    public static void main(String[] args) throws URISyntaxException, UnknownHostException, InterruptedException {
+    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
 
         String host = args[0];
         Integer port = Integer.parseInt(args[1]);
@@ -45,16 +49,23 @@ public class TestGossip {
         message.setKey("OSD_MAP");
         String nodeId = Integer.toString(port-50000);
         message.setNodeId(nodeId);
-        Map<String,String> map = new HashMap<>();
+        ConfigLoader.init("C://cloud//config.conf");
 
         int i = Integer.parseInt(args[3]);
         while(true) {
             System.out.println("\n");
             if(mode.equals("w")) {
                 message.setTimestamp(System.currentTimeMillis());
-                map = new HashMap<>();
-                map.put(nodeId, Integer.toString(i++));
-                message.setPayload(map);
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+                CephRoutingTable rt = CephRoutingTable.giveInstance();
+
+                String str = mapper.writeValueAsString(rt);
+                System.out.println(str);
+                CephRoutingTable rr = mapper.readValue(str, CephRoutingTable.class);
+                System.out.println(rr);
+
+                message.setPayload(rt);
                 gossipService.gossipSharedData(message);
                 System.out.println("Sent Gossip Message::" + message.getPayload());
                 message.setExpireAt(System.currentTimeMillis()+120000);

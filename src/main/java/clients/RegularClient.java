@@ -5,11 +5,7 @@ import common.IRoutingTable;
 import common.Payload;
 import config.ConfigLoader;
 import config.DHTConfig;
-import ring.DataNode;
-import ring.RingDHTScheme;
 import ring.RingRoutingTable;
-import schemes.ElasticDHT.ElasticRoutingTable;
-import schemes.ElasticDHT.RoutingTable;
 import socket.MessageSendImpl;
 
 import java.io.BufferedReader;
@@ -17,7 +13,6 @@ import java.io.FileReader;
 import java.util.Scanner;
 
 import ceph.CephRoutingTable;
-import ceph.EntryPoint;
 
 import static common.Constants.*;
 
@@ -56,7 +51,7 @@ public class RegularClient {
             if(splits.length > 1 && splits[1].trim().length() > 0) {
                 String fileName = splits[1].trim();
                 for(int i=1 ; i <= config.replicationFactor;i++) {
-                    Integer nodeId = routingTable.getNodeId(fileName, i);
+                    Integer nodeId = routingTable.giveNodeId(fileName, i);
                     if(config.verbose.equalsIgnoreCase("debug")) {
                         System.out.println("Write "+ fileName + " to "+ nodeId + " replicaid: " + i);
                     }
@@ -68,10 +63,10 @@ public class RegularClient {
                         messageSender.sendMessage(config.nodesMap.get(nodeId), WRITE_FILE, payload);
                         break;
                     case "ELASTIC":
-                    	// no version id field in elastic
+                    	// no versionNumber id field in elastic
                         break;
                     case "CEPH":
-                        payload = new Payload(fileName, i, ((CephRoutingTable)routingTable).VersionNo);
+                        payload = new Payload(fileName, i, ((CephRoutingTable)routingTable).getVersionNumber());
                         messageSender.sendMessage(config.nodesMap.get(nodeId), WRITE_FILE, payload);
                         break;
                     default:

@@ -1,37 +1,38 @@
 package ceph;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
-import common.Commons;
-import common.Constants;
 import common.IDataNode;
 import common.IRoutingTable;
 import config.ConfigLoader;
-import config.DHTConfig;
 
 public class CephDataNode  implements IDataNode{
     public ArrayList<DataObject> dataList = new ArrayList<DataObject>();
 
-    private HashGenerator hashGenerator;
-    
-    private DHTConfig config;
-    
+    public HashGenerator hashGenerator;
+
     public int NodeId;
     
     public IRoutingTable cephRtTable;
     
     private static CephDataNode single_instance = null;
     
+    public CephDataNode()
+    {
+    	
+    }
+    
     public CephDataNode(int nodeId)
     {
-    	this.hashGenerator = HashGenerator.getInstance();
-    	this.config = ConfigLoader.config;
+    	this.hashGenerator = HashGenerator.giveInstance();
     	this.NodeId = nodeId;
     	EntryPoint entryPoint = new EntryPoint();
         entryPoint.BootStrapCeph();
-    	cephRtTable = CephRoutingTable.getInstance();
+    	cephRtTable = CephRoutingTable.giveInstance();
     }
     
     public static CephDataNode getInstance(int nodeId) {
@@ -43,10 +44,10 @@ public class CephDataNode  implements IDataNode{
     
 	public boolean writeFile(String fileName, int replicaId) {
 		//step 1. find the placementGroupId for file
-		int placementGroupId = this.hashGenerator.getPlacementGroupIdFromFileName(fileName, config.PlacementGroupMaxLimit);
+		int placementGroupId = this.hashGenerator.givePlacementGroupIdFromFileName(fileName, ConfigLoader.config.PlacementGroupMaxLimit);
 		
 		// Find the node on which it should go.
-		int destinationNodeId = this.cephRtTable.getNodeId(fileName, replicaId);
+		int destinationNodeId = this.cephRtTable.giveNodeId(fileName, replicaId);
 		
 		System.out.println("Write file request received for FileName: " + fileName + " replicaId: " + replicaId + " on node " + (destinationNodeId) );
 		
@@ -88,121 +89,16 @@ public class CephDataNode  implements IDataNode{
 		this.cephRtTable = cephRtTable.loadBalance(nodeId, loadFraction);
 	}
     
-    public void MoveFiles(int clusterId,String nodeIp, double newnodeWeight, double clusterWeight, boolean isLoadbalance)
-    {
-
-    	if(isLoadbalance)
-    	{
-    	   this.OnLoadBalanceMovement(clusterId, newnodeWeight, clusterWeight);	
-    	}
-    	else
-    	{
-    	// iterate on local file copy and move the file accordingly    	
-    	List<DataObject> filesToremove = new LinkedList<DataObject>();
-    	for(DataObject obj : dataList)
-    	{
-    		double hashvalue = HashGenerator.getInstance().generateHashValue(clusterId, obj.placementGroup, obj.replicaId);
-			double weightFactor = HashGenerator.getInstance().GetWeightFactor(newnodeWeight, clusterWeight);
-			
-			if(hashvalue < weightFactor)
-			{
-				System.out.println("File with Pgroup " + obj.placementGroup + " replica " + obj.replicaId + " moves to new node " + nodeIp);
-				Commons.messageSender.sendMessage(nodeIp, Constants.WRITE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
-				filesToremove.add(obj);
-			}
-    	}
        
-    	// Now remove the files from local copy of data node.
-    	dataList.removeAll(filesToremove);
-       }
-    }
-    
-    private void OnLoadBalanceMovement(int clusterId, double nodeWeight, double clusterWeight)
-    {
-    	List<DataObject> filesToremove = new LinkedList<DataObject>();
-    	for(DataObject obj : dataList)
-    	{
-    		double hashvalue = HashGenerator.getInstance().generateHashValue(clusterId, obj.placementGroup, obj.replicaId);
-			double weightFactor = HashGenerator.getInstance().GetWeightFactor(nodeWeight, clusterWeight);
-			
-			if(hashvalue < weightFactor)
-			{
-			  System.out.println("File movement is not needed for file: " + obj.fileName + " with replica " + obj.replicaId);
-			}
-			else
-			{
-				int nodeidToMoveFile = this.cephRtTable.getNodeId(obj.fileName, obj.replicaId);
-				if(nodeidToMoveFile != -2)
-				{
-
-				System.out.println("File with pGroup " + obj.placementGroup + " replica " + obj.replicaId + " moves to node " + nodeidToMoveFile);
-				String nodeIp = config.nodesMap.get(nodeidToMoveFile);
-				Commons.messageSender.sendMessage(nodeIp, Constants.WRITE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
-				System.out.println("File with pGroup " + obj.placementGroup + " replica " + obj.replicaId + " moves to node " + nodeIp);
-				filesToremove.add(obj);
-				}
-				else
-				{
-					System.out.println("The file is out of range for Osd Map with fileName " + obj.fileName + " replica " + obj.replicaId);
-				}
-			}
-    	}
-    	
-    	// Now remove the files from local copy of data node.
-    	dataList.removeAll(filesToremove);
-    }
-    
-    
-    public void OnDeleteNodeMoveFile()
-    {
-    	// Iterate over their the files and for each file check if the file with filename and replica exist then fine otherwise increment the 
-    	// replica and add the file to ceph system.
-    	System.out.println("Moves files on Node Deletion at Node " + this.NodeId);
-    	for(DataObject obj : dataList)
-    	{
-    		int count = 0; 
-    		for(int i = 1; i <= obj.replicaId; i++)
-    		{
-    			int nodeWithrequestFileAndReplica = this.cephRtTable.getNodeId(obj.fileName,i);
-    			// if File present with active node then its good call
-    			if(nodeWithrequestFileAndReplica != -2)
-    			{
-    				count++;
-    			}
-    		}
-    		// if file with some intermediate replica is not present then add the fie with same filename with incremented replicaId
-    		if(count < obj.replicaId)
-    		{
-    			 int replicaAddedBy = 1;
-    			 int nodeidToMoveFile = this.cephRtTable.getNodeId(obj.fileName, obj.replicaId + replicaAddedBy);
-    			 while(nodeidToMoveFile == -2)
-    			 {
-    				 System.out.println("Checking for valid live node");
-    				 replicaAddedBy++;
-    				 nodeidToMoveFile = this.cephRtTable.getNodeId(obj.fileName, obj.replicaId + replicaAddedBy);
-    				 
-    			 }
-    			 if(nodeidToMoveFile != -2)
-    			 {
-    			 // send write request to the destination node
-    			String nodeIp = config.nodesMap.get(nodeidToMoveFile);
-    			System.out.println("Add file to ceph system with Pgroup : " + obj.placementGroup + " and replica = " + (obj.replicaId + 1) + " to node " + (nodeidToMoveFile));
- 				Commons.messageSender.sendMessage(nodeIp, Constants.WRITE_FILE,Commons.GeneratePayload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
-    			 }
-    			 else
-    			 {
-    				 System.out.println("The file to ceph system with Pgroup : " + obj.placementGroup + " and replica = " + (obj.replicaId + 1) + " mapping to Deleted node!!");
-    			 }
-    		}
-    	}
-    	
-    }
-    
     public void UpdateRoutingTable(IRoutingTable cephrtTable)
     {
     	this.cephRtTable = cephrtTable;
 		CephRoutingTable rt = (CephRoutingTable)cephrtTable;
-    	System.out.println("OSD Routing table is updated::" + rt.VersionNo);
+    	System.out.println("OSD Routing table is updated::" + rt.versionNumber);
+    	
+    	// Trigger file movement on this DataNode
+    	System.out.println("File Movement has been triggered at node: " + this.NodeId);
+    	this.MoveFilesOnWeightChangeInOsdMap();
     }
   
 	public IRoutingTable getRoutingTable() {
@@ -216,11 +112,90 @@ public class CephDataNode  implements IDataNode{
 		
 	}
 
-	@Override
 	public void addHashRange(String hashRange) {
 		// TODO Auto-generated method stub
 		
 	}
 
+	public void MoveFiles(int clusterIdofNewNode, String nodeIp, double newnodeWeight, double clusterWeight,
+			boolean isLoadbalance) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	private void MoveFilesOnWeightChangeInOsdMap()
+	{
+		Map<Integer, List<DataObject>> addMap = new HashMap<>();
+		for(DataObject obj : this.dataList)
+		{
+            int destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(obj.replicaId, obj.placementGroup);
+            if(destinationNodeId != -2 && this.NodeId != destinationNodeId)
+            {
+            	List<DataObject> list = addMap.get(destinationNodeId);
+        		if(list == null) list = new ArrayList<>();
+        		list.add(obj);
+        		addMap.put(destinationNodeId, list);
+            }
+            
+		}
+		
+		
+		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
+    		System.out.println("file need to move from " +  this.NodeId + " to node " + e.getKey());
+    		for(DataObject obj : e.getValue())
+    		{
+    			System.out.println(" Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
+    		}
+    		
+    	}		
+	}
+	
+	private void MoveFilesOnNodeDeletion()
+	{
+		int replicaFactor = ConfigLoader.config.replicationFactor;
+		Map<Integer, List<DataObject>> addMap = new HashMap<>();
+		for(DataObject obj : this.dataList)
+		{
+            int noOfReplicaPresent = 0;
+            int currentreplicaValue = 1;
+            while(noOfReplicaPresent != replicaFactor)
+            {
+            	int destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(currentreplicaValue, obj.placementGroup);
+            	if(destinationNodeId != -2)
+            	{
+            		noOfReplicaPresent++;
+            	}
+
+        		currentreplicaValue++;
+            }
+            
+            // If replicationFactor value == currentReplicaValue then no file need to be written otherwise need to write file with replica equal to currentreplicaValue;
+            if(replicaFactor + 1 < currentreplicaValue )
+            {
+            	// need to add file with current replica value
+            	int destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(currentreplicaValue, obj.placementGroup);
+            	while(destinationNodeId == -2)
+            	{
+            		destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(currentreplicaValue++, obj.placementGroup);	
+            	}
+            	if(this.NodeId != destinationNodeId )
+            	{
+            		List<DataObject> list = addMap.get(destinationNodeId);
+            		if(list == null) list = new ArrayList<>();
+            		list.add(new DataObject(obj.placementGroup, currentreplicaValue, obj.fileName));
+            		addMap.put(destinationNodeId, list);
+            		
+                }
+            }
+		}
+		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
+    		System.out.println("file need to added to node " + e.getKey());
+    		for(DataObject obj : e.getValue())
+    		{
+    			System.out.println(" Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
+    		}
+    		
+    	}
+	}
 }
 

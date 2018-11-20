@@ -59,7 +59,7 @@ public class RoutingTable implements IRoutingTable {
 		Commons.messageSender = new MockMessageSender();
 
 		Random rn = new Random();
-		List<Integer> liveNodes = getLiveNodes();
+		List<Integer> liveNodes = giveLiveNodes();
 		if(!liveNodes.remove((Integer)nodeId)) {
 			System.out.print("Node id " + nodeId + "is not present in routing table.");
 			return this;
@@ -110,16 +110,17 @@ public class RoutingTable implements IRoutingTable {
 		return resizeElasticTable;
 	}
 
-	public int getNodeId(String filename, int replicaId) {
+	public int giveNodeId(String filename, int replicaId) {
 		int code = filename.hashCode() % elasticTable.length;
-		System.out.println(code);
 		// May not be the temporary hash code I have
 		int nodeId = 0;
+		if(code<0) {
+			code = Math.abs(code);
+		}
 
 		for (int k = 0; k < elasticTable.length; k++) {
 			if (elasticTable[k].hashIndex == code) {
 				nodeId = elasticTable[k].nodeId.get(replicaId - 1);
-				System.out.println("In function");
 			}
 		}
 		return nodeId;
@@ -139,7 +140,7 @@ public class RoutingTable implements IRoutingTable {
 		//
 		Commons.messageSender = new MockMessageSender();
 
-		List<Integer> liveNodes = getLiveNodes();
+		List<Integer> liveNodes = giveLiveNodes();
 		int maxLiveNodes = liveNodes.size();
 		System.out.println(maxLiveNodes);
 
@@ -184,7 +185,7 @@ public class RoutingTable implements IRoutingTable {
 		return this;
 	}
 
-	public List<Integer> getLiveNodes() {
+	public List<Integer> giveLiveNodes() {
 
 		return new ArrayList<Integer>(getLiveNodesSet());
 	}
@@ -244,7 +245,7 @@ public class RoutingTable implements IRoutingTable {
 		Commons.messageSender = new MockMessageSender();
 
 		
-		List<Integer> liveNodes = getLiveNodes();
+		List<Integer> liveNodes = giveLiveNodes();
 		if(liveNodes.contains((Integer) nodeId)) {
 			System.out.println("Node Id " + nodeId + "already exists in Routing Table.");
 			return this;
@@ -277,7 +278,7 @@ public class RoutingTable implements IRoutingTable {
 						+ elasticTable[index].nodeId.get(subIndex));
 			}
 		}
-		liveNodes = getLiveNodes();
+		liveNodes = giveLiveNodes();
 		range = liveNodes.size();
 		int ratio = elasticTable.length/range;
 		if(ratio<config.ConfigLoader.config.resizeFactor) {

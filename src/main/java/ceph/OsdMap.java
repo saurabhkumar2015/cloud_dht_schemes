@@ -1,20 +1,13 @@
 package ceph;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Random;
 
-import common.Commons;
-import common.Constants;
-import config.ConfigLoader;
-import javafx.util.Pair;
-import java.io.Serializable;
+import static common.Commons.osdMap;
 
 public class OsdMap implements Serializable{
-	
-	private static OsdMap single_instance = null;
 	
 	public OsdNode root= null;
 	
@@ -24,39 +17,40 @@ public class OsdMap implements Serializable{
 	
 	public int depthofOsdMap;  // This is the calculated value using #node & #clusterSize
 	
-	public List<Integer> liveNodes = new LinkedList<Integer>();
-	
 	public Queue<OsdNode> Parentqueue = new LinkedList<OsdNode>();
 	
 	public HashGenerator hashGenerator;
+	
+	public int clusterMaxValue;
 	
 	private OsdMap(int maxclusterInaNode, int depth)
 	{
 		this.maxclusterInlevel = maxclusterInaNode;
 		this.depthofOsdMap = depth;
-		hashGenerator = HashGenerator.getInstance();
+		this.clusterMaxValue = 1;
+		hashGenerator = HashGenerator.giveInstance();
 	}
-	
+	public OsdMap(){}
 	
 	// we can pass the configuration here
-	public static OsdMap getInstance(int maxclusterInaNode, int depth) 
+	public static OsdMap giveInstance(int maxclusterInaNode, int depth)
     { 
-        if (single_instance == null) 
-            single_instance = new OsdMap(maxclusterInaNode, depth); 
+        if (osdMap == null)
+			osdMap = new OsdMap(maxclusterInaNode, depth);
   
-        return single_instance; 
+        return osdMap;
     } 
 	
 	// Input to populate the osd map need to think
-    public void AddNodeToOsdMap(int clusterId, int nodeId)
+    public void AddNodeToOsdMap(int nodeId)
 	{
 		if(root == null)
 		{
 			OsdNode currentnode = new OsdNode();
 			if(depthofOsdMap == 1)
-			currentnode.AddNode(hashGenerator.randomWeightGenerator(), clusterId, nodeId, 1);
+			currentnode.AddNode(hashGenerator.randomWeightGenerator(), this.clusterMaxValue++, nodeId, 1);
 			else
-				currentnode.AddNode(0, clusterId, -1, 1);
+				currentnode.AddNode(0, this.clusterMaxValue++, -1, 1);
 			
 			// set root of the Osd map
 			root = currentnode;
@@ -64,9 +58,9 @@ public class OsdMap implements Serializable{
 		else if(this.root.clusterCountInLevel < maxclusterInlevel)
 	   {
 		if(depthofOsdMap == 1)
-		   this.root.AddNode(hashGenerator.randomWeightGenerator(), clusterId, nodeId,1);
+		   this.root.AddNode(hashGenerator.randomWeightGenerator(), this.clusterMaxValue++, nodeId,1);
 		else
-			this.root.AddNode(0, clusterId, -1,1);
+			this.root.AddNode(0, this.clusterMaxValue++, -1,1);
 	   }
 	else
 	{
@@ -82,7 +76,7 @@ public class OsdMap implements Serializable{
 						if(internalKey != null)
 						{
 							double weight = hashGenerator.randomWeightGenerator();
-						    internalKey.AddNode(weight, clusterId, nodeId,value);
+						    internalKey.AddNode(weight, this.clusterMaxValue++, nodeId,value);
 						}
 					}
 				}
@@ -92,7 +86,7 @@ public class OsdMap implements Serializable{
 					{
 						OsdNode internalKey = leftNodePair.Child;
 						if(internalKey != null)
-						internalKey.AddNode(0, clusterId, -1,value);
+						internalKey.AddNode(0, this.clusterMaxValue++, -1,value);
 					}
 				}
 			}
@@ -100,17 +94,18 @@ public class OsdMap implements Serializable{
 	}
 	
     // Add extra node after OSD Map Creation
-    public void AddExtraNodeToOsdMap(int clusterId, int nodeId)
+    public void AddExtraNodeToOsdMap(int nodeId)
     {
     	// Guard Clause for root node new node added to root and logic is totally different
     	// Verbose Mode on. Print the log of new node addition
     	System.out.println("New node add request triggered with NodeId: " + nodeId);
     	if(root.clusterCountInLevel < maxclusterInlevel)
     	{
-    			Node newlyAddedNode = root.AddNodeAtStartOfList(hashGenerator.randomWeightGenerator(), clusterId, nodeId,1);
-    			MoveFileInClusterOnNewNodeAddition(newlyAddedNode.nextNode);
+    			Node newlyAddedNode = root.AddNodeAtStartOfList(hashGenerator.randomWeightGenerator(), this.clusterMaxValue++, nodeId,1);
+    		//	MoveFileInClusterOnNewNodeAddition(newlyAddedNode.nextNode);
     	    	return;
     	}
+    	
     	ParentChildPair leftNodePair = findTheClusterNodetoAddIterative(root.headNode.leftNode, root.headNode, 1);
 		if(leftNodePair != null)
 		{
@@ -119,57 +114,49 @@ public class OsdMap implements Serializable{
 			if(value == depthofOsdMap)
 			{
 				
-       			Node newlyAddedNode = internalKey.AddNodeAtStartOfList(hashGenerator.randomWeightGenerator(), clusterId, nodeId,value);
+       			Node newlyAddedNode = internalKey.AddNodeAtStartOfList(hashGenerator.randomWeightGenerator(), this.clusterMaxValue++, nodeId,value);
 				
 				// Now need to set the Osd Map pointer to the newly added node as cluster start point
        			leftNodePair.Parent.leftNode.headNode = newlyAddedNode;
 				// Need to move the files from other node in sub cluster
-				MoveFileInClusterOnNewNodeAddition(newlyAddedNode.nextNode);
+			//	MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
 			}
 			else
-				internalKey.AddNode(0, clusterId, -1,value);				
+				internalKey.AddNode(0, this.clusterMaxValue++, -1,value);				
 		}
     }
     
     public void MoveFileInClusterOnNewNodeAddition(Node newlyAddedNode)
     {
-    	// Generally the data nodes should contain the local copies of files
-    	// excact file match should run on those Data nodes.
-    	// iterate over the cluster and print which Data nodes need to move data
-    	Node tempNode = newlyAddedNode;
-    	while(tempNode != null)
+    	List<Integer> liveNodes = giveLiveNodes();
+    	
+    	for(int nodeId : liveNodes)
     	{
-    		if(tempNode.isActive)
-    		System.out.println("Files need to moves from Data Node: " + tempNode.nodeId);
-    		tempNode = tempNode.nextNode;
+    		if(newlyAddedNode.nodeId != nodeId)
+    		System.out.println("Files need to moves from Data Node: " + nodeId);
     	}
     }
     
-    public void MoveFileInClusterOnNodeDeleteion(Node headNode, Node excludedNode)
+    public void MoveFileInClusterOnNodeDeleteion()
     {
-    	// Generally the data nodes should contain the local copies of files
-    	// excact file match should run on those Data nodes.
-    	// iterate over the cluster and print which Data nodes need to move data
-    	Node tempNode = headNode;
-    	while(tempNode != null)
+        List<Integer> liveNodes = giveLiveNodes();
+    	
+    	for(int nodeId : liveNodes)
     	{
-    		if(tempNode.nodeId != excludedNode.nodeId && tempNode.isActive)
-    		System.out.println("Files need to moves from Data Node: " + tempNode.nodeId);
-    		tempNode = tempNode.nextNode;
+    		System.out.println("Files need to moves from Data Node: " + nodeId);
     	}
     }
     
-    public void ShowOsdMap(boolean isShow)
+    public void ShowOsdMap()
     {
-    	liveNodes.clear();
-    	_showOsdMap(root, isShow);
-    	liveNodes.clear();
+        List<Integer> liveNodes = new LinkedList<Integer>();
+    	_showOsdMap(root, true, liveNodes);
     }
     
-    public List<Integer> GetLiveNodes()
+    public List<Integer> giveLiveNodes()
     {
-    	liveNodes.clear();
-    	_showOsdMap(root, false);
+    	List<Integer> liveNodes = new LinkedList<Integer>();
+    	_showOsdMap(root, false, liveNodes);
     	return liveNodes;
     }
     
@@ -190,14 +177,12 @@ public class OsdMap implements Serializable{
  		   System.out.println("Node with NodeId : " + nodeId + " is deleted");
  		   this.foundNode.isActive = false;
  	   }
- 	   Node headNodeOfCluster = this.findHeadNodeOfTheCluster(nodeId);
- 	   Node deleteNode = this.FindNodeInOsdMap(nodeId);
- 	   // We need to check the files to moves from these nodes.
- 	   this.MoveFileInClusterOnNodeDeleteion(headNodeOfCluster, deleteNode);
+ 	   
+ 	   this.MoveFileInClusterOnNodeDeleteion();
     }
     
     // Once we have weight distrubuted for leaf node, then populate weight from leaf to root
-    public void PopulateWeightOfInternalNode(OsdNode node)
+    public void PopulateWeightOfInternalNode()
     {
  	   _populateWeight(root);
     }
@@ -211,28 +196,8 @@ public class OsdMap implements Serializable{
  	 return nodeId;
     }
     
-    public Node findHeadNodeOfTheCluster(int nodeId)
-    {
- 	   this.foundNode = null;
- 	   _findNodeInOsdMap(root,nodeId, 1);
- 	   Node tempNode = this.foundNode;
- 	   while(tempNode.prevNode != null)
- 	   {
- 		   tempNode = tempNode.prevNode;
- 	   }
- 	   return tempNode;
-    }
-    public void AddFileToCephSystem(String fileName, int replicaId, int placementGroupSize)
-    {
- 	   int placementGroupId = hashGenerator.getPlacementGroupIdFromFileName(fileName, placementGroupSize);
- 	   int nodeId = findNodeWithRequestedReplica(replicaId, placementGroupId); 
-
- 	   // we can add files to CephDataNode
- 	    CephDataNode.getInstance(nodeId).writeFile(fileName,replicaId);
-    }
-    
     // Traverse the OSD map and show the snapshot 
-   private void _showOsdMap(OsdNode currentNode, boolean isshow)
+   private void _showOsdMap(OsdNode currentNode, boolean isshow, List<Integer> liveNodes)
    {
 	   //System.out.println("Show the nodes of osd map");
 	   
@@ -246,12 +211,12 @@ public class OsdMap implements Serializable{
 		   return;
 	   }
 	   // show the current node 
-	   currentNode.ShowCurrentNode(currentNode, this.liveNodes, isshow);
+	   currentNode.ShowCurrentNode(currentNode, liveNodes, isshow);
 	   // iterate over the next node and show their child
 	   Node tempNode = currentNode.headNode;
 	   while(tempNode != null)
 	   {
-	     _showOsdMap(tempNode.leftNode, isshow);
+	     _showOsdMap(tempNode.leftNode, isshow, liveNodes);
 	     tempNode = tempNode.nextNode;
 	   }
    }
@@ -268,7 +233,7 @@ public class OsdMap implements Serializable{
 	   while(tempNode != null)
 	   {
 		   double hashval = hashGenerator.generateHashValue(tempNode.clusterId, placementGroupId, replicaId);
-		   double weightFactor = hashGenerator.GetWeightFactor(tempNode.weight, subClusterSum);
+		   double weightFactor = hashGenerator.giveWeightFactor(tempNode.weight, subClusterSum);
 		   if(hashval < weightFactor)
 			   break;
 		   subClusterSum = subClusterSum - tempNode.weight;
@@ -279,6 +244,11 @@ public class OsdMap implements Serializable{
 		   return _findNodeWithRequestedReplica(tempNode.leftNode,placementGroupId, replicaId, level + 1);
 	   if(tempNode != null && level == depthofOsdMap && tempNode.isActive)
 		   return tempNode.nodeId;
+	   else if(tempNode != null && level == depthofOsdMap && !tempNode.isActive)
+	   {
+		   System.out.println("The file come to delete node " + tempNode.nodeId );
+		   return -2;
+	   }
 	   else
 		   return -2;
    }
@@ -308,12 +278,13 @@ public class OsdMap implements Serializable{
 	   double sum = 0;
 	   while(temp != null)
 	   {
-		  // if(temp.isActive)
+		   //if(temp.isActive)
 		   sum = sum + temp.weight;
 		   temp = temp.nextNode;
 	   }
 	   return sum;
    }
+   
    private void _findNodeInOsdMap(OsdNode node, int nodeId, int level)
    {
 	   if(node == null)
@@ -431,4 +402,16 @@ public class OsdMap implements Serializable{
 	   return null;
 	   
    }
-   }
+
+	@Override
+	public String toString() {
+		return "OsdMap{" +
+				"root=" + root +
+				", foundNode=" + foundNode +
+				", maxclusterInlevel=" + maxclusterInlevel +
+				", depthofOsdMap=" + depthofOsdMap +
+				", hashGenerator=" + hashGenerator +
+				", clusterMaxValue=" + clusterMaxValue +
+				'}';
+	}
+}

@@ -13,8 +13,6 @@ public class Node implements Serializable {
 	
     public Node nextNode;
     
-    public Node prevNode;
-    
     public OsdNode leftNode;
     
     public boolean isActive;
@@ -22,14 +20,13 @@ public class Node implements Serializable {
     public int level;
     
   //  public OsdNode rightNode;
-    
+    public Node(){}
     public Node(double weight, int clusterId, int nodeid, int level)
     {
     	this.weight = weight;
     	this.nodeId = nodeid;
     	this.clusterId = clusterId;
     	this.nextNode = null;
-        this.prevNode = null;
     	this.leftNode = null;
         this.isActive = true;
         this.level = level;
@@ -57,5 +54,18 @@ public class Node implements Serializable {
     		}
     		temp = temp.nextNode;
     	}
+    }
+
+    @Override
+    public String toString() {
+        return "Node{" +
+                "weight=" + weight +
+                ", clusterId=" + clusterId +
+                ", nodeId=" + nodeId +
+                ", nextNode=" + nextNode +
+                ", leftNode=" + leftNode +
+                ", isActive=" + isActive +
+                ", level=" + level +
+                '}';
     }
 }

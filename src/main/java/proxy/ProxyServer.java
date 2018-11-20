@@ -1,21 +1,17 @@
 package proxy;
 
 import java.io.IOException;
+
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import common.CephPayload;
 import common.Constants;
 import common.EpochPayload;
-import common.IRoutingTable;
 import common.LoadBalance;
-
-import org.apache.commons.lang3.SerializationUtils;
 
 import ceph.CephRoutingTable;
 import ceph.EntryPoint;
@@ -24,10 +20,10 @@ import config.ConfigLoader;
 import config.DHTConfig;
 import socket.MessageSendImpl;
 import ring.RingRoutingTable;
-import schemes.ElasticDHT.ElasticRoutingTable;
+import schemes.ElasticDHT.ElasticRoutingTableInstance;
+import schemes.ElasticDHT.RoutingTable;
 import socket.IMessageSend;
 import socket.Request;
-import sun.misc.IOUtils;
 
 public class ProxyServer {
 	
@@ -35,7 +31,7 @@ public class ProxyServer {
 	private static DHTConfig config;
 	private static CephRoutingTable ceph_routing_table;
 	private static RingRoutingTable ring_routing_table;
-	private static ElasticRoutingTable elastic_routing_table;
+	private static ElasticRoutingTableInstance [] elastic_routing_table;
 	private static IMessageSend sendMsg = new MessageSendImpl();
 	
 	/* Bootstrapping the DHT table according to scheme */
@@ -51,12 +47,13 @@ public class ProxyServer {
                 break;
             case "ELASTIC":
             case "elastic":
+            	elastic_routing_table = RoutingTable.GetInstance().getRoutingTable();
                 break;
             case "CEPH":
             case "ceph":
                 EntryPoint entryPoint = new EntryPoint();
                 entryPoint.BootStrapCeph();
-                ceph_routing_table = CephRoutingTable.getInstance();
+                ceph_routing_table = CephRoutingTable.giveInstance();
                 break;
             default:
                 throw new Exception("Incompatible DHT schema found!");
@@ -77,7 +74,7 @@ public class ProxyServer {
             break;
         case "CEPH":
         case "ceph":
-            List<Integer> liveNodes = ceph_routing_table.getLiveNodes();
+            List<Integer> liveNodes = ceph_routing_table.giveLiveNodes();
             for(int id: liveNodes) {
             	System.out.println("Live node "+id);
             	EpochPayload payload = new EpochPayload("true", ceph_routing_table);
@@ -128,7 +125,7 @@ public class ProxyServer {
 		                   Node temp = headNode;
 		                   Node temp1 = headNode.nextNode;
 		             	   double sum = 0;
-		             	   while(temp != null && temp.isActive)
+		             	   while(temp != null)
 		             	   {
 		             		   sum = sum + temp.weight;
 		             		   temp = temp.nextNode;
@@ -138,7 +135,7 @@ public class ProxyServer {
 	            		  int newNodeClusterId = headNode.clusterId;
 	            		  double newNodeWt = headNode.weight;
 	            		  
-		             	   while(temp1 != null && temp1.isActive) {
+		             	   while(temp1 != null) {
 		             		   
 		             		   double weight = temp1.weight;
 		             		   String nodeIp = config.nodesMap.get(temp1.nodeId);
@@ -165,68 +162,8 @@ public class ProxyServer {
 				    		CephRoutingTable updated_ceph_routing_table = (CephRoutingTable)ceph_routing_table.loadBalance(nodeToBeBalanced, loadFactor);
 				    		
 		                    ceph_routing_table = updated_ceph_routing_table;
-		                    
-		                    Node headNode = ceph_routing_table.mapInstance.findHeadNodeOfTheCluster(nodeToBeBalanced);
-		                    
-			                Node temp = headNode;
-			     
-			             	   double sum = 0;
-			             	   while(temp != null && temp.isActive)
-			             	   {
-			             		   sum = sum + temp.weight;
-			             		   temp = temp.nextNode;
-			             	   }
-			             	   
-			          
-		            		  
-		            	      Node ptr = headNode;
-		            	    
-			             	   while(ptr != null && ptr.isActive) {
-			             		   
-			             		   double weight = ptr.weight;
-			             		   int clusterId = ptr.clusterId;
-			             		   String nodeIp = config.nodesMap.get(ptr.nodeId);
-			             		   
-			             		   CephPayload payload = new CephPayload(nodeIp, clusterId, weight, sum, true, ceph_routing_table);
-			             		   System.out.println("Move file called::" + payload + " to node IP: " + nodeIp);
-			             		   sendMsg.sendMessage(nodeIp, Constants.MOVE_FILE, payload);
-			             		   sum = sum - weight;
-			             		   ptr = ptr.nextNode;
-			             	   }
-		                      
-			             	   sendUpdatedDHT();
-		                }
-				    	
-				    	
-				    	if((message.getType()).equals(Constants.DELETE_NODE)) {
-				    		
-				    		int nodeIdToDelete = (Integer)message.getPayload();
-				    		
-				    		
-				    		System.out.println("DataNode to be deleted "+nodeIdToDelete);
-				    		
-				    		CephRoutingTable updated_ceph_routing_table = (CephRoutingTable)ceph_routing_table.deleteNode(nodeIdToDelete);
-				    		
-		                    ceph_routing_table = updated_ceph_routing_table;
-		                    
-		                    sendUpdatedDHT();
-		                    
-		                    Node headNode = ceph_routing_table.mapInstance.findHeadNodeOfTheCluster(nodeIdToDelete);
-		                    Node ptr = headNode;
-		            	    
-			             	   while(ptr != null && ptr.isActive) {
-			             		   
-			             		   double weight = ptr.weight;
-			             		   String nodeIp = config.nodesMap.get(ptr.nodeId);
-			             		   
-			             		   System.out.println("Send move on delete to "+nodeIp);
-				             	   CephPayload payload = null;
-				             	   sendMsg.sendMessage(nodeIp, Constants.MOVE_ON_DELETE, payload);
-			             		   
-			             		   ptr = ptr.nextNode;
-			             	   }
-		                      
-			             	  
+		                
+			           	   sendUpdatedDHT();
 		                }
 		        	}	
 		    	

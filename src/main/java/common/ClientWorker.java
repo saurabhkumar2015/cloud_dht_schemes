@@ -48,9 +48,9 @@ public class ClientWorker {
 	                    CephDataNode cephDataNd = (CephDataNode)dataNode;
 	                    CephRoutingTable cephRoutingTable = (CephRoutingTable)cephDataNd.cephRtTable;
 
-	                    System.out.println("DataNode version:: " +cephRoutingTable.VersionNo+ " Regular Client version:: "+ p.versionNumber);
+	                    System.out.println("DataNode version:: " +cephRoutingTable.versionNumber + " Regular Client version:: "+ p.versionNumber);
 
-	                    if(cephRoutingTable.VersionNo > p.versionNumber) {
+	                    if(cephRoutingTable.versionNumber > p.versionNumber) {
 	                    	System.out.println("Sender's routing table needs to be updated");
 	                    	EpochPayload payload = new EpochPayload("fail", cephDataNd.cephRtTable);
 	                    	oos.writeObject(payload);
@@ -115,7 +115,7 @@ public class ClientWorker {
                 case MOVE_ON_DELETE:
                 	System.out.println("inside client worker move on delete");
                 	CephPayload payload = (CephPayload) request.getPayload();
-                	((CephDataNode)dataNode).OnDeleteNodeMoveFile();
+//                	((CephDataNode)dataNode).OnDeleteNodeMoveFile();
                 	break;
 
                 case ADD_HASH:
@@ -152,7 +152,7 @@ public class ClientWorker {
         out.write(stream);
     }
 
-    private void gossipNow() {
+    private void gossipNow() throws IOException {
         SharedGossipDataMessage message = new SharedGossipDataMessage();
         message.setExpireAt(System.currentTimeMillis()+120000);
         message.setTimestamp(System.currentTimeMillis());

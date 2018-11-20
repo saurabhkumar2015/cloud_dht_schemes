@@ -35,7 +35,7 @@ public class ControlClient {
             System.out.println("Enter \"L\" to load Balance for a node in DHT scheme " + config.scheme);
             System.out.println("Enter \"X\" to exit");
             String input = sc.next();
-            List<Integer> liveNodes = routingTable.getLiveNodes();
+            List<Integer> liveNodes = routingTable.giveLiveNodes();
             int nodeId = getRandomNode(r, liveNodes);
 
             switch (input.toUpperCase().trim()){
