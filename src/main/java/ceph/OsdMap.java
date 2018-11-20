@@ -102,9 +102,10 @@ public class OsdMap implements Serializable{
     	if(root.clusterCountInLevel < maxclusterInlevel)
     	{
     			Node newlyAddedNode = root.AddNodeAtStartOfList(hashGenerator.randomWeightGenerator(), this.clusterMaxValue++, nodeId,1);
-    			MoveFileInClusterOnNewNodeAddition(newlyAddedNode.nextNode);
+    		//	MoveFileInClusterOnNewNodeAddition(newlyAddedNode.nextNode);
     	    	return;
     	}
+    	
     	ParentChildPair leftNodePair = findTheClusterNodetoAddIterative(root.headNode.leftNode, root.headNode, 1);
 		if(leftNodePair != null)
 		{
@@ -118,7 +119,7 @@ public class OsdMap implements Serializable{
 				// Now need to set the Osd Map pointer to the newly added node as cluster start point
        			leftNodePair.Parent.leftNode.headNode = newlyAddedNode;
 				// Need to move the files from other node in sub cluster
-				MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
+			//	MoveFileInClusterOnNewNodeAddition(newlyAddedNode);
 			}
 			else
 				internalKey.AddNode(0, this.clusterMaxValue++, -1,value);				
@@ -243,6 +244,11 @@ public class OsdMap implements Serializable{
 		   return _findNodeWithRequestedReplica(tempNode.leftNode,placementGroupId, replicaId, level + 1);
 	   if(tempNode != null && level == depthofOsdMap && tempNode.isActive)
 		   return tempNode.nodeId;
+	   else if(tempNode != null && level == depthofOsdMap && !tempNode.isActive)
+	   {
+		   System.out.println("The file come to delete node " + tempNode.nodeId );
+		   return -2;
+	   }
 	   else
 		   return -2;
    }
