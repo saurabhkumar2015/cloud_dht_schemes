@@ -11,7 +11,7 @@ import java.util.List;
 public class DataNodeStart {
 	
 		public static void main(String args[]) throws Exception{
-			if(args.length!=3) throw new Exception("Please specify Two arguments. \n 1) Config file absolute path " +
+			if(args.length!=4) throw new Exception("Please specify Two arguments. \n 1) Config file absolute path " +
 					"\n 2) Jar file location " +
 					"\n 3)Nodes.csv location"
 					+ "\n 4) IP value");
@@ -24,9 +24,8 @@ public class DataNodeStart {
 		     
 		     //Fetching current Host Address
 		     String currentHostAddress = args[4];
-		     
+
 		     while ((line = br.readLine()) != null) {
-		    	       
 		    	  String[] arr = line.split(",");
 		    	  String nodeId = ((arr[1]).split(":"))[0];
 		    	  if(nodeId.equals(currentHostAddress)) {
