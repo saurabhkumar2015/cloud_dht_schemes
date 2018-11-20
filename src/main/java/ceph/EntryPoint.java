@@ -23,27 +23,8 @@ public class EntryPoint {
       PopulateOsdMap(mapInstance, config.nodeIdEnd - config.nodeIdStart + 1, depth,config.cephMaxClusterSize );
       
      //set the internal node weight
-      mapInstance.PopulateWeightOfInternalNode(mapInstance.root);
-     // Till this Point Osd Map is populated and build properly.
-     // Find the node containing PG = 5 & replication 2 I can change the name to add file : TODO : Refactor this code
-     // AddFilesToCephSystem();
-      
-	}
-	
-	public void AddFilesToCephSystem()
-	{
-		DHTConfig config = new DHTConfig();
-		int depth = FindDepthOfOsdMap(config.nodeIdEnd - config.nodeIdStart, config.cephMaxClusterSize);
-		OsdMap mapInstance = OsdMap.getInstance(config.cephMaxClusterSize,depth);
-		
-		for(int i = 0; i < 1000; i++)
-		{
-			Random r = new Random();
-			int replicaId = r.nextInt(3) + 1;
-			String fileName = "CloudComputing" + i;
-			mapInstance.AddFileToCephSystem(fileName, replicaId, config.PlacementGroupMaxLimit);
-		}
-		
+      mapInstance.PopulateWeightOfInternalNode();
+     
 	}
 	
 	public void PopulateOsdMap(OsdMap mapInstance, int nodeIds, int depth, int clusterSize)
@@ -53,13 +34,13 @@ public class EntryPoint {
 			// populate internal node
 			for(int j = 0; j< Math.pow(clusterSize,i); j++)
 			{
-				mapInstance.AddNodeToOsdMap(randomClusterNoGenerator(), -1);
+				mapInstance.AddNodeToOsdMap(-1);
 			}
 		}
 		// Insert regular data node
 		for(int k = 1; k<= nodeIds; k++)
 		{
-			mapInstance.AddNodeToOsdMap(randomClusterNoGenerator(), k);
+			mapInstance.AddNodeToOsdMap(k);
 		}
 	}
 
@@ -67,14 +48,5 @@ public class EntryPoint {
 	{
 		// depth should be log base nodeperCluster (countOfNodes) ceiling value
 		return (int) Math.ceil((Math.log(countOfNodes) / Math.log(nodePerCluster)));
-	}
-	
-	public int randomClusterNoGenerator()
-	{
-		Random r = new Random();
-		int low = 1;
-		int high = 21;
-		int result = r.nextInt(high-low) + low;
-		return result;
 	}
 }
