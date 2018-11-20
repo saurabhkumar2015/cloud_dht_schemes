@@ -115,7 +115,7 @@ public class ClientWorker {
                 case MOVE_ON_DELETE:
                 	System.out.println("inside client worker move on delete");
                 	CephPayload payload = (CephPayload) request.getPayload();
-                	((CephDataNode)dataNode).OnDeleteNodeMoveFile();
+//                	((CephDataNode)dataNode).OnDeleteNodeMoveFile();
                 	break;
 
                 case ADD_HASH:
