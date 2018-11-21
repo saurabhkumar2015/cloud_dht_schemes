@@ -34,12 +34,11 @@ public class DataNode implements IDataNode {
 
 	//Send routing table
 	public IRoutingTable getRoutingTable() {
-		System.out.println("hey");
 		return this.routingTableObj;
 	}
 	
 	//update to latest routing table
-	public void UpdateRoutingTable(IRoutingTable ringNewTable) {
+	public void UpdateRoutingTable(IRoutingTable ringNewTable, String type) {
 		this.routingTableObj = (RingRoutingTable) ringNewTable;
 		System.out.println("New versionNumber: " +this.routingTableObj.versionNumber);
 		//this.routingTableObj.printRoutingTable();
@@ -97,5 +96,9 @@ public class DataNode implements IDataNode {
 	public void MoveFiles(int clusterIdofNewNode,String nodeIp, double newnodeWeight, double clusterWeight, boolean isLoadbalance) {
 		
 	}
-	
+	@Override
+	public boolean writeAllFiles(List<Payload> payloads) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

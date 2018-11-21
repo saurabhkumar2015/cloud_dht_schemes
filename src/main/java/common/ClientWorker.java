@@ -6,6 +6,7 @@ import socket.Request;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 
 import static common.Constants.*;
 
@@ -34,8 +35,11 @@ public class ClientWorker {
 
             ObjectInputStream in = new ObjectInputStream(client.getInputStream());
             Request request = (Request) in.readObject();
+            
             switch (request.getType()) {
+            
                  case WRITE_FILE:
+                	
                     Payload p = (Payload) request.getPayload();
                     System.out.println("File Write:: " + p.fileName);
                      long dataNodeVersionNo = dataNode.getRoutingTable().getVersionNumber();
@@ -53,8 +57,34 @@ public class ClientWorker {
                          stream = baos.toByteArray();
                          out.write(stream);
                      }
-
                     break;
+                  
+                 case ADD_FILES:
+                 	
+                      @SuppressWarnings("unchecked") 
+                     List<Payload> paylds = (List<Payload>) request.getPayload();
+                     System.out.println("Received Add files request");
+                     long dataNodeVerNo = dataNode.getRoutingTable().getVersionNumber();
+                     if(paylds.size() == 0)
+                         break;
+                     System.out.println("DataNode versionNumber:: " + dataNodeVerNo + " Sender datanode's versionNumber:: " + paylds.get(0).versionNumber);
+	                      
+                    	 if (dataNodeVerNo > paylds.get(0).versionNumber) {
+	                          System.out.println("Sender's routing table needs to be updated");
+	                          EpochPayload payload = new EpochPayload("fail", dataNode.getRoutingTable());
+	                          oos.writeObject(payload);
+	                          stream = baos.toByteArray();
+	                          out.write(stream);
+	                      } else {
+	                          dataNode.writeAllFiles(paylds);
+	                          EpochPayload payload = new EpochPayload("success", null);
+	                          oos.writeObject(payload);
+	                          stream = baos.toByteArray();
+	                          out.write(stream);
+	                      }
+                     
+                     break;
+                     
                 case DELETE_FILE:
                     Payload p1 = (Payload) request.getPayload();
                     System.out.println("File Write:: " + p1.fileName);
@@ -65,7 +95,7 @@ public class ClientWorker {
                     System.out.println("Add node " + nodeId);
                     dataNode.addNode(nodeId);
                     if(distributed) {
-                        gossipNow();
+                        gossipNow(ADD_NODE, nodeId);
                         System.out.println("Sender's routing table needs to be updated");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
                     }
@@ -75,7 +105,7 @@ public class ClientWorker {
                     System.out.println("Delete node " + nodeId1);
                     dataNode.deleteNode(nodeId1);
                     if(distributed) {
-                        gossipNow();
+                        gossipNow(DELETE_NODE,nodeId1);
                         System.out.println("Sender's routing table needs to be updated");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
                     }
@@ -85,7 +115,7 @@ public class ClientWorker {
                     System.out.println("Load Balance    " + lb);
                     dataNode.loadBalance(lb.nodeId, lb.loadFactor);
                     if(distributed) {
-                        gossipNow();
+                        gossipNow(LOAD_BALANCE, lb.nodeId);
                         System.out.println("Sender's routing table needs to be updated");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
                     }
@@ -96,7 +126,7 @@ public class ClientWorker {
                 	if((ConfigLoader.config.scheme).toUpperCase().equals("CEPH")) {
 	                	CephPayload payload = (CephPayload) request.getPayload();
 	                	System.out.println("Received move file request from proxy: "+ payload);
-	                    dataNode.UpdateRoutingTable((IRoutingTable)payload.updated_ceph_routing_table);
+	                    //dataNode.UpdateRoutingTable((IRoutingTable)payload.updated_ceph_routing_table);
 	                    dataNode.MoveFiles(payload.clusterId, payload.nodeIp, payload.nodeWeight, payload.totalWt, payload.isLoadBalance);
                 	}
                     break;
@@ -121,15 +151,19 @@ public class ClientWorker {
 
                case NEW_VERSION:
                 	UpdateRoutingPayload payld = (UpdateRoutingPayload) request.getPayload();
-	                System.out.println("Received update routing table request from proxy: "+ payld);
-			if(((ConfigLoader.config.scheme).toUpperCase()).equals("ELASTIC"))
-	                	dataNode.newUpdatedRoutingTable(payld.nodeId, payld.type, payld.newRoutingTable);
+	                System.out.println("Received update routing table request from proxy");
 	                
-                    if(distributed) gossipNow();
+	                if(((ConfigLoader.config.scheme).toUpperCase()).equals("ELASTIC"))
+	                	dataNode.newUpdatedRoutingTable(payld.nodeId, payld.type, payld.newRoutingTable);
+	              
+	                if(((ConfigLoader.config.scheme).toUpperCase()).equals("CEPH"))
+	                	dataNode.UpdateRoutingTable(payld.newRoutingTable,payld.type);
+
 	                break;
                 default:
                     throw new Exception("Unsupported message type");
             }
+            client.close();
         } catch (Exception e) {
             e.printStackTrace();
             exceptionCount++;
@@ -144,14 +178,18 @@ public class ClientWorker {
         out.write(stream);
     }
 
-    private void gossipNow() throws IOException {
+    private void gossipNow(String type, int nodeId) throws IOException {
         System.out.println("Please Updated Share data");
         SharedGossipDataMessage message = new SharedGossipDataMessage();
         message.setExpireAt(System.currentTimeMillis()+120000);
         message.setTimestamp(System.currentTimeMillis());
         message.setKey(Constants.ROUTING_TABLE);
         message.setNodeId(Integer.toString(Commons.nodeId));
-        message.setPayload(dataNode.getRoutingTable());
+        RoutingTableWrapper wrapper = new RoutingTableWrapper();
+        wrapper.table = dataNode.getRoutingTable();
+        wrapper.type = type;
+        wrapper.nodeId = nodeId;
+        message.setPayload(wrapper);
         Commons.gossip.gossipSharedData(message);
         System.out.println("Yes Updated Share data");
     }

@@ -43,8 +43,7 @@ public class DataNodeLoader {
             for (Map.Entry<Integer, List<Integer>> e : gossipList.entrySet()) {
                 if(e.getValue().contains(nodeId)){
                     System.out.println("Gossip Group found for the node!!" + e.getValue());
-                    members = e.getValue();
-                    break;
+                    members.addAll(e.getValue());
                 }
             }
             List<GossipMember> startupMembers = new ArrayList<>();

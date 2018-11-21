@@ -244,11 +244,6 @@ public class OsdMap implements Serializable{
 		   return _findNodeWithRequestedReplica(tempNode.leftNode,placementGroupId, replicaId, level + 1);
 	   if(tempNode != null && level == depthofOsdMap && tempNode.isActive)
 		   return tempNode.nodeId;
-	   else if(tempNode != null && level == depthofOsdMap && !tempNode.isActive)
-	   {
-		   System.out.println("The file come to delete node " + tempNode.nodeId );
-		   return -2;
-	   }
 	   else
 		   return -2;
    }

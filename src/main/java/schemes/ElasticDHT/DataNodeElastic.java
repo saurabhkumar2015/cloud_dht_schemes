@@ -16,6 +16,11 @@ import common.Payload;
 import config.ConfigLoader;
 import config.DHTConfig;
 
+import java.util.List;
+
+import static common.Commons.elasticTable;
+import static common.Commons.elasticTable1;
+
 public class DataNodeElastic implements IDataNode {
 
 	private int nodeId;
@@ -39,10 +44,7 @@ public class DataNodeElastic implements IDataNode {
 	}
 	public void MoveFiles(int clusterIdofNewNode, String nodeIp, double newnodeWeight, double clusterWeight) {
 	}
-	public void UpdateRoutingTable(IRoutingTable elasticTable) {
-		Commons.elasticERoutingTable = (ERoutingTable) elasticTable;
-		System.out.println("New elastic table with versionNumber number : "+Commons.elasticERoutingTable.versionNumber);
-	}
+	
 
 
 	public boolean writeFile(String fileName, int replicaId) {
@@ -63,6 +65,7 @@ public class DataNodeElastic implements IDataNode {
 
 
 	}
+
 
 	public void deleteFile(String fileName) {
 		int hashcode =  fileName.hashCode();
@@ -170,5 +173,11 @@ public class DataNodeElastic implements IDataNode {
 	public void UpdateRoutingTable(IRoutingTable cephrtTable, String updateType) {
 		// TODO Auto-generated method stub
 		
+	
+	
+}
+	public boolean writeAllFiles(List<Payload> payloads) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

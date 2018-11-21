@@ -1,0 +1,4 @@
+java -cp schemes-1.0-SNAPSHOT-shaded.jar common.DataNodeLoader C:/cloud/config.conf 1
+java -cp schemes-1.0-SNAPSHOT-shaded.jar common.DataNodeLoader C:/cloud/config.conf 2
+java -cp schemes-1.0-SNAPSHOT-shaded.jar common.DataNodeLoader C:/cloud/config.conf 3
+java -cp schemes-1.0-SNAPSHOT-shaded.jar common.DataNodeLoader C:/cloud/config.conf 4

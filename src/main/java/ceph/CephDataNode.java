@@ -53,15 +53,36 @@ public class CephDataNode  implements IDataNode{
 		
 		// Find the node on which it should go.
 		int destinationNodeId = this.cephRtTable.giveNodeId(fileName, replicaId);
-		
-		System.out.println("Write file request received for FileName: " + fileName + " replicaId: " + replicaId + " on node " + (destinationNodeId) );
+
 		
 		if(destinationNodeId != this.NodeId)
 			return false;
+		
+		System.out.println("Write file request received for FileName: " + fileName + " pGroup: " + placementGroupId + " replicaId: " + replicaId + " on node " + (destinationNodeId) );
+
 		// Step 2: push the Data to the DataNode if not present in DataList
 		DataObject obj = new DataObject(placementGroupId, replicaId,fileName);
 		dataList.add(obj);
 		return true;
+	}
+	
+	@Override
+	public boolean writeAllFiles(List<Payload> payloads) {
+		//step 1. find the placementGroupId for file
+		for(Payload pload : payloads)
+		{
+				int placementGroupId = this.hashGenerator.givePlacementGroupIdFromFileName(pload.fileName, ConfigLoader.config.PlacementGroupMaxLimit);
+				
+				// Find the node on which it should go.
+				int destinationNodeId = this.cephRtTable.giveNodeId(pload.fileName, pload.replicaId);
+				
+				System.out.println("Write file request received for FileName: " + pload.fileName + " pGroup: " + placementGroupId + " replicaId: " + pload.replicaId + " on node " + (destinationNodeId) );
+
+				// Step 2: push the Data to the DataNode if not present in DataList
+				DataObject obj = new DataObject(placementGroupId, pload.replicaId,pload.fileName);
+				dataList.add(obj);
+		}
+				return true;
 	}
 
 	public void deleteFile(String fileName) {
@@ -166,12 +187,12 @@ public class CephDataNode  implements IDataNode{
     		filesTobeMove.clear();
     		for(DataObject obj : e.getValue())
     		{
-    			System.out.println(" Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
+    			System.out.println("fileName: " + obj.fileName + " Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
     			filesTobeMove.add(new Payload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
     		}
     		
     		// send the aggregated request to the destination node. 
-    		Commons.messageSender.sendMessage(destinationNodeIp, Constants.WRITE_FILE, filesTobeMove);
+    		Commons.messageSender.sendMessage(destinationNodeIp, Constants.ADD_FILES, filesTobeMove);
     	}		
 	}
 	
@@ -220,12 +241,12 @@ public class CephDataNode  implements IDataNode{
     		filesTobeMove.clear();
     		for(DataObject obj : e.getValue())
     		{
-    			System.out.println(" Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
+    			System.out.println("fileName" + obj.fileName + " Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
     			filesTobeMove.add(new Payload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
     		}
     		
     		// send the aggregated request to the destination node. 
-    		Commons.messageSender.sendMessage(destinationNodeIp, Constants.WRITE_FILE, filesTobeMove);
+    		Commons.messageSender.sendMessage(destinationNodeIp, Constants.ADD_FILES, filesTobeMove);
     		
     	}
 	}
