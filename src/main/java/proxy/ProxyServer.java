@@ -11,15 +11,19 @@ import java.util.List;
 import common.CephPayload;
 import common.Constants;
 import common.EpochPayload;
+import common.IRoutingTable;
 import common.LoadBalance;
-
+import common.UpdateRoutingPayload;
 import ceph.CephRoutingTable;
 import ceph.EntryPoint;
 import ceph.Node;
 import config.ConfigLoader;
 import config.DHTConfig;
 import socket.MessageSendImpl;
+import ring.DataNode;
+import ring.RingDHTScheme;
 import ring.RingRoutingTable;
+import schemes.ElasticDHT.ElasticRoutingTable;
 import schemes.ElasticDHT.ElasticRoutingTableInstance;
 import schemes.ElasticDHT.RoutingTable;
 import socket.IMessageSend;
@@ -29,67 +33,54 @@ public class ProxyServer {
 	
 	private static String scheme;
 	private static DHTConfig config;
-	private static CephRoutingTable ceph_routing_table;
-	private static RingRoutingTable ring_routing_table;
-	private static ElasticRoutingTableInstance [] elastic_routing_table;
+	private static IRoutingTable routingTable;
 	private static IMessageSend sendMsg = new MessageSendImpl();
 	
 	/* Bootstrapping the DHT table according to scheme */
 	
     public static void initProxy(DHTConfig config) throws Exception {
     	
-    	//get initial Instances of routing tables or osdMap 
-    	scheme = config.scheme;
-    	
-        switch (scheme) {
-            case "RING":
-            case "ring":
-                break;
-            case "ELASTIC":
-            case "elastic":
-            	elastic_routing_table = RoutingTable.GetInstance().getRoutingTable();
-                break;
-            case "CEPH":
-            case "ceph":
-                EntryPoint entryPoint = new EntryPoint();
-                entryPoint.BootStrapCeph();
-                ceph_routing_table = CephRoutingTable.giveInstance();
-                break;
-            default:
-                throw new Exception("Incompatible DHT schema found!");
-
-        }
+    	 String scheme = config.scheme;
+    	 
+         switch (scheme.toUpperCase().trim()) {
+             case "RING":
+                 RingDHTScheme ring = new RingDHTScheme();
+                 DataNode dNode = new DataNode(ring);
+                 routingTable = dNode.routingTableObj;
+                 break;
+             case "ELASTIC":
+                 schemes.ElasticDHT.RoutingTable r = new schemes.ElasticDHT.RoutingTable();
+                 RoutingTable.GetInstance().getRoutingTable();
+                 routingTable = r;
+                 break;
+             case "CEPH":
+                 EntryPoint entryPoint = new EntryPoint();
+                 entryPoint.BootStrapCeph();
+                 routingTable = CephRoutingTable.giveInstance();
+                 break;
+             default:
+                 throw new Exception("Incompatible DHT schema found!");
+         }
 
     
     }
     
     
-    public static void sendUpdatedDHT() throws Exception {
-    	switch (scheme) {
-        case "RING":
-        case "ring":
-            break;
-        case "ELASTIC":
-        case "elastic":
-            break;
-        case "CEPH":
-        case "ceph":
-            List<Integer> liveNodes = ceph_routing_table.giveLiveNodes();
+    public static void sendUpdatedDHT(int nodeId, String type) throws Exception {
+    	
+            List<Integer> liveNodes = routingTable.giveLiveNodes();
             for(int id: liveNodes) {
             	System.out.println("Live node "+id);
-            	EpochPayload payload = new EpochPayload("true", ceph_routing_table);
+            	UpdateRoutingPayload payload = new UpdateRoutingPayload(nodeId, type, routingTable);
             	sendMsg.sendMessage(config.nodesMap.get(id), Constants.NEW_VERSION, payload);
             }
-            break;
-        default:
-            throw new Exception("Incompatible DHT schema found!");
-    	}    
+             
     }
     
     public static void main(String[] argv) throws Exception {
 		
     	
-    	if(argv.length != 1) throw new Exception("Please specify Two arguments. \n 1) Config file absolute path \n");
+    	if(argv.length != 1) throw new Exception("Please specify one arguments. \n 1) Config file absolute path \n");
     	
     	/*loading config file*/
         ConfigLoader.init(argv[0]);
@@ -111,46 +102,20 @@ public class ProxyServer {
 				ObjectInputStream ins = new ObjectInputStream(socket.getInputStream());
 		        Request message = (Request) ins.readObject();
 		        
-		        if(scheme.toUpperCase().equals("CEPH")) {
+		        
 		        	
 			    	if((message.getType()).equals(Constants.ADD_NODE)) {
 			    		
 			    		Integer nodeId = (Integer) message.getPayload();
 	                    System.out.println("Add node " + nodeId);
-	                    CephRoutingTable updated_ceph_routing_table = (CephRoutingTable)ceph_routing_table.addNode(nodeId);
-	                    ceph_routing_table = updated_ceph_routing_table;
+	                    IRoutingTable updated_routing_table =  routingTable.addNode(nodeId);
+	                    routingTable = updated_routing_table;
 	                    
-	                    Node headNode = ceph_routing_table.mapInstance.FindNodeInOsdMap(nodeId);
-	                    
-		                   Node temp = headNode;
-		                   Node temp1 = headNode.nextNode;
-		             	   double sum = 0;
-		             	   while(temp != null)
-		             	   {
-		             		   sum = sum + temp.weight;
-		             		   temp = temp.nextNode;
-		             	   }
-		             	   
-		             	  String newNodeStr = config.nodesMap.get(headNode.nodeId);
-	            		  int newNodeClusterId = headNode.clusterId;
-	            		  double newNodeWt = headNode.weight;
-	            		  
-		             	   while(temp1 != null) {
-		             		   
-		             		   double weight = temp1.weight;
-		             		   String nodeIp = config.nodesMap.get(temp1.nodeId);
-		             		   CephPayload payload = new CephPayload(newNodeStr, newNodeClusterId, newNodeWt, sum, false, ceph_routing_table);
-		             		   System.out.println("Move file called::" + payload + " to node IP: " + nodeIp);
-		             		   sendMsg.sendMessage(nodeIp, Constants.MOVE_FILE, payload);
-		             		   sum = sum - weight;
-		             		   temp1 = temp1.nextNode;
-		             	   }
-		             	   
-		             	   sendUpdatedDHT();
+	                    sendUpdatedDHT(nodeId, Constants.ADD_NODE);
 	                       
-	                   }
+	                 }
 			    	
-				    	if((message.getType()).equals(Constants.LOAD_BALANCE)) {
+				    if((message.getType()).equals(Constants.LOAD_BALANCE)) {
 				    		
 				    		LoadBalance lb = (LoadBalance) message.getPayload();
 				    		int nodeToBeBalanced = lb.nodeId;
@@ -159,16 +124,25 @@ public class ProxyServer {
 				    		System.out.println("DataNode to be loadbalanced "+nodeToBeBalanced);
 				    		System.out.println("Load Factor "+loadFactor);
 				    		
-				    		CephRoutingTable updated_ceph_routing_table = (CephRoutingTable)ceph_routing_table.loadBalance(nodeToBeBalanced, loadFactor);
-				    		
-		                    ceph_routing_table = updated_ceph_routing_table;
+				    		IRoutingTable updated_routing_table =  routingTable.loadBalance(nodeToBeBalanced, loadFactor);
+		                    routingTable = updated_routing_table;
 		                
-			           	   sendUpdatedDHT();
-		                }
-		        	}	
-		    	
-		    }
-	    	
+			           	    sendUpdatedDHT(nodeToBeBalanced,Constants.LOAD_BALANCE);
+		              }
+				    
+				    if((message.getType()).equals(Constants.DELETE_NODE)) {
+			    		
+			    		int nodeToBeDeleted = (Integer) message.getPayload();
+			    		
+			    		System.out.println("DataNode to be deleted "+nodeToBeDeleted);
+			    		
+			    		IRoutingTable updated_routing_table =  routingTable.deleteNode(nodeToBeDeleted);
+	                    routingTable = updated_routing_table;
+	                
+		           	    sendUpdatedDHT(nodeToBeDeleted, Constants.DELETE_NODE);
+	               }
+		       }
+		      
 		} catch (IOException e) { 
 			// TODO Auto-generated catch block
 			e.printStackTrace();
