@@ -43,27 +43,24 @@ public class ClientWorker {
                 	Payload p = (Payload) request.getPayload();
                     System.out.println("File Write:: " + p.fileName);
 
-                    if((ConfigLoader.config.scheme).toUpperCase().equals("CEPH")) {
+                    IDataNode dataNd = (IDataNode)dataNode;
+                    IRoutingTable rTable = (IRoutingTable)dataNd.getRoutingTable();
 
-	                    CephDataNode cephDataNd = (CephDataNode)dataNode;
-	                    CephRoutingTable cephRoutingTable = (CephRoutingTable)cephDataNd.cephRtTable;
+                    System.out.println("DataNode version:: " +rTable.getVersionNumber() + " Regular Client version:: "+ p.versionNumber);
 
-	                    System.out.println("DataNode version:: " +cephRoutingTable.versionNumber + " Regular Client version:: "+ p.versionNumber);
-
-	                    if(cephRoutingTable.versionNumber > p.versionNumber) {
-	                    	System.out.println("Sender's routing table needs to be updated");
-	                    	EpochPayload payload = new EpochPayload("fail", cephDataNd.cephRtTable);
-	                    	oos.writeObject(payload);
-	                        stream = baos.toByteArray();
-	                        out.write(stream);
-	                    }
-	                    else {
-	                    	dataNode.writeFile(p.fileName, p.replicaId);
-	                    	EpochPayload payload = new EpochPayload("success", null);
-	                    	oos.writeObject(payload);
-	                        stream = baos.toByteArray();
-	                        out.write(stream);
-	                    }
+                    if(rTable.getVersionNumber() > p.versionNumber) {
+                    	System.out.println("Sender's routing table needs to be updated");
+                    	EpochPayload payload = new EpochPayload("fail", dataNd.getRoutingTable());
+                    	oos.writeObject(payload);
+                        stream = baos.toByteArray();
+                        out.write(stream);
+                    }
+                    else {
+                    	dataNode.writeFile(p.fileName, p.replicaId);
+                    	EpochPayload payload = new EpochPayload("success", null);
+                    	oos.writeObject(payload);
+                        stream = baos.toByteArray();
+                        out.write(stream);
                     }
                     break;
                 case DELETE_FILE:

@@ -10,29 +10,31 @@ import common.Commons;
 public class DataNode implements IDataNode {
 	
 	public int myNodeId;
+	public RingRoutingTable routingTableObj;
+	
 	public DataNode(int id){
+		RingDHTScheme ring = new RingDHTScheme();
+		this.routingTableObj = ring.routingTableObj;
 		this.myNodeId = id;
 	}
-    public RingRoutingTable routingTableObj;
-
-    public DataNode(RingDHTScheme ring) {
+	public DataNode(RingDHTScheme ring) {
     	this.routingTableObj = ring.routingTableObj;
     }
-
     public void addNode(int nodeId) {
-    	routingTableObj.addNode(nodeId);
+    	this.routingTableObj.addNode(nodeId);
     }
 	
 	public void deleteNode(int nodeId) {
-		routingTableObj.deleteNode(nodeId);
+		this.routingTableObj.deleteNode(nodeId);
 	}
 	
 	public void loadBalance(int nodeId, double loadFraction) {
-		routingTableObj.loadBalance(nodeId, loadFraction);
+		this.routingTableObj.loadBalance(nodeId, loadFraction);
 	}
 
 	//Send routing table
 	public IRoutingTable getRoutingTable() {
+		System.out.println("hey");
 		return this.routingTableObj;
 	}
 	
@@ -47,26 +49,28 @@ public class DataNode implements IDataNode {
 	public boolean writeFile(String fileName, int replicaId) {
 		//System.out.println("\nFileName: "+fileName);
 		//When the receiving node is primary node for the given file
-		int nId = routingTableObj.giveNodeId(fileName, replicaId);
-		if(nId == myNodeId) {
+		int nId = this.routingTableObj.giveNodeId(fileName, replicaId);
+		if(nId == this.myNodeId) {
 			System.out.println("File written with Replication Id:"+replicaId);
 			return true;
 		}
 		else {
 			int hashVal = Math.abs(fileName.hashCode())%this.routingTableObj.MAX_HASH;
-	        LinkedList<Integer> listOfNodesForGivenHash = routingTableObj.modifiedBinarySearch(hashVal);
+	        LinkedList<Integer> listOfNodesForGivenHash = this.routingTableObj.modifiedBinarySearch(hashVal);
 	        if (listOfNodesForGivenHash!=null) {
 	        	if(listOfNodesForGivenHash.size()>=this.routingTableObj.replicationFactor) {
 	        		System.out.println(this.routingTableObj.routingMap.get(listOfNodesForGivenHash.get(replicaId-1)));
-	        		nId = routingTableObj.routingMap.get(listOfNodesForGivenHash.get(replicaId-1));
+	        		nId = this.routingTableObj.routingMap.get(listOfNodesForGivenHash.get(replicaId-1));
+	        		System.out.println("nId:"+nId);
+	        		System.out.println("my node Id:"+this.myNodeId);
 	        		//When the receiving node is the given replica node for the file
-	        		if(nId == myNodeId) {
+	        		if(nId == this.myNodeId) {
 	        			System.out.println("File written with Replication Id:"+replicaId);
 	        			return true;
 	        		}
 	        		else {
 	        			//sending write file request to the corresponding node
-	        			Commons.messageSender.sendMessage(routingTableObj.physicalTable.get(nId), Constants.WRITE_FILE, Commons.GeneratePayload(fileName, replicaId, this.routingTableObj.version));
+	        			Commons.messageSender.sendMessage(this.routingTableObj.physicalTable.get(nId), Constants.WRITE_FILE, Commons.GeneratePayload(fileName, replicaId, this.routingTableObj.version));
 	        			return true;
 	        		}
 	        	}

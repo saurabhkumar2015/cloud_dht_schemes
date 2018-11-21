@@ -73,8 +73,6 @@ public class DataNodeLoader {
             Thread gsThread = new GossipThread(dataNode);
             gsThread.start();
         }
-
-
         while(true) {
             Socket clientSocket = server.accept();
             w.run(clientSocket);

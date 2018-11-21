@@ -38,7 +38,7 @@ public class Commons {
         switch (scheme) {
             case "RING":
             case "ring":
-                return new DataNode(new RingDHTScheme());
+                return new DataNode(nodeId);
             case "ELASTIC":
             case "elastic":
                 return new DataNodeElastic(nodeId);

@@ -48,7 +48,7 @@ public class RingRoutingTable implements IRoutingTable {
     public int randomHashGenerator()
 	{
 		int low = 1;
-		int high = MAX_HASH;
+		int high = this.MAX_HASH;
 		int result = randomGen.nextInt(high-low);
 		return result;
 	}
