@@ -10,6 +10,13 @@ public class Payload implements Serializable {
 	public int nodeId;
 	public int hashBucket;
 	
+	public Payload(String fileName,int replicaId,long versionNumber) {
+		this.fileName = fileName;
+		this.replicaId = replicaId;
+		this.versionNumber = versionNumber;
+		
+	}
+	
 	public Payload(String fileName, int replicaId, long versionNumber, int nodeId,int hashBucket)
 	{
 		this.fileName = fileName;
@@ -18,13 +25,9 @@ public class Payload implements Serializable {
 		this.nodeId = nodeId;
 		this.hashBucket = hashBucket;
 	}
-	public Payload(String fileName,int replicaId,long versionNumber) {
-		this.fileName = fileName;
-		this.replicaId = replicaId;
-		this.versionNumber = versionNumber;
-		
-	}
+	
 
+	
 	@Override
 	public String toString() {
 		return "Payload{" +

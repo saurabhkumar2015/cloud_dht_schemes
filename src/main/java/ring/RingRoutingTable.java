@@ -242,17 +242,17 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
 			System.out.println("Hash range "+ listOfHashesForNewHash.get(0)+" - "+(newHash-1)+ " removed from Node :"+ rNodeId);
 			Commons.messageSender.sendMessage(nodeIp, Constants.REMOVE_HASH, payload);
 		}
-    	int newNodeId = ++this.numNodeIds;
-    	nodeIp = this.physicalTable.get(newNodeId);
+    	++this.numNodeIds;
+    	nodeIp = this.physicalTable.get(nodeIdInt);
     	payload = String.valueOf(newHash)+"-"+ (listOfHashesForNewHash.get(1)-1);
-    	System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " added to Node :"+ newNodeId);
+    	System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " added to Node :"+ nodeIdInt);
     	Commons.messageSender.sendMessage(nodeIp, Constants.ADD_HASH, payload);
     	
     	//update physical table
     	//this.routingTableObj.physicalTable.put(newNodeId, nodeId);
     	
     	//update routing map
-    	this.routingMap.put(newHash, newNodeId);
+    	this.routingMap.put(newHash, nodeIdInt);
     	this.versionNumber++;
     	
     	//Print updated Routing Table
