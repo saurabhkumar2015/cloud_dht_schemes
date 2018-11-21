@@ -24,9 +24,9 @@ public class RegularClient {
     public static IRoutingTable routingTable;
     private static MessageSendImpl messageSender = new MessageSendImpl();
     private static Scanner sc = new Scanner(System.in);
-
-
-
+    
+    
+    
     public static void main(String[] args) throws Exception {
 
         if(args.length != 2) throw new Exception("Please specify Two arguments. \n 1) Config file absolute path " +
