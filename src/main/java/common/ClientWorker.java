@@ -122,7 +122,9 @@ public class ClientWorker {
                case NEW_VERSION:
                 	UpdateRoutingPayload payld = (UpdateRoutingPayload) request.getPayload();
 	                System.out.println("Received update routing table request from proxy: "+ payld);
-	                dataNode.newUpdatedRoutingTable(payld.nodeId, payld.type, payld.newRoutingTable);
+			if(((ConfigLoader.config.scheme).toUpperCase()).equals("ELASTIC"))
+	                	dataNode.newUpdatedRoutingTable(payld.nodeId, payld.type, payld.newRoutingTable);
+	                
                     if(distributed) gossipNow();
 	                break;
                 default:
