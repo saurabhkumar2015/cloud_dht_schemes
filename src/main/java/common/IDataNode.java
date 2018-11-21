@@ -10,6 +10,8 @@ public interface IDataNode {
 	 * @param replicaId
 	 */
 	public boolean writeFile(String fileName, int replicaId);
+	
+	public boolean writeAllFiles(List<Payload>  payloads);
 
 	public void deleteFile(String fileName);
 
