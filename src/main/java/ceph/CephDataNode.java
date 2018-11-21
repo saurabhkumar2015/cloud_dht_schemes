@@ -65,6 +65,25 @@ public class CephDataNode  implements IDataNode{
 		dataList.add(obj);
 		return true;
 	}
+	
+	@Override
+	public boolean writeAllFiles(List<Payload> payloads) {
+		//step 1. find the placementGroupId for file
+		for(Payload pload : payloads)
+		{
+				int placementGroupId = this.hashGenerator.givePlacementGroupIdFromFileName(pload.fileName, ConfigLoader.config.PlacementGroupMaxLimit);
+				
+				// Find the node on which it should go.
+				int destinationNodeId = this.cephRtTable.giveNodeId(pload.fileName, pload.replicaId);
+				
+				System.out.println("Write file request received for FileName: " + pload.fileName + " pGroup: " + placementGroupId + " replicaId: " + pload.replicaId + " on node " + (destinationNodeId) );
+
+				// Step 2: push the Data to the DataNode if not present in DataList
+				DataObject obj = new DataObject(placementGroupId, pload.replicaId,pload.fileName);
+				dataList.add(obj);
+		}
+				return true;
+	}
 
 	public void deleteFile(String fileName) {
 		// TODO Auto-generated method stub				

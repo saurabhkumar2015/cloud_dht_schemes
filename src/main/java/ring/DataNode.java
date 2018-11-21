@@ -96,5 +96,9 @@ public class DataNode implements IDataNode {
 	public void MoveFiles(int clusterIdofNewNode,String nodeIp, double newnodeWeight, double clusterWeight, boolean isLoadbalance) {
 		
 	}
-	
+	@Override
+	public boolean writeAllFiles(List<Payload> payloads) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
