@@ -34,7 +34,8 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 	Map<Integer, Integer> hashReplicaNodeId = new HashMap<Integer, Integer>();
 	Map<Integer, Map<Integer,Integer>> hashNodeIdReplicaAdd = new HashMap<Integer,Map<Integer,Integer>>();//Hash,NodeId,Replica
 	Map<Integer,Integer> hashNodeIdDelete = new HashMap<Integer,Integer>();
-	
+	Map<Integer,Integer> hashNodeIdTrueMapPayload = new HashMap<Integer,Integer>();
+
 
 	public ERoutingTable() { }
 
@@ -71,12 +72,12 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 				}
 				hashNodeIdDelete = createSendMapforDeleteNode( nodeId);
 				int temp = hashNodeIdDelete.get(i);
-				Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(temp), MOVE_FILE, hashNodeIdDelete);
+				//Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(temp), MOVE_FILE, hashNodeIdDelete);
 				System.out.println("Moving files from "+temp +"to "+replaceNodeId);
 				elasticTable[i].nodeId.set(k, replaceNodeId);
 				hashNodeIdReplicaAdd = createSendMapforAddNode(replaceNodeId);
 
-				Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(replaceNodeId), ADD_FILES, hashNodeIdReplicaAdd);
+				//Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(replaceNodeId), ADD_FILES, hashNodeIdReplicaAdd);
 				
 				elasticTable[i].nodeId.set(k, replaceNodeId);
 				System.out.println("The nodeId "+nodeId+" which was in hash bucket "+elasticTable[i].hashIndex + "now has "+replaceNodeId);
@@ -85,7 +86,8 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 			// check if nodeId is in hash and get that index
 		}
 		System.out.println("Node Id "+nodeId+" was deleted");
-
+		DataNodeElastic.getInstance(nodeId).newUpdatedRoutingTable(nodeId, MOVE_FILE, this);
+		DataNodeElastic.getInstance(nodeId).newUpdatedRoutingTable(nodeId, ADD_FILES, this);
 		this.versionNumber = this.versionNumber +1 ;
 		return this;
 	}
@@ -153,7 +155,6 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 				break;
 
 			int key = e.getKey();
-			Map<Integer,Integer> hashNodeIdTrueMapPayload = new HashMap<Integer,Integer>();
 			hashNodeIdTrueMapPayload.put(key, nodeId);
 			int nodeIndex = rn.nextInt(maxLiveNodes);
 			while (nodeId == liveNodes.get(nodeIndex) || elasticTable[key].nodeId.contains((Integer)liveNodes.get(nodeIndex) )) {
@@ -176,6 +177,8 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 
 		}
 		System.out.println("Load balanced");
+		DataNodeElastic.getInstance(nodeId).newUpdatedRoutingTable(nodeId, MOVE_FILE, this);
+		DataNodeElastic.getInstance(nodeId).newUpdatedRoutingTable(nodeId, ADD_FILES, this);
 		this.versionNumber = this.versionNumber +1 ;
 		return this;
 	}
@@ -218,9 +221,7 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 	int check(int index, int nodeId) {
 		int i = 0;
 		boolean b = false;
-		if (index == 401) {
-			System.out.println("");
-		}
+		
 
 		for (i = 0; i < rFactor; i++) {
 			if (elasticTable[index].nodeId.get(i) == nodeId) {
@@ -250,9 +251,9 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 		Set<Integer> usedBuckets = new HashSet<Integer>();
 
 		for (int i = 0; i < interval; i++) {
-			int index = rno1.nextInt(bucketSize);
+			int index = rno1.nextInt(elasticTable.length);
 			while (usedBuckets.contains(index)) {
-				index = rno1.nextInt(bucketSize);
+				index = rno1.nextInt(elasticTable.length);
 			}
 			usedBuckets.add(index);
 			// For which hashIndex, we want
@@ -262,10 +263,10 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 				System.out.println("File with hash bucket : "+elasticTable[index].hashIndex + "with replica id: "+subIndex + "is currently in node id : "+previous);
 				elasticTable[index].nodeId.set(subIndex, nodeId);
 				hashNodeIdReplicaAdd = createSendMapforAddNode(nodeId);
-				Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(previous), DELETE_FILE, hashNodeIdReplicaAdd);
+				//Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(previous), DELETE_FILE, hashNodeIdReplicaAdd);
 				System.out.println("File with hash bucket : " + elasticTable[index].hashIndex + " with replicaId" + subIndex + " is now in nodeId"
 						+ nodeId);
-				Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(nodeId), ADD_FILES, hashNodeIdReplicaAdd);
+				//Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(nodeId), ADD_FILES, hashNodeIdReplicaAdd);
 				elasticTable[index].nodeId.set(subIndex, nodeId);
 				System.out.println("After Add node  in this hash " + elasticTable[index].hashIndex + "which had" + previous + ", now has"
 						+ elasticTable[index].nodeId.get(subIndex));
@@ -277,9 +278,13 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 		if(ratio<config.ConfigLoader.config.resizeFactor) {
 			elasticTable = Resize();
 		}
+		
+
 
 
 		this.versionNumber = this.versionNumber +1;
+		DataNodeElastic.getInstance(nodeId).newUpdatedRoutingTable(nodeId, DELETE_FILE, this);
+		DataNodeElastic.getInstance(nodeId).newUpdatedRoutingTable(nodeId, ADD_FILES, this);
 		return this;
 	}
 

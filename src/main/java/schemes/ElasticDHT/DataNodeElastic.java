@@ -1,19 +1,29 @@
 package schemes.ElasticDHT;
 
+import static common.Commons.elasticTable;
+import static common.Commons.elasticTable1;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import common.Commons;
 import common.IDataNode;
 import common.IRoutingTable;
+import common.Payload;
 import config.ConfigLoader;
 import config.DHTConfig;
-
-import static common.Commons.elasticTable;
-import static common.Commons.elasticTable1;
 
 public class DataNodeElastic implements IDataNode {
 
 	private int nodeId;
 	private static DataNodeElastic single_instance = null;
 	private DHTConfig config;
+	public static Payload [] payload;
+	public List<Payload> listofPayloads = new ArrayList<Payload>();
+	
 	public DataNodeElastic(int nodeId) {
 		this.config = ConfigLoader.config;
 		this.nodeId = nodeId;
@@ -102,9 +112,63 @@ public class DataNodeElastic implements IDataNode {
 		// TODO Auto-generated method stub
 
 	}
+	//List of payload is specific to nodeId, get it from map and then populate it.
 
-	@Override
 	public void newUpdatedRoutingTable(int nodeId, String type, IRoutingTable rt) {
+		ElasticRoutingTableInstance [] newTable = ((ERoutingTable)rt).giveRoutingTable();
+		ElasticRoutingTableInstance [] oldTable = Commons.elasticERoutingTable.giveRoutingTable();
+		List<Integer> ListofnodeIds = new ArrayList<Integer>();
+		Map<Integer, List<Payload>> nodeMap = new HashMap<Integer,List<Payload>>();
+		if(type.equals("ADD_FILES")) {
+			ListofnodeIds.clear();
+			for(int  i = 0;i<oldTable.length;i++) {
+				for(int j = 0;j<Commons.elasticERoutingTable.rFactor;j++) {
+					if(oldTable[i].nodeId.get(j)== this.nodeId && oldTable[i].nodeId.get(j)!=newTable[i].nodeId.get(j)) {
+						int updatedNodeId = newTable[i].nodeId.get(j);
+						Payload p = new Payload("", j, this.getRoutingTable().getVersionNumber(),this.nodeId ,i);
+						List<Payload> list = nodeMap.get(updatedNodeId);
+						if(list == null) list = new ArrayList<Payload>();
+						list.add(p);
+						nodeMap.put(updatedNodeId, list);
+					}
+				}
+				
+			}
+			
+			for(Entry<Integer, List<Payload>> e : nodeMap.entrySet()) {
+				int key = e.getKey();
+				common.Commons.messageSender.sendMessage(config.nodesMap.get(key), common.Constants.ADD_FILES, e.getValue());
 
+			}
+		}
+		if(type.equals("DELETE_FILE")) {
+			ListofnodeIds.clear();
+			for(int  i = 0;i<oldTable.length;i++) {
+				for(int j = 0;j<Commons.elasticERoutingTable.rFactor;j++) {
+					if(oldTable[i].nodeId.get(j)!=newTable[i].nodeId.get(j)) {
+						
+					}
+				}
+			}
+			common.Commons.messageSender.sendMessage(config.nodesMap.get(ListofnodeIds), common.Constants.DELETE_FILE, payload);
+
+		}
+		if(type.equals("MOVE_FILE")) {
+			ListofnodeIds.clear();
+			for(int i = 0;i<oldTable.length;i++) {
+				for(int j = 0; j<Commons.elasticERoutingTable.rFactor;j++) {
+					if(oldTable[i].nodeId.get(j)!=newTable[i].nodeId.get(j)) {
+						
+					}
+				}
+			}
+			common.Commons.messageSender.sendMessage(config.nodesMap.get(ListofnodeIds), common.Constants.MOVE_FILE, payload);
+
+		}
+
+	}
+	public void UpdateRoutingTable(IRoutingTable cephrtTable, String updateType) {
+		// TODO Auto-generated method stub
+		
 	}
 }
