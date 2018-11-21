@@ -159,6 +159,9 @@ public class ClientWorker {
 	              
 	                if(((ConfigLoader.config.scheme).toUpperCase()).equals("CEPH"))
 	                	dataNode.UpdateRoutingTable(payld.newRoutingTable,payld.type);
+	                
+	                if(((ConfigLoader.config.scheme).toUpperCase()).equals("RING"))
+	                	dataNode.UpdateRoutingTable(payld.newRoutingTable, payld.type);
 
 	                break;
                 default:

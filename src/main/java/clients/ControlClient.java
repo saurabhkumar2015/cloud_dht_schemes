@@ -33,6 +33,7 @@ public class ControlClient {
             System.out.println("Enter \"A\" to add node in DHT scheme " + config.scheme);
             System.out.println("Enter \"D\" to remove node in DHT scheme " + config.scheme);
             System.out.println("Enter \"L\" to load Balance for a node in DHT scheme " + config.scheme);
+            System.out.println("Enter \"P\" to print routing table " + config.scheme);
             System.out.println("Enter \"X\" to exit");
             String input = sc.next();
             List<Integer> liveNodes = routingTable.giveLiveNodes();
@@ -92,6 +93,9 @@ public class ControlClient {
                         System.out.print("Load Balance request for node id " + node+" sent to Proxy:"+config.proxyIp);
                         messageSender.sendMessage(config.proxyIp, LOAD_BALANCE, new LoadBalance(node, factor));
                     }
+                    break;
+                case "P":
+                	routingTable.printRoutingTable();
                     break;
                 case "X":
                     exit = false;

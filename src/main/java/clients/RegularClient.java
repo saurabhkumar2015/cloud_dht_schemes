@@ -55,7 +55,6 @@ public class RegularClient {
                     if(config.verbose.equalsIgnoreCase("debug")) {
                         System.out.println("Write "+ fileName + " to "+ nodeId + " replicaid: " + i);
                     }
-                    
                     Payload payload;
                     switch (config.scheme.toUpperCase().trim()) {
                     case "RING":

@@ -1,7 +1,8 @@
 package ring;
 
 import java.util.LinkedList;
-
+import common.Payload;
+import java.util.List;
 import common.IDataNode;
 import common.IRoutingTable;
 import common.Constants;
@@ -39,7 +40,9 @@ public class DataNode implements IDataNode {
 	
 	//update to latest routing table
 	public void UpdateRoutingTable(IRoutingTable ringNewTable, String type) {
+		//long oldVersion = this.routingTableObj.versionNumber;
 		this.routingTableObj = (RingRoutingTable) ringNewTable;
+		//this.routingTableObj.versionNumber = oldVersion+1;
 		System.out.println("New versionNumber: " +this.routingTableObj.versionNumber);
 		//this.routingTableObj.printRoutingTable();
 	}
@@ -64,7 +67,7 @@ public class DataNode implements IDataNode {
 	        		System.out.println("my node Id:"+this.myNodeId);
 	        		//When the receiving node is the given replica node for the file
 	        		if(nId == this.myNodeId) {
-	        			System.out.println("File written with Replication Id:"+replicaId);
+	        			System.out.println("File written into "+ this.myNodeId+" with Replication Id:"+replicaId);
 	        			return true;
 	        		}
 	        		else {
@@ -83,7 +86,7 @@ public class DataNode implements IDataNode {
 		System.out.println("Files corresponding to Hash range: "+ hashRange+" added\n");
 	}
 
-	@Override
+	//Needed for Elastic DHT only
 	public void newUpdatedRoutingTable(int nodeId, String type, IRoutingTable rt) {
 
 	}
@@ -96,7 +99,7 @@ public class DataNode implements IDataNode {
 	public void MoveFiles(int clusterIdofNewNode,String nodeIp, double newnodeWeight, double clusterWeight, boolean isLoadbalance) {
 		
 	}
-	@Override
+	
 	public boolean writeAllFiles(List<Payload> payloads) {
 		// TODO Auto-generated method stub
 		return false;
