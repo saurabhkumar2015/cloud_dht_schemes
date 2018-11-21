@@ -61,29 +61,28 @@ public class ClientWorker {
                   
                  case ADD_FILES:
                  	
-                     @SuppressWarnings("unchecked") 
+                      @SuppressWarnings("unchecked") 
                      List<Payload> paylds = (List<Payload>) request.getPayload();
                      System.out.println("Received Add files request");
                      long dataNodeVerNo = dataNode.getRoutingTable().getVersionNumber();
                      
-                     for(Payload pyld:paylds) {
+                      
+                    	 System.out.println("DataNode versionNumber:: " + dataNodeVerNo + " Sender datanode's versionNumber:: " + paylds.get(0).versionNumber);
 	                      
-                    	 System.out.println("DataNode versionNumber:: " + dataNodeVerNo + " Sender datanode's versionNumber:: " + pyld.versionNumber);
-	                      
-                    	 if (dataNodeVerNo > pyld.versionNumber) {
+                    	 if (dataNodeVerNo > paylds.get(0).versionNumber) {
 	                          System.out.println("Sender's routing table needs to be updated");
 	                          EpochPayload payload = new EpochPayload("fail", dataNode.getRoutingTable());
 	                          oos.writeObject(payload);
 	                          stream = baos.toByteArray();
 	                          out.write(stream);
 	                      } else {
-	                          dataNode.writeFile(pyld.fileName, pyld.replicaId);
+	                          dataNode.writeAllFiles(paylds);
 	                          EpochPayload payload = new EpochPayload("success", null);
 	                          oos.writeObject(payload);
 	                          stream = baos.toByteArray();
 	                          out.write(stream);
 	                      }
-                     }
+                     
                      break;
                      
                 case DELETE_FILE:
