@@ -162,12 +162,16 @@ public class CephDataNode  implements IDataNode{
 		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
     		System.out.println("file need to move from " +  this.NodeId + " to node " + e.getKey());
     		String destinationNodeIp = ConfigLoader.config.nodesMap.get(e.getKey());
+    		List<Payload> filesTobeMove = new LinkedList<>();
+    		filesTobeMove.clear();
     		for(DataObject obj : e.getValue())
     		{
     			System.out.println(" Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
-    			Commons.messageSender.sendMessage(destinationNodeIp, Constants.WRITE_FILE, new Payload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
+    			filesTobeMove.add(new Payload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
     		}
     		
+    		// send the aggregated request to the destination node. 
+    		Commons.messageSender.sendMessage(destinationNodeIp, Constants.WRITE_FILE, filesTobeMove);
     	}		
 	}
 	
@@ -212,11 +216,16 @@ public class CephDataNode  implements IDataNode{
 		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
     		System.out.println("file need to added to node " + e.getKey());
     		String destinationNodeIp = ConfigLoader.config.nodesMap.get(e.getKey());
+    		List<Payload> filesTobeMove = new LinkedList<>();
+    		filesTobeMove.clear();
     		for(DataObject obj : e.getValue())
     		{
     			System.out.println(" Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
-    			Commons.messageSender.sendMessage(destinationNodeIp, Constants.WRITE_FILE, new Payload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
+    			filesTobeMove.add(new Payload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
     		}
+    		
+    		// send the aggregated request to the destination node. 
+    		Commons.messageSender.sendMessage(destinationNodeIp, Constants.WRITE_FILE, filesTobeMove);
     		
     	}
 	}
