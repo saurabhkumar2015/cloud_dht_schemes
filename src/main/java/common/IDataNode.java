@@ -26,6 +26,8 @@ public interface IDataNode {
 	public IRoutingTable getRoutingTable();
 	
 	public void addHashRange(String hashRange);
+	public void newUpdatedRoutingTable(int nodeId, String type, IRoutingTable rt);
+
 	
 }
 

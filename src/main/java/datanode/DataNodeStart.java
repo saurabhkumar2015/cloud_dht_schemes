@@ -11,10 +11,12 @@ import java.util.List;
 public class DataNodeStart {
 	
 		public static void main(String args[]) throws Exception{
-			if(args.length!=4) throw new Exception("Please specify Two arguments. \n 1) Config file absolute path " +
+			if(args.length != 6) throw new Exception("Please specify Two arguments. \n 1) Config file absolute path " +
 					"\n 2) Jar file location " +
-					"\n 3)Nodes.csv location"
-					+ "\n 4) IP value");
+					"\n 3) Nodes.csv location"
+					+ "\n 4) IP value"
+					+ "\n 5) node Id start "
+					+ "\n 6) node Id end ");
 		     
 		     //Fetching nodes.csv file location
 		     String nodesMapLoc = args[2];
