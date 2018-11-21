@@ -65,9 +65,9 @@ public class ClientWorker {
                      List<Payload> paylds = (List<Payload>) request.getPayload();
                      System.out.println("Received Add files request");
                      long dataNodeVerNo = dataNode.getRoutingTable().getVersionNumber();
-                     
-                      
-                    	 System.out.println("DataNode versionNumber:: " + dataNodeVerNo + " Sender datanode's versionNumber:: " + paylds.get(0).versionNumber);
+                     if(paylds.size() == 0)
+                         break;
+                     System.out.println("DataNode versionNumber:: " + dataNodeVerNo + " Sender datanode's versionNumber:: " + paylds.get(0).versionNumber);
 	                      
                     	 if (dataNodeVerNo > paylds.get(0).versionNumber) {
 	                          System.out.println("Sender's routing table needs to be updated");

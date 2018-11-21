@@ -50,12 +50,14 @@ public class RegularClient {
             String [] splits = line.split("]");
             if(splits.length > 1 && splits[1].trim().length() > 0) {
                 String fileName = splits[1].trim();
+                int replicaId = 1;
                 for(int i=1 ; i <= config.replicationFactor;i++) {
-                    Integer nodeId = routingTable.giveNodeId(fileName, i);
+                    Integer nodeId = routingTable.giveNodeId(fileName, replicaId);
+                    while(nodeId <0) nodeId = routingTable.giveNodeId(fileName, ++replicaId);
                     if(config.verbose.equalsIgnoreCase("debug")) {
-                        System.out.println("Write "+ fileName + " to "+ nodeId + " replicaid: " + i);
+                        System.out.println("Write "+ fileName + " to "+ nodeId + " replicaid: " + replicaId);
                     }
-                    
+                    replicaId++;
                     Payload payload;
                     switch (config.scheme.toUpperCase().trim()) {
                     case "RING":
