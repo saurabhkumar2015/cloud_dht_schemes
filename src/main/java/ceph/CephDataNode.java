@@ -11,7 +11,8 @@ import common.IRoutingTable;
 import config.ConfigLoader;
 
 public class CephDataNode  implements IDataNode{
-    public ArrayList<DataObject> dataList = new ArrayList<DataObject>();
+
+	public ArrayList<DataObject> dataList = new ArrayList<DataObject>();
 
     public HashGenerator hashGenerator;
 
@@ -115,6 +116,11 @@ public class CephDataNode  implements IDataNode{
 	public void addHashRange(String hashRange) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void newUpdatedRoutingTable(int nodeId, String type, IRoutingTable rt) {
+
 	}
 
 	public void MoveFiles(int clusterIdofNewNode, String nodeIp, double newnodeWeight, double clusterWeight,

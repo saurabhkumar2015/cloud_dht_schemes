@@ -7,13 +7,11 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class GossipListGenerator {
     public static void main(String[] args) throws Exception {
-        if(args.length!=4) throw new Exception("Please specify Three arguments." +
+        if(args.length!=4) throw new Exception("Please specify Four arguments." +
                 "\n 1)Nodes.csv location"
                 +"\n 2)output location"
                 + "\n 3) max Size of gossip"
@@ -35,7 +33,7 @@ public class GossipListGenerator {
                 nodesIds.add(Integer.parseInt(line.split(",")[0]));
             line = bf.readLine();
         }
-        Map<String, String> map = new HashMap<String, String>();
+
         for (int i=0 ; i <= nodesIds.size()/max;i++) {
             int start = Math.max(max*i -overlap, 0);
             int end = Math.min(start+max, nodesIds.size());

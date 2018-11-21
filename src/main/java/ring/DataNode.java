@@ -83,7 +83,12 @@ public class DataNode implements IDataNode {
 		System.out.println("My Node Id: "+ this.myNodeId);
 		System.out.println("Files corresponding to Hash range: "+ hashRange+" added\n");
 	}
-	
+
+	@Override
+	public void newUpdatedRoutingTable(int nodeId, String type, IRoutingTable rt) {
+
+	}
+
 	public void deleteFile(String hashRange) {
 		System.out.println("My Node Id: "+ this.myNodeId);
 		System.out.println("Files corresponding to Hash range: "+ hashRange+" deleted\n");
