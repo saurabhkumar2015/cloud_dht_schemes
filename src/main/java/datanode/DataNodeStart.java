@@ -38,6 +38,7 @@ public class DataNodeStart {
 		  		      command.add("common.DataNodeLoader");
 		  		      command.add(args[0]);
 		  		      command.add(arr[0]);
+					  command.add(" > /home/logs/"+nodeId+".log");
 		    		  ProcessBuilder builder = new ProcessBuilder(command);		    
 		    		  Process process = builder.start();
 		    	  }
