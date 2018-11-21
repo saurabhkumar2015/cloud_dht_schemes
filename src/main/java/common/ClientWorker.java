@@ -64,7 +64,7 @@ public class ClientWorker {
                  	
                      @SuppressWarnings("unchecked") 
                      List<Payload> paylds = (List<Payload>) request.getPayload();
-                     System.out.println("Received Add Node request");
+                     System.out.println("Received Add files request");
                      long dataNodeVerNo = dataNode.getRoutingTable().getVersionNumber();
                      
                      for(Payload pyld:paylds) {
