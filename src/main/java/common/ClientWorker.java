@@ -39,29 +39,30 @@ public class ClientWorker {
             ObjectInputStream in = new ObjectInputStream(client.getInputStream());
             Request request = (Request) in.readObject();
             switch (request.getType()) {
-                case WRITE_FILE:
-                	Payload p = (Payload) request.getPayload();
+                 case WRITE_FILE:
+                    Payload p = (Payload) request.getPayload();
                     System.out.println("File Write:: " + p.fileName);
 
-                    IDataNode dataNd = (IDataNode)dataNode;
-                    IRoutingTable rTable = (IRoutingTable)dataNd.getRoutingTable();
 
-                    System.out.println("DataNode version:: " +rTable.getVersionNumber() + " Regular Client version:: "+ p.versionNumber);
+	                    long dataNodeVersionNo = dataNode.getRoutingTable().getVersionNumber();
 
-                    if(rTable.getVersionNumber() > p.versionNumber) {
-                    	System.out.println("Sender's routing table needs to be updated");
-                    	EpochPayload payload = new EpochPayload("fail", dataNd.getRoutingTable());
-                    	oos.writeObject(payload);
-                        stream = baos.toByteArray();
-                        out.write(stream);
-                    }
-                    else {
-                    	dataNode.writeFile(p.fileName, p.replicaId);
-                    	EpochPayload payload = new EpochPayload("success", null);
-                    	oos.writeObject(payload);
-                        stream = baos.toByteArray();
-                        out.write(stream);
-                    }
+	                    System.out.println("DataNode version:: " + dataNodeVersionNo + " Regular Client version:: "+ p.versionNumber);
+
+	                    if(dataNodeVersionNo > p.versionNumber) {
+	                    	System.out.println("Sender's routing table needs to be updated");
+	                    	EpochPayload payload = new EpochPayload("fail",dataNode.getRoutingTable());
+	                    	oos.writeObject(payload);
+	                        stream = baos.toByteArray();
+	                        out.write(stream);
+	                    }
+	                    else {
+	                    	dataNode.writeFile(p.fileName, p.replicaId);
+	                    	EpochPayload payload = new EpochPayload("success", null);
+	                    	oos.writeObject(payload);
+	                        stream = baos.toByteArray();
+	                        out.write(stream);
+	                    }
+                    
                     break;
                 case DELETE_FILE:
                     Payload p1 = (Payload) request.getPayload();
@@ -127,10 +128,10 @@ public class ClientWorker {
                 	dataNode.deleteFile(hashRangeToBeDeleted);
                     break;
 
-                case NEW_VERSION:
-                	EpochPayload payld = (EpochPayload) request.getPayload();
+               case NEW_VERSION:
+                	UpdateRoutingPayload payld = (UpdateRoutingPayload) request.getPayload();
 	                System.out.println("Received update routing table request from proxy: "+ payld);
-	                dataNode.UpdateRoutingTable((IRoutingTable)payld.newRoutingTable);
+	                //call update routing table methods
                     if(distributed) gossipNow();
 	                break;
                 default:
