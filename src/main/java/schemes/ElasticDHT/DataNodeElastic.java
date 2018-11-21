@@ -100,4 +100,9 @@ public class DataNodeElastic implements IDataNode {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void newUpdatedRoutingTable(int nodeId, String type, IRoutingTable rt) {
+
+	}
 }
