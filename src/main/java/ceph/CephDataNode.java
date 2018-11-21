@@ -187,7 +187,7 @@ public class CephDataNode  implements IDataNode{
     		filesTobeMove.clear();
     		for(DataObject obj : e.getValue())
     		{
-    			System.out.println(" Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
+    			System.out.println("fileName: " + obj.fileName + " Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
     			filesTobeMove.add(new Payload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
     		}
     		
@@ -241,7 +241,7 @@ public class CephDataNode  implements IDataNode{
     		filesTobeMove.clear();
     		for(DataObject obj : e.getValue())
     		{
-    			System.out.println(" Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
+    			System.out.println("fileName" + obj.fileName + " Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
     			filesTobeMove.add(new Payload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
     		}
     		
