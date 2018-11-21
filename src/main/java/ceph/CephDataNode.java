@@ -171,7 +171,7 @@ public class CephDataNode  implements IDataNode{
     		}
     		
     		// send the aggregated request to the destination node. 
-    		Commons.messageSender.sendMessage(destinationNodeIp, Constants.WRITE_FILE, filesTobeMove);
+    		Commons.messageSender.sendMessage(destinationNodeIp, Constants.ADD_FILES, filesTobeMove);
     	}		
 	}
 	
@@ -225,7 +225,7 @@ public class CephDataNode  implements IDataNode{
     		}
     		
     		// send the aggregated request to the destination node. 
-    		Commons.messageSender.sendMessage(destinationNodeIp, Constants.WRITE_FILE, filesTobeMove);
+    		Commons.messageSender.sendMessage(destinationNodeIp, Constants.ADD_FILES, filesTobeMove);
     		
     	}
 	}
