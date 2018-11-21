@@ -18,6 +18,12 @@ public class Payload implements Serializable {
 		this.nodeId = nodeId;
 		this.hashBucket = hashBucket;
 	}
+	public Payload(String fileName,int replicaId,long versionNumber) {
+		this.fileName = fileName;
+		this.replicaId = replicaId;
+		this.versionNumber = versionNumber;
+		
+	}
 
 	@Override
 	public String toString() {

@@ -148,25 +148,52 @@ public class DataNodeElastic implements IDataNode {
 			ListofnodeIds.clear();
 			for(int  i = 0;i<oldTable.length;i++) {
 				for(int j = 0;j<Commons.elasticERoutingTable.rFactor;j++) {
-					if(oldTable[i].nodeId.get(j)!=newTable[i].nodeId.get(j)) {
-						
+					if(oldTable[i].nodeId.get(j)==this.nodeId&&oldTable[i].nodeId.get(j)!=newTable[i].nodeId.get(j)) {
+						int oldNodeId = oldTable[i].nodeId.get(j);
+						Payload p = new Payload("", j, this.getRoutingTable().getVersionNumber(),this.nodeId ,i);
+						List<Payload> list = nodeMap.get(oldNodeId);
+						if(list == null) list = new ArrayList<Payload>();
+						list.add(p);
+						nodeMap.put(oldNodeId, list);
 					}
 				}
 			}
-			common.Commons.messageSender.sendMessage(config.nodesMap.get(ListofnodeIds), common.Constants.DELETE_FILE, payload);
+			for(Entry<Integer, List<Payload>> e : nodeMap.entrySet()) {
+				int key = e.getKey();
+				common.Commons.messageSender.sendMessage(config.nodesMap.get(key), common.Constants.DELETE_FILE, e.getValue());
 
+			}
 		}
 		if(type.equals("MOVE_FILE")) {
 			ListofnodeIds.clear();
 			for(int i = 0;i<oldTable.length;i++) {
 				for(int j = 0; j<Commons.elasticERoutingTable.rFactor;j++) {
-					if(oldTable[i].nodeId.get(j)!=newTable[i].nodeId.get(j)) {
-						
+					if(oldTable[i].nodeId.get(j)==this.nodeId&&oldTable[i].nodeId.get(j)!=newTable[i].nodeId.get(j)) {
+						int oldNodeId;
+						int temp;
+						if(j==0) {
+							temp = j+1;
+						}
+						else if(j==Commons.elasticERoutingTable.rFactor-1) {
+							temp = j-1;
+						}
+						else {
+							temp = j-1;
+						}
+						oldNodeId = oldTable[i].nodeId.get(temp);
+						Payload p = new Payload("", j, this.getRoutingTable().getVersionNumber(),newTable[i].nodeId.get(j) ,i);
+						List<Payload> list = nodeMap.get(oldTable[i].nodeId.get(temp));
+						if(list == null) list = new ArrayList<Payload>();
+						list.add(p);
+						nodeMap.put(oldNodeId, list);
 					}
 				}
 			}
-			common.Commons.messageSender.sendMessage(config.nodesMap.get(ListofnodeIds), common.Constants.MOVE_FILE, payload);
+			for(Entry<Integer, List<Payload>> e : nodeMap.entrySet()) {
+				int key = e.getKey();
+				common.Commons.messageSender.sendMessage(config.nodesMap.get(key), common.Constants.MOVE_FILE, e.getValue());
 
+			}
 		}
 
 	}
