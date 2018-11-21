@@ -23,7 +23,6 @@ public class ClientWorker {
     }
 
     public void run(Socket client) {
-
         try {
         	DataOutputStream out = null;
             out = new DataOutputStream(client.getOutputStream());
@@ -39,27 +38,22 @@ public class ClientWorker {
                  case WRITE_FILE:
                     Payload p = (Payload) request.getPayload();
                     System.out.println("File Write:: " + p.fileName);
+                     long dataNodeVersionNo = dataNode.getRoutingTable().getVersionNumber();
+                     System.out.println("DataNode version:: " + dataNodeVersionNo + " Regular Client version:: " + p.versionNumber);
+                     if (dataNodeVersionNo > p.versionNumber) {
+                         System.out.println("Sender's routing table needs to be updated");
+                         EpochPayload payload = new EpochPayload("fail", dataNode.getRoutingTable());
+                         oos.writeObject(payload);
+                         stream = baos.toByteArray();
+                         out.write(stream);
+                     } else {
+                         dataNode.writeFile(p.fileName, p.replicaId);
+                         EpochPayload payload = new EpochPayload("success", null);
+                         oos.writeObject(payload);
+                         stream = baos.toByteArray();
+                         out.write(stream);
+                     }
 
-
-	                    long dataNodeVersionNo = dataNode.getRoutingTable().getVersionNumber();
-
-	                    System.out.println("DataNode version:: " + dataNodeVersionNo + " Regular Client version:: "+ p.versionNumber);
-
-	                    if(dataNodeVersionNo > p.versionNumber) {
-	                    	System.out.println("Sender's routing table needs to be updated");
-	                    	EpochPayload payload = new EpochPayload("fail",dataNode.getRoutingTable());
-	                    	oos.writeObject(payload);
-	                        stream = baos.toByteArray();
-	                        out.write(stream);
-	                    }
-	                    else {
-	                    	dataNode.writeFile(p.fileName, p.replicaId);
-	                    	EpochPayload payload = new EpochPayload("success", null);
-	                    	oos.writeObject(payload);
-	                        stream = baos.toByteArray();
-	                        out.write(stream);
-	                    }
-                    
                     break;
                 case DELETE_FILE:
                     Payload p1 = (Payload) request.getPayload();
