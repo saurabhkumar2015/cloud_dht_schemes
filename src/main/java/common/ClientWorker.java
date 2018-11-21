@@ -7,9 +7,6 @@ import socket.Request;
 import java.io.*;
 import java.net.Socket;
 
-import ceph.CephDataNode;
-import ceph.CephRoutingTable;
-
 import static common.Constants.*;
 
 public class ClientWorker {
