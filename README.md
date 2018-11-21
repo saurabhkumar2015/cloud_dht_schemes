@@ -1,5 +1,4 @@
-"# cloud_dht_schemes" 
-
+CLOUD DISTRIBUTED SCHEMES
 DHT schemes: Ring, Elastic, Ceph
 DHT architecture type: Centralized, Distributed
 
