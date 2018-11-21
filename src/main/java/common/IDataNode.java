@@ -21,7 +21,7 @@ public interface IDataNode {
 	
 	public void MoveFiles(int clusterIdofNewNode,String nodeIp, double newnodeWeight, double clusterWeight, boolean isLoadbalance);
 	
-	public void UpdateRoutingTable(IRoutingTable cephrtTable);
+	public void UpdateRoutingTable(IRoutingTable cephrtTable, String updateType);
 
 	public IRoutingTable getRoutingTable();
 	
