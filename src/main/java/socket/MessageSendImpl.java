@@ -43,7 +43,6 @@ public class MessageSendImpl implements IMessageSend {
         try {
             socket = new Socket(address, port);
             out = new DataOutputStream(socket.getOutputStream());
-
             byte[] stream = null;
             // ObjectOutputStream is used to convert a Java object into OutputStream
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -51,6 +50,7 @@ public class MessageSendImpl implements IMessageSend {
             oos.writeObject(request);
             stream = baos.toByteArray();
             out.write(stream);
+
 
             if(type.equals(Constants.WRITE_FILE)) {
 	            input = new DataInputStream(socket.getInputStream());

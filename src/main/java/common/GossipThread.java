@@ -32,6 +32,8 @@ public class GossipThread extends Thread{
                     }
                     if (r.getVersionNumber() > dataNode.getRoutingTable().getVersionNumber()) {
                         System.out.println("Routing Table Recieved from Gossip::" + dataNode.getRoutingTable().getVersionNumber());
+                        msg.setTimestamp(System.currentTimeMillis());
+                        Commons.gossip.gossipSharedData(msg);
                         dataNode.UpdateRoutingTable(r);
                     }
                 }

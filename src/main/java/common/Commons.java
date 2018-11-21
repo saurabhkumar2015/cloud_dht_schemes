@@ -11,6 +11,7 @@ import schemes.ElasticDHT.ERoutingTable;
 import schemes.ElasticDHT.ElasticRoutingTable;
 import schemes.ElasticDHT.ElasticRoutingTableInstance;
 import socket.IMessageSend;
+import socket.MessageSendImpl;
 
 import java.util.Random;
 
@@ -82,7 +83,7 @@ public class Commons {
     }
     
     // Message Sender
-    public static IMessageSend messageSender;
+    public static IMessageSend messageSender = new MessageSendImpl();
     public static GossipService gossip;
     public static int nodeId;
     public static CephRoutingTable cephRoutingTable = null;

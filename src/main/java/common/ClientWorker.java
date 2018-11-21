@@ -131,6 +131,7 @@ public class ClientWorker {
                     throw new Exception("Unsupported message type");
             }
         } catch (Exception e) {
+            e.printStackTrace();
             exceptionCount++;
         }
     }
