@@ -52,7 +52,7 @@ public class MessageSendImpl implements IMessageSend {
             out.write(stream);
 
 
-            if(type.equals(Constants.WRITE_FILE)) {
+            if(type.equals(Constants.WRITE_FILE) || type.equals(Constants.ADD_FILES)) {
 	            input = new DataInputStream(socket.getInputStream());
 	            ObjectInputStream ois = new ObjectInputStream(input);
 	            EpochPayload p = (EpochPayload) ois.readObject();
