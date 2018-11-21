@@ -7,8 +7,12 @@ import ring.DataNode;
 import ring.RingDHTScheme;
 import ring.RingRoutingTable;
 import schemes.ElasticDHT.DataNodeElastic;
-import schemes.ElasticDHT.RoutingTable;
+import schemes.ElasticDHT.ERoutingTable;
+import schemes.ElasticDHT.ElasticRoutingTable;
+import schemes.ElasticDHT.ElasticRoutingTableInstance;
 import socket.IMessageSend;
+
+import java.util.Random;
 
 public class Commons {
 
@@ -21,8 +25,8 @@ public class Commons {
                 return new RingRoutingTable();
             case "ELASTIC":
             case "elastic":
-                schemes.ElasticDHT.RoutingTable r = new schemes.ElasticDHT.RoutingTable();
-                RoutingTable.GetInstance().getRoutingTable();
+                ERoutingTable r = new ERoutingTable();
+                ERoutingTable.giveInstance().giveRoutingTable();
                 return r;
             case "CEPH":
             case "ceph":
@@ -62,8 +66,8 @@ public class Commons {
                 routingTable = dNode.routingTableObj;
                 break;
             case "ELASTIC":
-                schemes.ElasticDHT.RoutingTable r = new schemes.ElasticDHT.RoutingTable();
-                RoutingTable.GetInstance().getRoutingTable();
+                ERoutingTable r = new ERoutingTable();
+                ERoutingTable.giveInstance().giveRoutingTable();
                 routingTable = r;
                 break;
             case "CEPH":
@@ -84,6 +88,12 @@ public class Commons {
     public static CephRoutingTable cephRoutingTable = null;
     public static OsdMap osdMap = null;
     public static HashGenerator hashGenerator = null;
+    public static Random randomGen;
+    public static ElasticRoutingTableInstance[] elasticTable;
+    public static ElasticRoutingTable elasticTable1 = new ElasticRoutingTable();
+
+    public static ERoutingTable elasticERoutingTable = null;
+
     public static Payload GeneratePayload(String fileName, int replica, long versionNo)
     {
     	return new Payload(fileName, replica, versionNo);

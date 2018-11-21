@@ -7,50 +7,51 @@ import common.IRoutingTable;
 import config.ConfigLoader;
 import socket.MockMessageSender;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
+
+import static common.Commons.elasticERoutingTable;
+import static common.Commons.elasticTable;
+import static common.Commons.elasticTable1;
 import static common.Constants.*;
 
 
-public class RoutingTable implements IRoutingTable {
+public class ERoutingTable implements IRoutingTable, Serializable {
 
-	int bucketSize = ConfigLoader.config.bucketSize;
-	int rFactor = ConfigLoader.config.replicationFactor;
-	long versionNumber;
+	public int bucketSize = ConfigLoader.config.bucketSize;
+	public int rFactor = ConfigLoader.config.replicationFactor;
+	public long versionNumber;
 	
 
 	@Override
 	public String toString() {
-		return "RoutingTable [bucketSize=" + bucketSize + ", rFactor=" + rFactor + ", versionNumber=" + versionNumber
-				+ ", hashReplicaNodeId=" + hashReplicaNodeId + ", getRoutingTable()="
-				+ Arrays.toString(getRoutingTable()) + ", getVersionNumber()=" + getVersionNumber() + "]";
+		return "ERoutingTable [bucketSize=" + bucketSize + ", rFactor=" + rFactor + ", versionNumber=" + versionNumber
+				+ ", hashReplicaNodeId=" + hashReplicaNodeId + ", giveRoutingTable()="
+				+ Arrays.toString(giveRoutingTable()) + ", getVersionNumber()=" + getVersionNumber() + "]";
 	}
 
 
 
-	public static ElasticRoutingTableInstance[] elasticTable;
-	public static ElasticRoutingTable elasticTable1 = new ElasticRoutingTable();
-
-	public static RoutingTable single_instance = null;
 
 	Map<Integer, Integer> hashReplicaNodeId = new HashMap<Integer, Integer>();
 	Map<Integer, Map<Integer,Integer>> hashNodeIdReplicaAdd = new HashMap<Integer,Map<Integer,Integer>>();//Hash,NodeId,Replica
 	Map<Integer,Integer> hashNodeIdDelete = new HashMap<Integer,Integer>();
 	
 
-	public RoutingTable() {
-		elasticTable = elasticTable1.populateRoutingTable();
-	}
+	public ERoutingTable() { }
 
 	// Make singleton Instance of routing table
-	public static RoutingTable GetInstance() {
-		if (single_instance == null)
-			single_instance = new RoutingTable();
+	public static ERoutingTable giveInstance() {
+		if (elasticERoutingTable == null) {
+			elasticERoutingTable = new ERoutingTable();
+			elasticTable = elasticTable1.populateRoutingTable();
+		}
 
-		return single_instance;
+		return elasticERoutingTable;
 	}
 
-	public ElasticRoutingTableInstance[] getRoutingTable() {
+	public ElasticRoutingTableInstance[] giveRoutingTable() {
 		return elasticTable;
 	}
 
@@ -187,10 +188,10 @@ public class RoutingTable implements IRoutingTable {
 
 	public List<Integer> giveLiveNodes() {
 
-		return new ArrayList<Integer>(getLiveNodesSet());
+		return new ArrayList<Integer>(giveLiveNodesSet());
 	}
 
-	public Set<Integer> getLiveNodesSet() {
+	public Set<Integer> giveLiveNodesSet() {
 		int tempNode;
 
 		Set<Integer> liveNodes = new HashSet<Integer>();

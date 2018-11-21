@@ -1,4 +1,5 @@
 package ring;
+import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -8,40 +9,42 @@ import common.IRoutingTable;
 import config.ConfigLoader;
 import config.DHTConfig;
 
-public class RingRoutingTable implements IRoutingTable {
+import static common.Commons.randomGen;
 
-    public long version;
+public class RingRoutingTable implements IRoutingTable,Serializable {
+
+    public long versionNumber;
     public Map<Integer,Integer> routingMap; // HashMap for hashStartIndex to nodeId mapping
-    public DHTConfig conf;
     public Map<Integer, String> physicalTable;
     public int MAX_HASH;
     public int numNodeIds;
     public byte replicationFactor;
-    public static Random randomGen;
     
     public RingRoutingTable(){
-    	
-        this.conf = ConfigLoader.config;
-    	this.numNodeIds = this.conf.nodeIdEnd-this.conf.nodeIdStart+1;
-    	this.version = conf.version;
-    	this.routingMap = new TreeMap<Integer,Integer>();
-    	this.physicalTable = conf.nodesMap;
-    	this.replicationFactor = conf.replicationFactor;
-    	this.MAX_HASH= conf.bucketSize;
-    	randomGen = new Random(this.conf.seed);
-    	this.populateTables(); 
-    	//printing Routing table which will be kept with each data node 
-    	System.out.print("This is the initial routing table which will be available at every data node\n");
-    	this.printRoutingTable();
-    	System.out.print("\n");
-    	//System.out.print("This is the initial NodeId-Physical Machine mapping table\n");
-    	//this.printPhysicalTable();
     }
+
+    public  void init() {
+    	DHTConfig config = ConfigLoader.config;
+		this.numNodeIds = config.nodeIdEnd-config.nodeIdStart+1;
+		this.versionNumber = config.version;
+		this.routingMap = new TreeMap<Integer,Integer>();
+		this.physicalTable = config.nodesMap;
+		this.replicationFactor = config.replicationFactor;
+		this.MAX_HASH= config.bucketSize;
+		randomGen = new Random(config.seed);
+		this.populateTables();
+		//printing Routing table which will be kept with each data node
+		System.out.print("This is the initial routing table which will be available at every data node\n");
+		this.printRoutingTable();
+		System.out.print("\n");
+		//System.out.print("This is the initial NodeId-Physical Machine mapping table\n");
+		//this.printPhysicalTable();
+	}
 
     @Override
     public String toString() {
         return "RingRoutingTable{" +
-                "version=" + version +
+                "versionNumber=" + versionNumber +
                 ", routingMap=" + routingMap +
                 '}';
     }
@@ -60,20 +63,21 @@ public class RingRoutingTable implements IRoutingTable {
 
     //initiating physical table and routing map
     public void populateTables() {
-    	int startNodeId = this.conf.nodeIdStart;
-    	int endNodeId = this.conf.nodeIdEnd;
+    	DHTConfig config = ConfigLoader.config;
+    	int startNodeId = config.nodeIdStart;
+    	int endNodeId = config.nodeIdEnd;
     	for(int s = startNodeId; s<=endNodeId; s++) {
     		int hashVal = randomHashGenerator();
     		this.routingMap.put(hashVal, s);
     	}
-    	this.version++;
+    	this.versionNumber++;
     }
 
     /*Find nodeId corresponding to given hashval
     Binary search done on routing table (Tree map)
     */
     public void printRoutingTable() {
-    	System.out.println("Routing Table version: "+this.version);
+    	System.out.println("Routing Table versionNumber: "+this.versionNumber);
         System.out.println("HashVal\tNodeId");
         for (Map.Entry<Integer, Integer> e : this.routingMap.entrySet()) {
             System.out.print(e.getKey());
@@ -124,7 +128,7 @@ public class RingRoutingTable implements IRoutingTable {
     	return -1;
     }
     
-    public LinkedList<Integer> getListOfNodes(int index, int replicationFactor){
+    public LinkedList<Integer> giveListOfNodes(int index, int replicationFactor){
     	LinkedList<Integer> listOfHash =  new LinkedList<Integer>();
     	listOfHash.addAll(this.routingMap.keySet());
     	LinkedList<Integer> listOfNodesForGivenHash = new LinkedList<Integer>();
@@ -180,7 +184,7 @@ public class RingRoutingTable implements IRoutingTable {
     		int index = binarySearch(findHashVal);
         	if(index!=-1){
         		//System.out.println("index: "+index);
-        		listOfHashesForGivenHash= this.getListOfNodes(index, this.replicationFactor);
+        		listOfHashesForGivenHash= this.giveListOfNodes(index, this.replicationFactor);
         		return listOfHashesForGivenHash;
         	}
         	System.out.println("Returning null");
@@ -221,14 +225,23 @@ public class RingRoutingTable implements IRoutingTable {
     	*/
     	String nodeIp = this.physicalTable.get(routingMap.get(listOfHashesForNewHash.get(0)));
     	String payload = String.valueOf(newHash)+"-"+String.valueOf(listOfHashesForNewHash.get(1)-1);
-    	System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " removed from Node :"+ routingMap.get(listOfHashesForNewHash.get(0)));
-    	Commons.messageSender.sendMessage(nodeIp, Constants.REMOVE_HASH, payload);
+    	int removeNodeId = routingMap.get(listOfHashesForNewHash.get(0));
+    	if(removeNodeId == Commons.nodeId)
+    		System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " removed from this Node :"+ removeNodeId);
+    	else {
+			System.out.println("Hash range " + newHash + " - " + (listOfHashesForNewHash.get(1) - 1) + " removed from Node :" + removeNodeId);
+			Commons.messageSender.sendMessage(nodeIp, Constants.REMOVE_HASH, payload);
+		}
     	
     	nodeIp = this.physicalTable.get(routingMap.get(listOfHashesForNewHash.get(listOfHashesForNewHash.size()-1)));
     	payload = String.valueOf(listOfHashesForNewHash.get(0))+"-"+String.valueOf((newHash-1));
-    	System.out.println("Hash range "+ listOfHashesForNewHash.get(0)+" - "+(newHash-1)+ " removed from Node :"+ routingMap.get(listOfHashesForNewHash.get(listOfHashesForNewHash.size()-1)));
-    	Commons.messageSender.sendMessage(nodeIp, Constants.REMOVE_HASH, payload);
-    	
+    	int rNodeId = routingMap.get(listOfHashesForNewHash.get(listOfHashesForNewHash.size()-1));
+    	if(rNodeId == Commons.nodeId)
+			System.out.println("Hash range "+ listOfHashesForNewHash.get(0)+" - "+(newHash-1)+ " removed from same Node :"+ rNodeId);
+		else {
+			System.out.println("Hash range "+ listOfHashesForNewHash.get(0)+" - "+(newHash-1)+ " removed from Node :"+ rNodeId);
+			Commons.messageSender.sendMessage(nodeIp, Constants.REMOVE_HASH, payload);
+		}
     	int newNodeId = ++this.numNodeIds;
     	nodeIp = this.physicalTable.get(newNodeId);
     	payload = String.valueOf(newHash)+"-"+ (listOfHashesForNewHash.get(1)-1);
@@ -240,11 +253,11 @@ public class RingRoutingTable implements IRoutingTable {
     	
     	//update routing map
     	this.routingMap.put(newHash, newNodeId);
-    	this.version++;
+    	this.versionNumber++;
     	
     	//Print updated Routing Table
     	System.out.println("\n");
-    	//System.out.println("Routing Table version: "+this.version);
+    	//System.out.println("Routing Table versionNumber: "+this.versionNumber);
     	System.out.println("New Routing Map after new node added");
     	printRoutingTable();
     	System.out.println("\n");
@@ -254,7 +267,7 @@ public class RingRoutingTable implements IRoutingTable {
     	return this;
     }
 	
-    public static <T, E> T getKeyByValue(Map<T, E> map, E value) {
+    public static <T, E> T giveKeyByValue(Map<T, E> map, E value) {
         for (Entry<T, E> entry : map.entrySet()) {
             if (Objects.equals(value, entry.getValue())) {
                 return entry.getKey();
@@ -266,7 +279,7 @@ public class RingRoutingTable implements IRoutingTable {
 	public IRoutingTable deleteNode(int nodeIdInt) {
 		String nodeId = physicalTable.get(nodeIdInt);
 		System.out.println("nodeId to be deleted: "+nodeId);
-		int deleteHash = getKeyByValue(this.routingMap, nodeIdInt);
+		int deleteHash = giveKeyByValue(this.routingMap, nodeIdInt);
 		System.out.println("Hash value to be deleted: "+deleteHash);
     	LinkedList<Integer> listOfAssociatedHashes = modifiedBinarySearch(deleteHash);
     	System.out.println("To get predecessor of node getting deleted");
@@ -288,10 +301,10 @@ public class RingRoutingTable implements IRoutingTable {
     	
     	//update routing map
     	this.routingMap.remove(deleteHash);
-    	this.version++;
+    	this.versionNumber++;
     	this.numNodeIds--;
     	System.out.println("\n");
-    	//System.out.println("Routing Table version: "+this.version);
+    	//System.out.println("Routing Table versionNumber: "+this.versionNumber);
     	//Print updated Routing Table
     	System.out.println("New Routing Map after new node added");
     	printRoutingTable();
@@ -304,7 +317,7 @@ public class RingRoutingTable implements IRoutingTable {
 	public IRoutingTable loadBalance(int nodeIdInt, double loadFraction) {
 		String nodeId = physicalTable.get(nodeIdInt);
 		System.out.println("nodeId to be balanced: "+nodeId);
-		int nodeHash = getKeyByValue(this.routingMap, nodeIdInt);
+		int nodeHash = giveKeyByValue(this.routingMap, nodeIdInt);
 		LinkedList<Integer> listOfAssociatedHashes = modifiedBinarySearch(nodeHash-1);
 		/*
 		//Print List of nodes associated with given hash value
@@ -339,9 +352,9 @@ public class RingRoutingTable implements IRoutingTable {
 	    	String payload = String.valueOf(newStartHash) +"-"+String.valueOf((nodeHash-1));
 	    	Commons.messageSender.sendMessage(nodeIp, Constants.ADD_HASH, payload);
 	    	
-	    	this.version++;
+	    	this.versionNumber++;
 			System.out.println("\n");
-			System.out.println("Routing Table version: "+this.version);
+			System.out.println("Routing Table versionNumber: "+this.versionNumber);
 	    	//Print updated Routing Table
 	    	System.out.println("New Routing Map after new node added");
 	    	printRoutingTable();
@@ -379,9 +392,9 @@ public class RingRoutingTable implements IRoutingTable {
 	    	payload = String.valueOf(nodeHash) +"-"+String.valueOf((newStartHash-1));
 	    	Commons.messageSender.sendMessage(nodeIp, Constants.REMOVE_HASH, payload);
 	    	
-	    	this.version++;
+	    	this.versionNumber++;
 			System.out.println("\n");
-			System.out.println("Routing Table version: "+this.version);
+			System.out.println("Routing Table versionNumber: "+this.versionNumber);
 	    	//Print updated Routing Table
 	    	System.out.println("New Routing Map after new node added");
 	    	printRoutingTable();
@@ -404,7 +417,7 @@ public class RingRoutingTable implements IRoutingTable {
     }
 
 	public long getVersionNumber() {
-		return this.version;
+		return this.versionNumber;
 	}
     
 }

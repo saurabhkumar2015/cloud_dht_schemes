@@ -59,7 +59,7 @@ public class RegularClient {
                     Payload payload;
                     switch (config.scheme.toUpperCase().trim()) {
                     case "RING":
-                        payload = new Payload(fileName, i, ((RingRoutingTable)routingTable).version);
+                        payload = new Payload(fileName, i, ((RingRoutingTable)routingTable).versionNumber);
                         messageSender.sendMessage(config.nodesMap.get(nodeId), WRITE_FILE, payload);
                         break;
                     case "ELASTIC":

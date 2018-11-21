@@ -1,8 +1,9 @@
 package schemes.ElasticDHT;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class ElasticRoutingTableInstance {
+public class ElasticRoutingTableInstance implements Serializable {
 
 	public int hashIndex;
 	@SuppressWarnings("rawtypes")
@@ -15,7 +16,8 @@ public class ElasticRoutingTableInstance {
 		nodeId = l;
 		// TODO Auto-generated constructor stub
 	}
-	
+
+	public ElasticRoutingTableInstance(){}
 }
 
 // Create Object ElasticRoutingTable ert[] , ert[0].hashIndex : Access, similarly for all fields.

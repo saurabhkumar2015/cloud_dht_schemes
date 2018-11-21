@@ -12,7 +12,7 @@ public class ElasticRoutingTable {
     @Override
     public String toString() {
         return "ElasticRoutingTable{" +
-                "version=" + version +
+                "versionNumber=" + version +
                 ", elasticRoutingMap=" + elasticRoutingMap +
                 ", invertedMap=" + invertedMap +
                 '}';

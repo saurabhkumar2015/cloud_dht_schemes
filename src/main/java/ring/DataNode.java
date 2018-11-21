@@ -41,7 +41,7 @@ public class DataNode implements IDataNode {
 	//update to latest routing table
 	public void UpdateRoutingTable(IRoutingTable ringNewTable) {
 		this.routingTableObj = (RingRoutingTable) ringNewTable;
-		System.out.println("New version: " +this.routingTableObj.version);
+		System.out.println("New versionNumber: " +this.routingTableObj.versionNumber);
 		//this.routingTableObj.printRoutingTable();
 	}
 
@@ -70,7 +70,7 @@ public class DataNode implements IDataNode {
 	        		}
 	        		else {
 	        			//sending write file request to the corresponding node
-	        			Commons.messageSender.sendMessage(this.routingTableObj.physicalTable.get(nId), Constants.WRITE_FILE, Commons.GeneratePayload(fileName, replicaId, this.routingTableObj.version));
+	        			Commons.messageSender.sendMessage(this.routingTableObj.physicalTable.get(nId), Constants.WRITE_FILE, Commons.GeneratePayload(fileName, replicaId, this.routingTableObj.versionNumber));
 	        			return true;
 	        		}
 	        	}

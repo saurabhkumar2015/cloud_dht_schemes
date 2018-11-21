@@ -12,6 +12,7 @@ public class RingDHTScheme implements IDHTScheme {
 	
     public RingDHTScheme() {
 			this.routingTableObj = new RingRoutingTable();
+			this.routingTableObj.init();
     }
 
     //Bootstrap

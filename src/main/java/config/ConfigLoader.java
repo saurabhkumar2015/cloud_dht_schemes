@@ -27,6 +27,7 @@ public class ConfigLoader {
         Map map = getConfigMap(configFile);
         config.nodeIdStart = Integer.parseInt(map.get("nodeIdStart").toString());
         config.nodeIdEnd = Integer.parseInt(map.get("nodeIdEnd").toString());
+        System.out.println("Node Id start end is ::" + config.nodeIdStart +"-"+ config.nodeIdEnd);
         config.proxyIp = map.get("proxyIp").toString();
         config.bucketSize = Integer.parseInt(map.get("bucketSize").toString());
         config.verbose  = map.get("verbose").toString();

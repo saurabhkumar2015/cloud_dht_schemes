@@ -21,15 +21,12 @@ public class GossipThread extends Thread{
                     IRoutingTable r = null;
                     switch (ConfigLoader.config.scheme.toLowerCase()){
                         case "ceph":
-                            System.out.println("Lets print payload ceph:" + msg.getPayload());
                             r = (IRoutingTable) msg.getPayload();
                             break;
                         case "elastic":
-                            System.out.println("Lets print payload elastic:" + msg.getPayload());
                             r = (IRoutingTable) msg.getPayload();
                            break;
                         case "ring":
-                            System.out.println("Lets print payload ring:" + msg.getPayload());
                             r = (IRoutingTable) msg.getPayload();
                             break;
                     }

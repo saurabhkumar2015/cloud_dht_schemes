@@ -22,7 +22,6 @@ import java.util.Map;
 public class MessageSendImpl implements IMessageSend {
 
     private static ObjectMapper mapper = new ObjectMapper();
-    public HashMap<String, Socket> socketHashMap = new HashMap<String,Socket>();
 
     @Override
     public void sendMessage(String nodeAddress, String type, Object payload) {
@@ -31,65 +30,55 @@ public class MessageSendImpl implements IMessageSend {
         Request request = new Request();
         request.setType(type);
         request.setPayload(payload);
-        
+
         Socket socket = null;
         DataOutputStream out = null;
         DataInputStream input = null;
 
         // Extracting address and port from NodeId
         String[] arr = nodeAddress.split(":");
-        
         String address = arr[0];
         int port = Integer.parseInt(arr[1]);
 
         try {
-        	String key = Arrays.toString(arr);
-        	if(socketHashMap.containsKey(key))
-        		socket = socketHashMap.get(key);
-        	else {
-        		socket = new Socket(address, port);
-        		socketHashMap.put(key, socket);
-        	}
-        	synchronized(socket) {
-        		System.out.println("This socket is under use: "+socket);
-        		out = new DataOutputStream(socket.getOutputStream());
+            socket = new Socket(address, port);
+            out = new DataOutputStream(socket.getOutputStream());
 
-        		byte[] stream = null;
-        		// ObjectOutputStream is used to convert a Java object into OutputStream
-        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        		ObjectOutputStream oos = new ObjectOutputStream(baos);
-        		oos.writeObject(request);
-        		stream = baos.toByteArray();
-        		out.write(stream);
-            
-        		if(type.equals(Constants.WRITE_FILE)) {
-        			input = new DataInputStream(socket.getInputStream());
-        			ObjectInputStream ois = new ObjectInputStream(input);
-        			EpochPayload p = (EpochPayload) ois.readObject();
-	          
-        			System.out.println("received ack "+p.status);
-	            
-        			if((p.status).trim().equals("fail"))
+            byte[] stream = null;
+            // ObjectOutputStream is used to convert a Java object into OutputStream
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(request);
+            stream = baos.toByteArray();
+            out.write(stream);
+
+            if(type.equals(Constants.WRITE_FILE)) {
+	            input = new DataInputStream(socket.getInputStream());
+	            ObjectInputStream ois = new ObjectInputStream(input);
+	            EpochPayload p = (EpochPayload) ois.readObject();
+
+	            System.out.println("received ack "+p.status);
+
+	            if((p.status).trim().equals("fail"))
 	            		RegularClient.routingTable = p.newRoutingTable;
-        		}
-        		else if(Arrays.asList(Constants.ADD_NODE, Constants.DELETE_NODE, Constants.LOAD_BALANCE ).contains(type)) {
-        			if(ConfigLoader.config.dhtType.equalsIgnoreCase("distributed")) {
-        				input = new DataInputStream(socket.getInputStream());
-        				ObjectInputStream ois = new ObjectInputStream(input);
-        				EpochPayload p = (EpochPayload) ois.readObject();
+            }
+            else if(Arrays.asList(Constants.ADD_NODE, Constants.DELETE_NODE, Constants.LOAD_BALANCE ).contains(type)) {
+                if(ConfigLoader.config.dhtType.equalsIgnoreCase("distributed")) {
+                    input = new DataInputStream(socket.getInputStream());
+                    ObjectInputStream ois = new ObjectInputStream(input);
+                    EpochPayload p = (EpochPayload) ois.readObject();
 
-        				System.out.println("received ack " + p.status);
-        				ControlClient.routingTable = p.newRoutingTable;
-        			}
-        		}
-        	}
-        	}catch (IOException | ClassNotFoundException e) {
-        		e.printStackTrace();
-        	} /*finally {
+                    System.out.println("received ack " + p.status);
+                    ControlClient.routingTable = p.newRoutingTable;
+                }
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        } finally {
 			   try {
 				socket.close();
 			} catch (IOException e) {
 			}
-		}*/
+		}
     }
 }

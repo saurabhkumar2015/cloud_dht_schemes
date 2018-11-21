@@ -32,7 +32,7 @@ public class DHTConfig implements Serializable{
     @Override
     public String toString() {
         return "DHTConfig{" +
-                "version=" + version +
+                "versionNumber=" + version +
                 ", nodeIdStart=" + nodeIdStart +
                 ", nodeIdEnd=" + nodeIdEnd +
                 ", proxyIp='" + proxyIp + '\'' +

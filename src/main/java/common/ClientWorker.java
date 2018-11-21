@@ -39,7 +39,7 @@ public class ClientWorker {
                     Payload p = (Payload) request.getPayload();
                     System.out.println("File Write:: " + p.fileName);
                      long dataNodeVersionNo = dataNode.getRoutingTable().getVersionNumber();
-                     System.out.println("DataNode version:: " + dataNodeVersionNo + " Regular Client version:: " + p.versionNumber);
+                     System.out.println("DataNode versionNumber:: " + dataNodeVersionNo + " Regular Client versionNumber:: " + p.versionNumber);
                      if (dataNodeVersionNo > p.versionNumber) {
                          System.out.println("Sender's routing table needs to be updated");
                          EpochPayload payload = new EpochPayload("fail", dataNode.getRoutingTable());
@@ -142,6 +142,7 @@ public class ClientWorker {
     }
 
     private void gossipNow() throws IOException {
+        System.out.println("Please Updated Share data");
         SharedGossipDataMessage message = new SharedGossipDataMessage();
         message.setExpireAt(System.currentTimeMillis()+120000);
         message.setTimestamp(System.currentTimeMillis());

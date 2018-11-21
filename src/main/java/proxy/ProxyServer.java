@@ -8,24 +8,18 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 
-import common.CephPayload;
 import common.Constants;
-import common.EpochPayload;
 import common.IRoutingTable;
 import common.LoadBalance;
 import common.UpdateRoutingPayload;
 import ceph.CephRoutingTable;
 import ceph.EntryPoint;
-import ceph.Node;
 import config.ConfigLoader;
 import config.DHTConfig;
+import schemes.ElasticDHT.ERoutingTable;
 import socket.MessageSendImpl;
 import ring.DataNode;
 import ring.RingDHTScheme;
-import ring.RingRoutingTable;
-import schemes.ElasticDHT.ElasticRoutingTable;
-import schemes.ElasticDHT.ElasticRoutingTableInstance;
-import schemes.ElasticDHT.RoutingTable;
 import socket.IMessageSend;
 import socket.Request;
 
@@ -49,8 +43,8 @@ public class ProxyServer {
                  routingTable = dNode.routingTableObj;
                  break;
              case "ELASTIC":
-                 schemes.ElasticDHT.RoutingTable r = new schemes.ElasticDHT.RoutingTable();
-                 RoutingTable.GetInstance().getRoutingTable();
+                 ERoutingTable r = new ERoutingTable();
+                 ERoutingTable.giveInstance().giveRoutingTable();
                  routingTable = r;
                  break;
              case "CEPH":

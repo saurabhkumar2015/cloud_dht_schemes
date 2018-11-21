@@ -10,7 +10,7 @@ public class RingRoutingTable {
     @Override
     public String toString() {
         return "RingRoutingTable{" +
-                "version=" + version +
+                "versionNumber=" + version +
                 ", routingMap=" + routingMap +
                 '}';
     }

@@ -8,7 +8,7 @@ public class CephRoutingTable {
     @Override
     public String toString() {
         return "CephRoutingTable{" +
-                "version=" + version +
+                "versionNumber=" + version +
                 ", tree=" + tree +
                 '}';
     }

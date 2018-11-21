@@ -1,9 +1,12 @@
 package schemes.ElasticDHT;
 
+import common.Commons;
 import common.IDataNode;
 import common.IRoutingTable;
 import config.ConfigLoader;
 import config.DHTConfig;
+
+import static common.Commons.elasticTable1;
 
 public class DataNodeElastic implements IDataNode {
 
@@ -14,7 +17,8 @@ public class DataNodeElastic implements IDataNode {
     public DataNodeElastic(int nodeId) {
     	this.config = ConfigLoader.config;
     	this.nodeId = nodeId;
-    	elasticTable  = new RoutingTable();
+    	elasticTable  = new ERoutingTable();
+		Commons.elasticTable = elasticTable1.populateRoutingTable();
     	
     }
     public static DataNodeElastic getInstance(int nodeId) {
@@ -27,8 +31,8 @@ public class DataNodeElastic implements IDataNode {
  	}
  	public void UpdateRoutingTable(IRoutingTable elasticTable) {
  		this.elasticTable = elasticTable;
- 		RoutingTable rt = (RoutingTable)elasticTable;
- 		System.out.println("New elastic table with version number : "+rt.versionNumber);
+ 		ERoutingTable rt = (ERoutingTable)elasticTable;
+ 		System.out.println("New elastic table with versionNumber number : "+rt.versionNumber);
  	
  	}
 
@@ -36,9 +40,9 @@ public class DataNodeElastic implements IDataNode {
 	public boolean writeFile(String fileName, int replicaId) {
 		int hashcode = fileName.hashCode()%1024;
 		nodeId = 0;
-		for(int i = 0; i<schemes.ElasticDHT.RoutingTable.elasticTable.length;i++) {
-			if(schemes.ElasticDHT.RoutingTable.elasticTable[i].hashIndex==hashcode) {
-				 nodeId = (Integer) schemes.ElasticDHT.RoutingTable.elasticTable[i].nodeId.get(replicaId-1);
+		for(int i = 0; i< Commons.elasticTable.length;i++) {
+			if(Commons.elasticTable[i].hashIndex==hashcode) {
+				 nodeId = (Integer) Commons.elasticTable[i].nodeId.get(replicaId-1);
 				break;
 			}
 		}
@@ -54,8 +58,8 @@ public class DataNodeElastic implements IDataNode {
 
 	public void deleteFile(String fileName) {
 		int hashcode =  fileName.hashCode();
-		for(int i = 0;i<schemes.ElasticDHT.RoutingTable.elasticTable.length;i++) {
-			if(schemes.ElasticDHT.RoutingTable.elasticTable[i].hashIndex==hashcode) {
+		for(int i = 0; i<Commons.elasticTable.length; i++) {
+			if(Commons.elasticTable[i].hashIndex==hashcode) {
 				System.out.println("File deleted from all the replicas");
 			}
 		}
@@ -65,19 +69,19 @@ public class DataNodeElastic implements IDataNode {
 
 
 	public void addNode(int nodeId) {
-		RoutingTable.GetInstance().addNode(nodeId);
+		ERoutingTable.giveInstance().addNode(nodeId);
 		// TODO Auto-generated method stub
 		
 	}
 
 	public void deleteNode(int nodeId) {
-		RoutingTable.GetInstance().deleteNode(nodeId);
+		ERoutingTable.giveInstance().deleteNode(nodeId);
 		// TODO Auto-generated method stub
 		
 	}
 
 	public void loadBalance(int nodeId, double loadFraction) {
-		RoutingTable.GetInstance().loadBalance(nodeId, loadFraction);
+		ERoutingTable.giveInstance().loadBalance(nodeId, loadFraction);
 
 		// TODO Auto-generated method stub
 		
@@ -94,7 +98,7 @@ public class DataNodeElastic implements IDataNode {
 	@Override
 	public String toString() {
 		return "DataNodeElastic [nodeId=" + nodeId + ", elasticTable=" + elasticTable + ", config=" + config
-				+ ", getRoutingTable()=" + getRoutingTable() + "]";
+				+ ", giveRoutingTable()=" + getRoutingTable() + "]";
 	}
 	public void addHashRange(String hashRange) {
 		// TODO Auto-generated method stub

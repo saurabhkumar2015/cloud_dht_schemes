@@ -4,6 +4,7 @@ import ceph.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import config.ConfigLoader;
+import schemes.ElasticDHT.ERoutingTable;
 
 import java.io.IOException;
 import java.util.Queue;
@@ -23,6 +24,17 @@ public class TestJackson {
         String str = mapper.writeValueAsString(rt);
         System.out.println(str);
         CephRoutingTable rr = mapper.readValue(str, CephRoutingTable.class);
-        System.out.println(rr);
+        System.out.println("\n\n\n\n" +rr);
+
+        ERoutingTable r = new ERoutingTable();
+        ERoutingTable.giveInstance().giveRoutingTable();
+
+        str = mapper.writeValueAsString(r);
+        System.out.println(str);
+        System.out.println("\n\n\n\n\nDEserialized::");
+        ERoutingTable rr1 = mapper.readValue(str, ERoutingTable.class);
+        System.out.println(rr1);
+
+
     }
 }

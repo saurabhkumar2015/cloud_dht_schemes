@@ -27,6 +27,8 @@ import org.apache.gossip.udp.UdpSharedGossipDataMessage;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import ring.RingRoutingTable;
+import schemes.ElasticDHT.ERoutingTable;
 
 
 @JsonTypeInfo(
@@ -48,7 +50,9 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
         @Type(value = OsdNode.class, name = "OsdNode"),
         @Type(value = OsdMap.class, name = "OsdMap"),
         @Type(value = HashGenerator.class, name = "HashGenerator"),
-        @Type(value = Node.class, name = "Node")
+        @Type(value = Node.class, name = "Node"),
+        @Type(value = RingRoutingTable.class, name = "RingRoutingTable"),
+        @Type(value = ERoutingTable.class, name = "ERoutingTable")
 })
 public class Base {
 
