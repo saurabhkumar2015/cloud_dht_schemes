@@ -6,6 +6,7 @@ import socket.Request;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 
 import static common.Constants.*;
 
@@ -34,8 +35,11 @@ public class ClientWorker {
 
             ObjectInputStream in = new ObjectInputStream(client.getInputStream());
             Request request = (Request) in.readObject();
+            
             switch (request.getType()) {
+            
                  case WRITE_FILE:
+                	
                     Payload p = (Payload) request.getPayload();
                     System.out.println("File Write:: " + p.fileName);
                      long dataNodeVersionNo = dataNode.getRoutingTable().getVersionNumber();
@@ -55,6 +59,34 @@ public class ClientWorker {
                      }
 
                     break;
+                  
+                 case ADD_FILES:
+                 	
+                     @SuppressWarnings("unchecked") 
+                     List<Payload> paylds = (List<Payload>) request.getPayload();
+                     System.out.println("Received Add Node request");
+                     long dataNodeVerNo = dataNode.getRoutingTable().getVersionNumber();
+                     
+                     for(Payload pyld:paylds) {
+	                      
+                    	 System.out.println("DataNode versionNumber:: " + dataNodeVerNo + " Sender datanode's versionNumber:: " + pyld.versionNumber);
+	                      
+                    	 if (dataNodeVerNo > pyld.versionNumber) {
+	                          System.out.println("Sender's routing table needs to be updated");
+	                          EpochPayload payload = new EpochPayload("fail", dataNode.getRoutingTable());
+	                          oos.writeObject(payload);
+	                          stream = baos.toByteArray();
+	                          out.write(stream);
+	                      } else {
+	                          dataNode.writeFile(pyld.fileName, pyld.replicaId);
+	                          EpochPayload payload = new EpochPayload("success", null);
+	                          oos.writeObject(payload);
+	                          stream = baos.toByteArray();
+	                          out.write(stream);
+	                      }
+                     }
+                     break;
+                     
                 case DELETE_FILE:
                     Payload p1 = (Payload) request.getPayload();
                     System.out.println("File Write:: " + p1.fileName);
@@ -96,7 +128,7 @@ public class ClientWorker {
                 	if((ConfigLoader.config.scheme).toUpperCase().equals("CEPH")) {
 	                	CephPayload payload = (CephPayload) request.getPayload();
 	                	System.out.println("Received move file request from proxy: "+ payload);
-	                    dataNode.UpdateRoutingTable((IRoutingTable)payload.updated_ceph_routing_table);
+	                    //dataNode.UpdateRoutingTable((IRoutingTable)payload.updated_ceph_routing_table);
 	                    dataNode.MoveFiles(payload.clusterId, payload.nodeIp, payload.nodeWeight, payload.totalWt, payload.isLoadBalance);
                 	}
                     break;
@@ -122,9 +154,13 @@ public class ClientWorker {
                case NEW_VERSION:
                 	UpdateRoutingPayload payld = (UpdateRoutingPayload) request.getPayload();
 	                System.out.println("Received update routing table request from proxy: "+ payld);
-			if(((ConfigLoader.config.scheme).toUpperCase()).equals("ELASTIC"))
-	                	dataNode.newUpdatedRoutingTable(payld.nodeId, payld.type, payld.newRoutingTable);
 	                
+	                if(((ConfigLoader.config.scheme).toUpperCase()).equals("ELASTIC"))
+	                	dataNode.newUpdatedRoutingTable(payld.nodeId, payld.type, payld.newRoutingTable);
+	              
+	                if(((ConfigLoader.config.scheme).toUpperCase()).equals("CEPH"))
+	                	dataNode.UpdateRoutingTable(payld.newRoutingTable,payld.type);
+	              
                     if(distributed) gossipNow();
 	                break;
                 default:
