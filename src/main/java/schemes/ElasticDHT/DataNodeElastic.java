@@ -107,4 +107,10 @@ public class DataNodeElastic implements IDataNode {
 	public void newUpdatedRoutingTable(int nodeId, String type, IRoutingTable rt) {
 
 	}
+	
+	@Override
+	public boolean writeAllFiles(List<Payload> payloads) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
