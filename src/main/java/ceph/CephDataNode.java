@@ -2,12 +2,16 @@ package ceph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import common.Commons;
+import common.Constants;
 import common.IDataNode;
 import common.IRoutingTable;
+import common.Payload;
 import config.ConfigLoader;
 
 public class CephDataNode  implements IDataNode{
@@ -91,7 +95,7 @@ public class CephDataNode  implements IDataNode{
 	}
     
        
-    public void UpdateRoutingTable(IRoutingTable cephrtTable)
+    public void UpdateRoutingTable(IRoutingTable cephrtTable, String updateType)
     {
     	this.cephRtTable = cephrtTable;
 		CephRoutingTable rt = (CephRoutingTable)cephrtTable;
@@ -99,7 +103,10 @@ public class CephDataNode  implements IDataNode{
     	
     	// Trigger file movement on this DataNode
     	System.out.println("File Movement has been triggered at node: " + this.NodeId);
+    	if(updateType.equals(Constants.ADD_NODE) || updateType.equals(Constants.LOAD_BALANCE))
     	this.MoveFilesOnWeightChangeInOsdMap();
+    	else
+    		this.MoveFilesOnNodeDeletion();
     }
   
 	public IRoutingTable getRoutingTable() {
@@ -118,7 +125,6 @@ public class CephDataNode  implements IDataNode{
 		
 	}
 
-	@Override
 	public void newUpdatedRoutingTable(int nodeId, String type, IRoutingTable rt) {
 
 	}
@@ -132,6 +138,7 @@ public class CephDataNode  implements IDataNode{
 	private void MoveFilesOnWeightChangeInOsdMap()
 	{
 		Map<Integer, List<DataObject>> addMap = new HashMap<>();
+		List<DataObject> removedFiles = new LinkedList<>();
 		for(DataObject obj : this.dataList)
 		{
             int destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(obj.replicaId, obj.placementGroup);
@@ -141,16 +148,24 @@ public class CephDataNode  implements IDataNode{
         		if(list == null) list = new ArrayList<>();
         		list.add(obj);
         		addMap.put(destinationNodeId, list);
+        		
+        		// Delete file from current node.
+        		removedFiles.add(obj);
             }
             
 		}
 		
+		// Delete the files from current node.
+		this.dataList.removeAll(removedFiles);
 		
+		// Send request to other data node.
 		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
     		System.out.println("file need to move from " +  this.NodeId + " to node " + e.getKey());
+    		String destinationNodeIp = ConfigLoader.config.nodesMap.get(e.getKey());
     		for(DataObject obj : e.getValue())
     		{
     			System.out.println(" Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
+    			Commons.messageSender.sendMessage(destinationNodeIp, Constants.WRITE_FILE, new Payload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
     		}
     		
     	}		
@@ -196,9 +211,11 @@ public class CephDataNode  implements IDataNode{
 		}
 		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
     		System.out.println("file need to added to node " + e.getKey());
+    		String destinationNodeIp = ConfigLoader.config.nodesMap.get(e.getKey());
     		for(DataObject obj : e.getValue())
     		{
     			System.out.println(" Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
+    			Commons.messageSender.sendMessage(destinationNodeIp, Constants.WRITE_FILE, new Payload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
     		}
     		
     	}
