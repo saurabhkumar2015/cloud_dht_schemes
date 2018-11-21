@@ -10,8 +10,8 @@ import static common.Commons.hashGenerator;
 
 public class HashGenerator implements Serializable{
 
-    private final long MAX_VALUE = 0xFFFFFFFFL;
-    private final double MAX_NODE = 15359.0;
+    private  long MAX_VALUE = 0xFFFFFFFFL;
+    private  double MAX_NODE = 16987.0;
     
     public HashGenerator() {}
     
@@ -50,9 +50,20 @@ public class HashGenerator implements Serializable{
 	
 	public int givePlacementGroupIdFromFileName(String fileName, int PlacementGroupLimit)
 	{
-		return fileName.hashCode() % PlacementGroupLimit;
+		int pgHash = fileName.hashCode() % PlacementGroupLimit;
+		if(pgHash == 0)
+			return generatevalidHash(PlacementGroupLimit);
+		
+		return Math.abs(pgHash);			
+			
 	}
 	
+	private int generatevalidHash(int PlacementGroupLimit)
+	{
+		int val = PlacementGroupLimit >> 1;
+		return val % PlacementGroupLimit;
+		
+	}
 	private double rHash(String s1,int r,String cid){
 
         long a = s1.hashCode();
