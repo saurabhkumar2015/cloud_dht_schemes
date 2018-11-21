@@ -2,10 +2,7 @@ package schemes.ElasticDHT;
 
 import common.Commons;
 import common.IRoutingTable;
-
-
 import config.ConfigLoader;
-import socket.MockMessageSender;
 
 import java.io.Serializable;
 import java.util.*;
@@ -56,9 +53,6 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 	}
 
 	public IRoutingTable deleteNode(int nodeId) {
-
-		Commons.messageSender = new MockMessageSender();
-
 		Random rn = new Random();
 		List<Integer> liveNodes = giveLiveNodes();
 		if(!liveNodes.remove((Integer)nodeId)) {
@@ -92,7 +86,7 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 		}
 		System.out.println("Node Id "+nodeId+" was deleted");
 
-
+		this.versionNumber = this.versionNumber +1 ;
 		return this;
 	}
 
@@ -139,7 +133,6 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 		// Get strength of current nodeId
 		// Randomly choose replaceNodeId
 		//
-		Commons.messageSender = new MockMessageSender();
 
 		List<Integer> liveNodes = giveLiveNodes();
 		int maxLiveNodes = liveNodes.size();
@@ -183,6 +176,7 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 
 		}
 		System.out.println("Load balanced");
+		this.versionNumber = this.versionNumber +1 ;
 		return this;
 	}
 
@@ -243,9 +237,7 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 	}
 
 	public IRoutingTable addNode(int nodeId) {
-		Commons.messageSender = new MockMessageSender();
 
-		
 		List<Integer> liveNodes = giveLiveNodes();
 		if(liveNodes.contains((Integer) nodeId)) {
 			System.out.println("Node Id " + nodeId + "already exists in Routing Table.");
@@ -285,9 +277,9 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 		if(ratio<config.ConfigLoader.config.resizeFactor) {
 			elasticTable = Resize();
 		}
-		
 
-		// TODO Auto-generated method stub
+
+		this.versionNumber = this.versionNumber +1;
 		return this;
 	}
 

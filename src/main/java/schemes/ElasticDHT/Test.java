@@ -2,13 +2,16 @@ package schemes.ElasticDHT;
 
 import java.io.IOException;
 
+import common.Commons;
 import config.ConfigLoader;
+import socket.MockMessageSender;
 
 public class Test {
 	@SuppressWarnings("static-access")
 	public static void main(String arg[]) {
 		try {
 			ConfigLoader.init("//Users//sreekrishnasridhar//cloud_dht_schemes//config.conf");
+			Commons.messageSender = new MockMessageSender();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
