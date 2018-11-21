@@ -34,7 +34,6 @@ public class DataNode implements IDataNode {
 
 	//Send routing table
 	public IRoutingTable getRoutingTable() {
-		System.out.println("hey");
 		return this.routingTableObj;
 	}
 	

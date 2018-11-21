@@ -57,7 +57,6 @@ public class ClientWorker {
                          stream = baos.toByteArray();
                          out.write(stream);
                      }
-
                     break;
                   
                  case ADD_FILES:

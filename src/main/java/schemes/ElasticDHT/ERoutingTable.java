@@ -326,12 +326,8 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 		}
 		return tempMap;
 	}
-	
-	
 
 	public long getVersionNumber() {
 		return this.versionNumber;
 	}
-
-
 }
