@@ -38,7 +38,7 @@ public class DataNode implements IDataNode {
 	}
 	
 	//update to latest routing table
-	public void UpdateRoutingTable(IRoutingTable ringNewTable) {
+	public void UpdateRoutingTable(IRoutingTable ringNewTable, String type) {
 		this.routingTableObj = (RingRoutingTable) ringNewTable;
 		System.out.println("New versionNumber: " +this.routingTableObj.versionNumber);
 		//this.routingTableObj.printRoutingTable();

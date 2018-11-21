@@ -29,7 +29,7 @@ public class DataNodeElastic implements IDataNode {
 	}
 	public void MoveFiles(int clusterIdofNewNode, String nodeIp, double newnodeWeight, double clusterWeight) {
 	}
-	public void UpdateRoutingTable(IRoutingTable elasticTable) {
+	public void UpdateRoutingTable(IRoutingTable elasticTable, String type) {
 		Commons.elasticERoutingTable = (ERoutingTable) elasticTable;
 		System.out.println("New elastic table with versionNumber number : "+Commons.elasticERoutingTable.versionNumber);
 	}
