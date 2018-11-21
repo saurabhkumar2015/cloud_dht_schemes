@@ -149,12 +149,12 @@ public class DataNodeElastic implements IDataNode {
 			for(int  i = 0;i<oldTable.length;i++) {
 				for(int j = 0;j<Commons.elasticERoutingTable.rFactor;j++) {
 					if(oldTable[i].nodeId.get(j)==this.nodeId&&oldTable[i].nodeId.get(j)!=newTable[i].nodeId.get(j)) {
-						int oldNodeId = oldTable[i].nodeId.get(j);
+						int updatedNodeId = newTable[i].nodeId.get(j);
 						Payload p = new Payload("", j, this.getRoutingTable().getVersionNumber(),this.nodeId ,i);
-						List<Payload> list = nodeMap.get(oldNodeId);
+						List<Payload> list = nodeMap.get(updatedNodeId);
 						if(list == null) list = new ArrayList<Payload>();
 						list.add(p);
-						nodeMap.put(oldNodeId, list);
+						nodeMap.put(updatedNodeId, list);
 					}
 				}
 			}
