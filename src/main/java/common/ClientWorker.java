@@ -96,7 +96,7 @@ public class ClientWorker {
                     System.out.println("Add node " + nodeId);
                     dataNode.addNode(nodeId);
                     if(distributed) {
-                        gossipNow();
+                        gossipNow(ADD_NODE, nodeId);
                         System.out.println("Sender's routing table needs to be updated");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
                     }
@@ -106,7 +106,7 @@ public class ClientWorker {
                     System.out.println("Delete node " + nodeId1);
                     dataNode.deleteNode(nodeId1);
                     if(distributed) {
-                        gossipNow();
+                        gossipNow(DELETE_NODE,nodeId1);
                         System.out.println("Sender's routing table needs to be updated");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
                     }
@@ -116,7 +116,7 @@ public class ClientWorker {
                     System.out.println("Load Balance    " + lb);
                     dataNode.loadBalance(lb.nodeId, lb.loadFactor);
                     if(distributed) {
-                        gossipNow();
+                        gossipNow(LOAD_BALANCE, lb.nodeId);
                         System.out.println("Sender's routing table needs to be updated");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
                     }
@@ -159,12 +159,12 @@ public class ClientWorker {
 	              
 	                if(((ConfigLoader.config.scheme).toUpperCase()).equals("CEPH"))
 	                	dataNode.UpdateRoutingTable(payld.newRoutingTable,payld.type);
-	              
-                    if(distributed) gossipNow();
+
 	                break;
                 default:
                     throw new Exception("Unsupported message type");
             }
+            client.close();
         } catch (Exception e) {
             e.printStackTrace();
             exceptionCount++;
@@ -179,14 +179,18 @@ public class ClientWorker {
         out.write(stream);
     }
 
-    private void gossipNow() throws IOException {
+    private void gossipNow(String type, int nodeId) throws IOException {
         System.out.println("Please Updated Share data");
         SharedGossipDataMessage message = new SharedGossipDataMessage();
         message.setExpireAt(System.currentTimeMillis()+120000);
         message.setTimestamp(System.currentTimeMillis());
         message.setKey(Constants.ROUTING_TABLE);
         message.setNodeId(Integer.toString(Commons.nodeId));
-        message.setPayload(dataNode.getRoutingTable());
+        RoutingTableWrapper wrapper = new RoutingTableWrapper();
+        wrapper.table = dataNode.getRoutingTable();
+        wrapper.type = type;
+        wrapper.nodeId = nodeId;
+        message.setPayload(wrapper);
         Commons.gossip.gossipSharedData(message);
         System.out.println("Yes Updated Share data");
     }

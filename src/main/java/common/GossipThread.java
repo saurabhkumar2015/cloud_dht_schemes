@@ -18,23 +18,33 @@ public class GossipThread extends Thread{
                 Thread.sleep(2000L);
                 SharedGossipDataMessage msg  = Commons.gossip.findSharedData(ROUTING_TABLE);
                 if(msg != null) {
-                    IRoutingTable r = null;
+                    RoutingTableWrapper r = null;
                     switch (ConfigLoader.config.scheme.toLowerCase()){
                         case "ceph":
-                            r = (IRoutingTable) msg.getPayload();
+                            r = (RoutingTableWrapper) msg.getPayload();
                             break;
                         case "elastic":
-                            r = (IRoutingTable) msg.getPayload();
+                            r = (RoutingTableWrapper) msg.getPayload();
                            break;
                         case "ring":
-                            r = (IRoutingTable) msg.getPayload();
+                            r = (RoutingTableWrapper) msg.getPayload();
                             break;
                     }
-                    if (r.getVersionNumber() > dataNode.getRoutingTable().getVersionNumber()) {
+                    if (r.table.getVersionNumber() > dataNode.getRoutingTable().getVersionNumber()) {
                         System.out.println("Routing Table Recieved from Gossip::" + dataNode.getRoutingTable().getVersionNumber());
                         msg.setTimestamp(System.currentTimeMillis());
                         Commons.gossip.gossipSharedData(msg);
-                        dataNode.UpdateRoutingTable(r);
+                        switch (ConfigLoader.config.scheme.toLowerCase()) {
+                            case "ceph":
+                                dataNode.UpdateRoutingTable(r.table, r.type );
+                                break;
+                            case "elastic":
+                                dataNode.UpdateRoutingTable(r.table, r.type );
+                                break;
+                            case "ring":
+                                dataNode.UpdateRoutingTable(r.table, r.type );
+                                break;
+                        }
                     }
                 }
             } catch (InterruptedException e) {
