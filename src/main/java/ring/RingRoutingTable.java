@@ -223,8 +223,11 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
     		System.out.println("NodeId: "+routingMap.get(listOfHashesForNewHash.get(i))+" hashStartValue: "+listOfHashesForNewHash.get(i));
     	}
     	*/
+    	++this.numNodeIds;
+    	
     	String nodeIp = this.physicalTable.get(routingMap.get(listOfHashesForNewHash.get(0)));
-    	String payload = String.valueOf(newHash)+"-"+String.valueOf(listOfHashesForNewHash.get(1)-1);
+    	String payload = String.valueOf(newHash)+"-"+String.valueOf(listOfHashesForNewHash.get(1)-1)+":"+nodeIdInt;
+    	
     	int removeNodeId = routingMap.get(listOfHashesForNewHash.get(0));
     	if(removeNodeId == Commons.nodeId)
     		System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " removed from this Node :"+ removeNodeId);
@@ -234,7 +237,7 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
 		}
     	
     	nodeIp = this.physicalTable.get(routingMap.get(listOfHashesForNewHash.get(listOfHashesForNewHash.size()-1)));
-    	payload = String.valueOf(listOfHashesForNewHash.get(0))+"-"+String.valueOf((newHash-1));
+    	payload = String.valueOf(listOfHashesForNewHash.get(0))+"-"+String.valueOf((newHash-1))+":"+"-1";
     	int rNodeId = routingMap.get(listOfHashesForNewHash.get(listOfHashesForNewHash.size()-1));
     	if(rNodeId == Commons.nodeId)
 			System.out.println("Hash range "+ listOfHashesForNewHash.get(0)+" - "+(newHash-1)+ " removed from same Node :"+ rNodeId);
@@ -242,11 +245,14 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
 			System.out.println("Hash range "+ listOfHashesForNewHash.get(0)+" - "+(newHash-1)+ " removed from Node :"+ rNodeId);
 			Commons.messageSender.sendMessage(nodeIp, Constants.REMOVE_HASH, payload);
 		}
+    	
+    	/*
     	++this.numNodeIds;
     	nodeIp = this.physicalTable.get(nodeIdInt);
     	payload = String.valueOf(newHash)+"-"+ (listOfHashesForNewHash.get(1)-1);
     	System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " added to Node :"+ nodeIdInt);
     	Commons.messageSender.sendMessage(nodeIp, Constants.ADD_HASH, payload);
+    	*/
     	
     	//update physical table
     	//this.routingTableObj.physicalTable.put(newNodeId, nodeId);
