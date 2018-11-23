@@ -2,8 +2,11 @@ package ceph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import common.IRoutingTable;
@@ -46,7 +49,7 @@ public class CephDataNodeStandalone {
 		// Find the node on which it should go.
 		int destinationNodeId = this.cephRtTable.giveNodeId(fileName, replicaId);
 		
-		System.out.println("Write file request received for FileName: " + fileName + " replicaId: " + replicaId + " on node " + (destinationNodeId) );
+		//System.out.println("Write file request received for FileName: " + fileName + " replicaId: " + replicaId + " on node " + (destinationNodeId) );
 
 		// Add the file to the hashmap with the given node id
 		if(dataList.containsKey(destinationNodeId))
@@ -112,9 +115,28 @@ public class CephDataNodeStandalone {
 		
 	}
 	
+	public void showDataNodeState()
+	{
+		for (Integer key : this.dataList.keySet())
+		{
+		
+		Set<DataObject> pgSet = new HashSet<>();
+		for(DataObject obj : this.dataList.get(key))
+		{
+			pgSet.add(obj);
+		}
+		System.out.println("Data Node " + key + " contains the following PlacementGroup->");
+		for(DataObject pload : pgSet)
+		{
+			System.out.println("Placementgroup: " + pload.placementGroup + " with replica: " + pload.replicaId);
+		}
+	 }
+	}
+	
 	private void MoveFilesOnWeightChangeInOsdMap()
 	{
 		Map<Integer, List<DataObject>> addMap = new HashMap<>();
+		List<DataObject> removedFiles = new LinkedList<>();
 		for (Integer key : this.dataList.keySet())
 			{
 		        for(DataObject obj : this.dataList.get(key))
@@ -126,17 +148,28 @@ public class CephDataNodeStandalone {
 	            		if(list == null) list = new ArrayList<>();
 	            		list.add(obj);
 	            		addMap.put(destinationNodeId, list);
+	            		
+	            		// Delete file from current node.
+	            		removedFiles.add(obj);
                   }
             
 		        }
 			
+		        // Remove the file locally 
+		        this.dataList.get(key).removeAll(removedFiles);
 		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
-    		System.out.println("file need to move from " +  key + " to node " + e.getKey());
+			Set<DataObject> pgSet = new HashSet<>();
+    		System.out.println("FILES need to move from " +  key + " to node " + e.getKey());
     		for(DataObject obj : e.getValue())
     		{
-    			System.out.println(" Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
+    			pgSet.add(obj);
+    			//System.out.println("fileName: " +obj.fileName + " Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
     		}
     		
+    		for(DataObject pload : pgSet)
+    		{
+    			System.out.println("write pgroup: " + pload.placementGroup + " with replica: " + pload.replicaId);
+    		}
     	}
 			}
 		
@@ -185,10 +218,17 @@ public class CephDataNodeStandalone {
 			
 		}
 		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
+			Set<CephPayload> pgSet = new HashSet<>();
     		System.out.println("file need to added to node " + e.getKey());
     		for(DataObject obj : e.getValue())
     		{
-    			System.out.println(" Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
+    			pgSet.add(new CephPayload(obj.placementGroup,obj.replicaId));
+    		   //	System.out.println("fileName: " +obj.fileName + " Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
+    		}
+    		
+    		for(CephPayload pload : pgSet)
+    		{
+    			System.out.println("write pgroup: " + pload.placementGroup + " with replica: " + pload.replicaId);
     		}
     	}
 		
