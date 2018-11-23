@@ -218,15 +218,15 @@ public class CephDataNodeStandalone {
 			
 		}
 		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
-			Set<CephPayload> pgSet = new HashSet<>();
+			Set<DataObject> pgSet = new HashSet<>();
     		System.out.println("file need to added to node " + e.getKey());
     		for(DataObject obj : e.getValue())
     		{
-    			pgSet.add(new CephPayload(obj.placementGroup,obj.replicaId));
+    			pgSet.add(obj);
     		   //	System.out.println("fileName: " +obj.fileName + " Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
     		}
     		
-    		for(CephPayload pload : pgSet)
+    		for(DataObject pload : pgSet)
     		{
     			System.out.println("write pgroup: " + pload.placementGroup + " with replica: " + pload.replicaId);
     		}
