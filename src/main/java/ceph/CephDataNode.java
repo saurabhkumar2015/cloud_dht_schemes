@@ -2,10 +2,12 @@ package ceph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import common.Commons;
 import common.Constants;
@@ -69,6 +71,7 @@ public class CephDataNode  implements IDataNode{
 	@Override
 	public boolean writeAllFiles(List<Payload> payloads) {
 		//step 1. find the placementGroupId for file
+		Set<DataObject> pgSet = new HashSet<>();
 		for(Payload pload : payloads)
 		{
 				int placementGroupId = this.hashGenerator.givePlacementGroupIdFromFileName(pload.fileName, ConfigLoader.config.PlacementGroupMaxLimit);
@@ -76,11 +79,17 @@ public class CephDataNode  implements IDataNode{
 				// Find the node on which it should go.
 				int destinationNodeId = this.cephRtTable.giveNodeId(pload.fileName, pload.replicaId);
 				
-				System.out.println("Write file request received for FileName: " + pload.fileName + " pGroup: " + placementGroupId + " replicaId: " + pload.replicaId + " on node " + (destinationNodeId) );
+				//System.out.println("Write file request received for FileName: " + pload.fileName + " pGroup: " + placementGroupId + " replicaId: " + pload.replicaId + " on node " + (destinationNodeId) );
 
 				// Step 2: push the Data to the DataNode if not present in DataList
-				DataObject obj = new DataObject(placementGroupId, pload.replicaId,pload.fileName);
+				DataObject obj = new DataObject(placementGroupId, pload.replicaId, pload.fileName);
 				dataList.add(obj);
+				pgSet.add(obj);
+		}
+		
+		for(DataObject pload : pgSet)
+		{
+			System.out.println("write pgroup: " + pload.replicaId + " with replica: " + pload.replicaId);
 		}
 				return true;
 	}
@@ -89,9 +98,10 @@ public class CephDataNode  implements IDataNode{
 		// TODO Auto-generated method stub				
 				// Step 1: Remove the Data from the DataNode
 		System.out.println("Delete file request received for FileName: " + fileName);
+		int placementGroupForFile = this.hashGenerator.givePlacementGroupIdFromFileName(fileName, ConfigLoader.config.PlacementGroupMaxLimit);
 				for(DataObject obj : dataList)
 				{
-					if(obj.fileName == fileName)
+					if(obj.placementGroup == placementGroupForFile)
 						dataList.remove(obj);
 				}
 	}
@@ -156,6 +166,20 @@ public class CephDataNode  implements IDataNode{
 		
 	}
 	
+	public void showDataNodeState()
+	{
+		Set<DataObject> pgSet = new HashSet<>();
+		for(DataObject obj : this.dataList)
+		{
+			pgSet.add(obj);
+		}
+		System.out.println("Data Node " + this.NodeId + " contains the following PlacementGroup->");
+		for(DataObject pload : pgSet)
+		{
+			System.out.println("Placementgroup: " + pload.placementGroup + " with replica: " + pload.replicaId);
+		}
+	}
+	
 	private void MoveFilesOnWeightChangeInOsdMap()
 	{
 		Map<Integer, List<DataObject>> addMap = new HashMap<>();
@@ -185,12 +209,19 @@ public class CephDataNode  implements IDataNode{
     		String destinationNodeIp = ConfigLoader.config.nodesMap.get(e.getKey());
     		List<Payload> filesTobeMove = new LinkedList<>();
     		filesTobeMove.clear();
+    		Set<DataObject> pgSet = new HashSet<>();
     		for(DataObject obj : e.getValue())
     		{
-    			System.out.println("fileName: " + obj.fileName + " Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
+    			//System.out.println(" Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
     			filesTobeMove.add(new Payload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
+    			pgSet.add(obj);
     		}
     		
+    		// Print at console for visibility
+    		for(DataObject pload : pgSet)
+    		{
+    			System.out.println("Move pgroup: " + pload.placementGroup + " with replica: " + pload.replicaId);
+    		}
     		// send the aggregated request to the destination node. 
     		Commons.messageSender.sendMessage(destinationNodeIp, Constants.ADD_FILES, filesTobeMove);
     	}		
@@ -239,12 +270,18 @@ public class CephDataNode  implements IDataNode{
     		String destinationNodeIp = ConfigLoader.config.nodesMap.get(e.getKey());
     		List<Payload> filesTobeMove = new LinkedList<>();
     		filesTobeMove.clear();
+    		Set<DataObject> pgSet = new HashSet<>();
     		for(DataObject obj : e.getValue())
     		{
-    			System.out.println("fileName" + obj.fileName + " Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
+    			//System.out.println("fileName" + obj.fileName + " Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
     			filesTobeMove.add(new Payload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
+    			pgSet.add(obj);
     		}
-    		
+    		// Print at console for visibility
+    		for(DataObject pload : pgSet)
+    		{
+    			System.out.println("Move pgroup: " + pload.placementGroup + " with replica: " + pload.replicaId);
+    		}
     		// send the aggregated request to the destination node. 
     		Commons.messageSender.sendMessage(destinationNodeIp, Constants.ADD_FILES, filesTobeMove);
     		
