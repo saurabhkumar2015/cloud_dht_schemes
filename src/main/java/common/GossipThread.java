@@ -15,7 +15,7 @@ public class GossipThread extends Thread{
     public void run() {
         while(true) {
             try {
-                Thread.sleep(2000L);
+                Thread.sleep(250L);
                 SharedGossipDataMessage msg  = Commons.gossip.findSharedData(ROUTING_TABLE);
                 if(msg != null) {
                     RoutingTableWrapper r = null;
@@ -30,19 +30,20 @@ public class GossipThread extends Thread{
                             r = (RoutingTableWrapper) msg.getPayload();
                             break;
                     }
-                    if (r.table.getVersionNumber() > dataNode.getRoutingTable().getVersionNumber()) {
-                        System.out.println("Routing Table Recieved from Gossip::" + dataNode.getRoutingTable().getVersionNumber());
+                    long oldVersion = dataNode.getRoutingTable().getVersionNumber();
+                    if (r.table.getVersionNumber() > oldVersion) {
+                        System.out.println("GOSSIP RECEIVED NEW ROUTING TABLE VERSION::" +r.table.getVersionNumber() + " OLD VERSION WAS:"+ oldVersion );
                         msg.setTimestamp(System.currentTimeMillis());
                         Commons.gossip.gossipSharedData(msg);
-                        switch (ConfigLoader.config.scheme.toLowerCase()) {
-                            case "ceph":
-                                dataNode.UpdateRoutingTable(r.table, r.type );
+                        switch((ConfigLoader.config.scheme).toUpperCase()) {
+                            case "ELASTIC":
+                                dataNode.newUpdatedRoutingTable(r.nodeId, r.type, r.table);
                                 break;
-                            case "elastic":
-                                dataNode.UpdateRoutingTable(r.table, r.type );
+                            case "CEPH":
+                                dataNode.UpdateRoutingTable(r.table,r.type);
                                 break;
-                            case "ring":
-                                dataNode.UpdateRoutingTable(r.table, r.type );
+                            case "RING":
+                                dataNode.UpdateRoutingTable(r.table,r.type);
                                 break;
                         }
                     }

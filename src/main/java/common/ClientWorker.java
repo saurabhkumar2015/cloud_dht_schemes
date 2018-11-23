@@ -92,19 +92,25 @@ public class ClientWorker {
                     break;
                 case ADD_NODE:
                     Integer nodeId = (Integer) request.getPayload();
-                    System.out.println("Add node " + nodeId);
-                    dataNode.addNode(nodeId);
                     if(distributed) {
+                        IRoutingTable table = dataNode.getRoutingTable().addNode(nodeId);
+                        System.out.println("ADD NODE ROUTING TABLE UPDATED TO VERSION:" + table.getVersionNumber());
+                        updates(nodeId, table, ADD_NODE);
                         gossipNow(ADD_NODE, nodeId);
-                        System.out.println("Sender's routing table needs to be updated");
+                        System.out.println("New Version  of Routing Table sent to control client");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
+                    }
+                    else{
+                        System.out.println("Add node " + nodeId);
+                        dataNode.addNode(nodeId);
                     }
                     break;
                 case DELETE_NODE:
                     Integer nodeId1 = (Integer) request.getPayload();
-                    System.out.println("Delete node " + nodeId1);
-                    dataNode.deleteNode(nodeId1);
                     if(distributed) {
+                        IRoutingTable table = dataNode.getRoutingTable().deleteNode(nodeId1);
+                        System.out.println("DELETE NODE ROUTING TABLE UPDATED TO VERSION:" + table.getVersionNumber());
+                        updates(nodeId1, table, DELETE_NODE);
                         gossipNow(DELETE_NODE,nodeId1);
                         System.out.println("Sender's routing table needs to be updated");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
@@ -113,11 +119,15 @@ public class ClientWorker {
                 case LOAD_BALANCE:
                     LoadBalance lb = (LoadBalance) request.getPayload();
                     System.out.println("Load Balance    " + lb);
-                    dataNode.loadBalance(lb.nodeId, lb.loadFactor);
                     if(distributed) {
+                        IRoutingTable table  = dataNode.getRoutingTable().loadBalance(lb.nodeId, lb.loadFactor);
+                        System.out.println("LOAD BALANCE ROUTING TABLE UPDATED TO VERSION:" + table.getVersionNumber());
+                        updates(lb.nodeId, table, LOAD_BALANCE);
                         gossipNow(LOAD_BALANCE, lb.nodeId);
-                        System.out.println("Sender's routing table needs to be updated");
+                        System.out.println("New Version  of Routing Table sent to control client");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
+                    }else {
+                        dataNode.loadBalance(lb.nodeId, lb.loadFactor);
                     }
                     break;
                     
@@ -152,16 +162,18 @@ public class ClientWorker {
                case NEW_VERSION:
                 	UpdateRoutingPayload payld = (UpdateRoutingPayload) request.getPayload();
 	                System.out.println("Received update routing table request from proxy");
-	                
-	                if(((ConfigLoader.config.scheme).toUpperCase()).equals("ELASTIC"))
-	                	dataNode.newUpdatedRoutingTable(payld.nodeId, payld.type, payld.newRoutingTable);
-	              
-	                if(((ConfigLoader.config.scheme).toUpperCase()).equals("CEPH"))
-	                	dataNode.UpdateRoutingTable(payld.newRoutingTable,payld.type);
-	                
-	                if(((ConfigLoader.config.scheme).toUpperCase()).equals("RING"))
-	                	dataNode.UpdateRoutingTable(payld.newRoutingTable, payld.type);
 
+                   switch (((ConfigLoader.config.scheme).toUpperCase())) {
+                       case "ELASTIC":
+                           dataNode.newUpdatedRoutingTable(payld.nodeId, payld.type, payld.newRoutingTable);
+                           break;
+                       case "CEPH":
+                           dataNode.UpdateRoutingTable(payld.newRoutingTable, payld.type);
+                           break;
+                       case "RING":
+                           dataNode.UpdateRoutingTable(payld.newRoutingTable, payld.type);
+                           break;
+                   }
 	                break;
                 default:
                     throw new Exception("Unsupported message type");
@@ -173,6 +185,18 @@ public class ClientWorker {
         }
     }
 
+    private void updates(Integer nodeId, IRoutingTable table, String type) {
+
+        switch((ConfigLoader.config.scheme).toUpperCase()) {
+            case "ELASTIC":
+                dataNode.newUpdatedRoutingTable(nodeId, type, table);
+            case "CEPH":
+                dataNode.UpdateRoutingTable(table, type);
+            case "RING":
+                dataNode.UpdateRoutingTable(table, type);
+        }
+    }
+
     private void sendRoutingTable(DataOutputStream out, ByteArrayOutputStream baos, ObjectOutputStream oos, String success, IRoutingTable routingTable) throws IOException {
         byte[] stream;
         EpochPayload payload = new EpochPayload(success, routingTable);
@@ -181,8 +205,7 @@ public class ClientWorker {
         out.write(stream);
     }
 
-    private void gossipNow(String type, int nodeId) throws IOException {
-        System.out.println("Please Updated Share data");
+    private void gossipNow(String type, int nodeId) {
         SharedGossipDataMessage message = new SharedGossipDataMessage();
         message.setExpireAt(System.currentTimeMillis()+120000);
         message.setTimestamp(System.currentTimeMillis());
@@ -194,6 +217,6 @@ public class ClientWorker {
         wrapper.nodeId = nodeId;
         message.setPayload(wrapper);
         Commons.gossip.gossipSharedData(message);
-        System.out.println("Yes Updated Share data");
+        System.out.println("GOSSIP MESSAGE SENT WITH NEW VERSION:" + wrapper.table.getVersionNumber());
     }
 }

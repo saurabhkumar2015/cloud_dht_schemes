@@ -32,7 +32,7 @@ public class CephRoutingTable implements IRoutingTable, Serializable {
         mapInstance.AddExtraNodeToOsdMap(nodeId);
         mapInstance.PopulateWeightOfInternalNode();
         this.versionNumber++;
-        return CephRoutingTable.giveInstance();
+        return this;
     }
 
 

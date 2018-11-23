@@ -49,7 +49,7 @@ public class ControlClient {
                         if(distributed)
                         {
                             String node = config.nodesMap.get(nodeId);
-                            System.out.print("Add Node "+ id +" sent to DataNode:"+node);
+                            System.out.print("Add Node "+ id +" sent to DataNode:"+nodeId+ "\n");
                             messageSender.sendMessage(node , ADD_NODE, i);
                         }
                         else{
@@ -69,7 +69,7 @@ public class ControlClient {
                         }
                         if(distributed) {
                             String node = config.nodesMap.get(nodeId);
-                            System.out.print("Delete Node "+ id +" sent to DataNode:"+node);
+                            System.out.print("Delete Node "+ id +" sent to DataNode:"+nodeId + "\n");
                             messageSender.sendMessage(config.nodesMap.get(nodeId), DELETE_NODE, i);
                         }
                         else {
@@ -86,7 +86,7 @@ public class ControlClient {
                     double factor = Double.parseDouble(ids[1].trim());
                     if(distributed) {
                         String sNode = config.nodesMap.get(nodeId);
-                        System.out.print("Load Balance request for node id " + node+" sent to DataNode:"+sNode);
+                        System.out.print("Load Balance request for node id " + node+" sent to DataNode:"+nodeId+ "\n");
                         messageSender.sendMessage(sNode, LOAD_BALANCE, new LoadBalance(node, factor));
                     }
                     else {

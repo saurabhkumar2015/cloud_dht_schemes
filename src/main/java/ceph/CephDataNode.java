@@ -141,12 +141,10 @@ public class CephDataNode  implements IDataNode{
     }
   
 	public IRoutingTable getRoutingTable() {
-		// return the routing table Instance of the Data Node
 		return this.cephRtTable;
 	}
 
 	public void setRoutingTable(IRoutingTable table) {
-		// set the routing table Instance for the Data node.
 		this.cephRtTable = table;
 		
 	}
