@@ -44,7 +44,7 @@ public class ProxyServer {
                  break;
              case "ELASTIC":
                  ERoutingTable r = new ERoutingTable();
-                 ERoutingTable.giveInstance().giveRoutingTable();
+                 r.giveInstance().giveRoutingTable();
                  routingTable = r;
                  break;
              case "CEPH":

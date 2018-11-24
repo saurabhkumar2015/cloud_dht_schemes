@@ -27,7 +27,7 @@ public class Commons {
             case "ELASTIC":
             case "elastic":
                 ERoutingTable r = new ERoutingTable();
-                ERoutingTable.giveInstance().giveRoutingTable();
+                r.giveInstance().giveRoutingTable();
                 return r;
             case "CEPH":
             case "ceph":
@@ -68,7 +68,7 @@ public class Commons {
                 break;
             case "ELASTIC":
                 ERoutingTable r = new ERoutingTable();
-                ERoutingTable.giveInstance().giveRoutingTable();
+                r.giveInstance().giveRoutingTable();
                 routingTable = r;
                 break;
             case "CEPH":
