@@ -413,7 +413,7 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
 				initialTotalHashRang = (this.MAX_HASH - myHashVal)+ succHashVal;
 			}
 			else {
-				initialTotalHashRang = listOfAssociatedHashes.get(2)-listOfAssociatedHashes.get(1);
+				initialTotalHashRang = listOfAssociatedHashesForSucc.get(1)-listOfAssociatedHashesForSucc.get(0);
 			}
 	    	System.out.println("Total number of hashes handled so far, by this node is: "+initialTotalHashRang);
 			int numOfHashesToBeRemoved = (int) Math.ceil(initialTotalHashRang*(1.0-loadFraction));
