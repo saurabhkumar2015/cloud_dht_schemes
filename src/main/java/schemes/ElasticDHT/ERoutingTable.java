@@ -80,7 +80,7 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 				//Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(replaceNodeId), ADD_FILES, hashNodeIdReplicaAdd);
 				
 				elasticTable[i].nodeId.set(k, replaceNodeId);
-				System.out.println("The nodeId "+nodeId+" which was in hash bucket "+elasticTable[i].hashIndex + "now has "+replaceNodeId);
+				System.out.println("The nodeId "+nodeId+" which was in hash bucket "+elasticTable[i].hashIndex + "now has node Id "+replaceNodeId);
 			}
 
 			// check if nodeId is in hash and get that index
@@ -161,14 +161,14 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 				nodeIndex = rn.nextInt(maxLiveNodes);
 
 			}
-			Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(nodeId), MOVE_FILE, hashNodeIdTrueMapPayload);
+			//Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(nodeId), MOVE_FILE, hashNodeIdTrueMapPayload);
 			System.out.println("Moving files with hashbucket value = "+key);
 			
 			elasticTable[key].nodeId.set(e.getValue(), liveNodes.get(nodeIndex));
 			Map<Integer,Integer> hashNodeIdNewNodePayload = new HashMap<Integer,Integer>();
 			hashNodeIdNewNodePayload.put(key, liveNodes.get(nodeIndex));
 
-			Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(liveNodes.get(nodeIndex)), ADD_FILES,hashNodeIdNewNodePayload );
+			//Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(liveNodes.get(nodeIndex)), ADD_FILES,hashNodeIdNewNodePayload );
 			elasticTable[key].nodeId.set(e.getValue(), liveNodes.get(nodeIndex));
 			System.out.println(key + " was the hash value. It  moved from " + nodeId + "to " + liveNodes.get(nodeIndex));
 			// System.out.println(elasticTable[e.getKey().intValue()]+ " :"+
@@ -268,8 +268,8 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 						+ nodeId);
 				//Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(nodeId), ADD_FILES, hashNodeIdReplicaAdd);
 				elasticTable[index].nodeId.set(subIndex, nodeId);
-				System.out.println("After Add node  in this hash " + elasticTable[index].hashIndex + "which had" + previous + ", now has"
-						+ elasticTable[index].nodeId.get(subIndex));
+				System.out.println("After Add bucket " + elasticTable[index].hashIndex + "change to " + elasticTable[index].nodeId.get(subIndex) + ", from"
+						+ previous);
 			}
 		}
 		liveNodes = giveLiveNodes();
