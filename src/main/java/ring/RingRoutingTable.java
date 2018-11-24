@@ -173,11 +173,12 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
         	}
     		//System.out.println("\n");
         	//Print List of nodes associated with given hash value
+    		/*
         	System.out.println("List of nodes under consideration now:"+listOfNodesForGivenHash.size());
         	for (int i=0; i<listOfNodesForGivenHash.size();i++) {
         		//System.out.println(i);
         		System.out.println("NodeId: "+listOfNodesForGivenHash.get(i)+" hashStartValue: "+listOfHashesForGivenHash.get(i));
-        	}
+        	}*/
     		return listOfHashesForGivenHash;
     	}
     	else {
@@ -246,13 +247,11 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
 			Commons.messageSender.sendMessage(nodeIp, Constants.REMOVE_HASH, payload);
 		}
     	
-    	/*
-    	++this.numNodeIds;
     	nodeIp = this.physicalTable.get(nodeIdInt);
     	payload = String.valueOf(newHash)+"-"+ (listOfHashesForNewHash.get(1)-1);
     	System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " added to Node :"+ nodeIdInt);
-    	Commons.messageSender.sendMessage(nodeIp, Constants.ADD_HASH, payload);
-    	*/
+    	//Commons.messageSender.sendMessage(nodeIp, Constants.ADD_HASH, payload);
+    
     	
     	//update physical table
     	//this.routingTableObj.physicalTable.put(newNodeId, nodeId);
@@ -299,10 +298,19 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
     	}*/
     	System.out.println("\n");
     	System.out.println("Deleting node: "+nodeIdInt);
+    	
+    	//predecessor to take care of deleted node's hash range
+    	int predNodeId = routingMap.get(predecessors.get(0));
+    	String predIp = this.physicalTable.get(predNodeId);
+    	String payload = String.valueOf((deleteHash))+"-" + String.valueOf((listOfAssociatedHashes.get(1))-1);
+    	System.out.println("Hash range "+ payload +" added to predecessor: "+ predNodeId);
+    	Commons.messageSender.sendMessage(predIp, Constants.ADD_HASH, payload);
+    	
+    	//predecessor's hash range to be added in the last replica node
     	int nid = routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1));
     	String nodeIp = this.physicalTable.get(nid);
-    	String payload = String.valueOf(predecessors.get(0)) +"-"+String.valueOf((deleteHash-1));
-    	System.out.println("Hash range "+ predecessors.get(0)+" - "+ (deleteHash-1) +" added to "+routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
+    	payload = String.valueOf(predecessors.get(0)) +"-"+String.valueOf((deleteHash-1));
+    	System.out.println("Hash range "+ payload +" added to last replica: "+ nid);
     	Commons.messageSender.sendMessage(nodeIp, Constants.ADD_HASH, payload);
     	
     	//update routing map

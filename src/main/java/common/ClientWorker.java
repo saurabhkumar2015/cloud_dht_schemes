@@ -149,13 +149,13 @@ public class ClientWorker {
 
                 case ADD_HASH:
                 	String hashRangeToBeAdded = (String) request.getPayload();
-                	System.out.println("Received hash range add request: "+ hashRangeToBeAdded);
+                	System.out.println("Received hash bucket add request");
                 	dataNode.addHashRange(hashRangeToBeAdded);
                     break;
 
                 case REMOVE_HASH:
                 	String hashRangeToBeDeleted = (String) request.getPayload();
-                	System.out.println("Received hash range delete request: "+ hashRangeToBeDeleted);
+                	System.out.println("Received hash bucket delete request: ");
                 	dataNode.deleteFile(hashRangeToBeDeleted);
                     break;
 

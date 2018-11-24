@@ -63,8 +63,8 @@ public class DataNode implements IDataNode {
 	        	if(listOfNodesForGivenHash.size()>=this.routingTableObj.replicationFactor) {
 	        		System.out.println(this.routingTableObj.routingMap.get(listOfNodesForGivenHash.get(replicaId-1)));
 	        		nId = this.routingTableObj.routingMap.get(listOfNodesForGivenHash.get(replicaId-1));
-	        		System.out.println("nId:"+nId);
-	        		System.out.println("my node Id:"+this.myNodeId);
+	        		//System.out.println("nId:"+nId);
+	        		//System.out.println("my node Id:"+this.myNodeId);
 	        		//When the receiving node is the given replica node for the file
 	        		if(nId == this.myNodeId) {
 	        			System.out.println("File written into "+ this.myNodeId+" with Replication Id:"+replicaId);
@@ -82,8 +82,8 @@ public class DataNode implements IDataNode {
 	}
 	
 	public void addHashRange(String hashRange) {
-		System.out.println("My Node Id: "+ this.myNodeId);
-		System.out.println("Files corresponding to Hash range: "+ hashRange+" added\n");
+		//System.out.println("My Node Id: "+ this.myNodeId);
+		System.out.println("Files corresponding to Hash range: "+ hashRange.split(":")[0]+" added\n");
 	}
 
 	//Needed for Elastic DHT only
