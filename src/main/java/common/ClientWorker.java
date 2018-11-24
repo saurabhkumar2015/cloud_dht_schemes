@@ -13,6 +13,7 @@ import static common.Constants.*;
 public class ClientWorker extends Thread {
 
     private static IDataNode dataNode;
+    private static Socket client;
     private static int exceptionCount;
     private static boolean debug = true;
     private static boolean distributed = false;
