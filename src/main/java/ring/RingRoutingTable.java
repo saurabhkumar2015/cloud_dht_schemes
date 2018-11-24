@@ -395,8 +395,20 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
 			System.out.println("\n");
 			System.out.println("Moving node's start hash range to right side - decreaseing the load");
 			int initialTotalHashRang = 0;
-			int succHashVal = listOfAssociatedHashes.get(2);
-			int myHashVal = listOfAssociatedHashes.get(1);
+			LinkedList<Integer> listOfAssociatedHashesForSucc = modifiedBinarySearch(nodeHash);
+			int succHashVal;
+			int myHashVal;
+			succHashVal = listOfAssociatedHashesForSucc.get(1);
+			myHashVal = listOfAssociatedHashesForSucc.get(0);
+			/*
+			if(this.replicationFactor > 2) {
+				succHashVal = listOfAssociatedHashesForSucc.get(2);
+				myHashVal = listOfAssociatedHashesForSucc.get(1);
+			}
+			else {
+				succHashVal = listOfAssociatedHashes.get(2);
+				myHashVal = listOfAssociatedHashes.get(1);
+			}*/
 			if (myHashVal > succHashVal){
 				initialTotalHashRang = (this.MAX_HASH - myHashVal)+ succHashVal;
 			}
