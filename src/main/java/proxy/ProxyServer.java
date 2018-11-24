@@ -63,10 +63,19 @@ public class ProxyServer {
     public static void sendUpdatedDHT(int nodeId, String type) throws Exception {
     	
             List<Integer> liveNodes = routingTable.giveLiveNodes();
+            
             for(int id: liveNodes) {
             	System.out.println("Live node "+id);
-            	UpdateRoutingPayload payload = new UpdateRoutingPayload(nodeId, type, routingTable);
-            	sendMsg.sendMessage(config.nodesMap.get(id), Constants.NEW_VERSION, payload);
+            	
+            		  new Thread() {
+            		      public void run() {
+            		    	  
+            		    	    UpdateRoutingPayload payload = new UpdateRoutingPayload(nodeId, type, routingTable);
+            	            	sendMsg.sendMessage(config.nodesMap.get(id), Constants.NEW_VERSION, payload);
+            		        
+            		      }
+            		  }.start();
+            	
             }
              
     }
