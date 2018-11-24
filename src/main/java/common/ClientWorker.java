@@ -30,7 +30,7 @@ public class ClientWorker extends Thread {
     }
  
 
-    public void run(Socket client) {
+    public void run() {
         try {
             //DataOutputStream out = null;
             //out = new DataOutputStream(client.getOutputStream());
@@ -233,7 +233,7 @@ public class ClientWorker extends Thread {
                 default:
                     throw new Exception("Unsupported message type");
             }
-            client.close();
+          //  client.close();
         } catch (Exception e) {
             e.printStackTrace();
             exceptionCount++;
