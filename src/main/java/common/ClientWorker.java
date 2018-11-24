@@ -41,7 +41,7 @@ public class ClientWorker {
                  case WRITE_FILE:
                 	
                     Payload p = (Payload) request.getPayload();
-                    System.out.println("File Write:: " + p.fileName);
+                    System.out.println("File Write:: " + p.fileName + "Replica:" + p.replicaId);
                      long dataNodeVersionNo = dataNode.getRoutingTable().getVersionNumber();
                      System.out.println("DataNode versionNumber:: " + dataNodeVersionNo + " Regular Client versionNumber:: " + p.versionNumber);
                      if (dataNodeVersionNo > p.versionNumber) {
