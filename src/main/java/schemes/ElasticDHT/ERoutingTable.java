@@ -193,9 +193,9 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 
 		Set<Integer> liveNodes = new HashSet<Integer>();
 		for (int i = 0; i < elasticTable.length; i++) {
-			for (int j = 0; j < 3; j++) {
+			for (int j = 0; j < rFactor; j++) {
 				tempNode = elasticTable[i].nodeId.get(j);
-				if (tempNode == 3) {
+				if (tempNode == rFactor) {
 					System.out.print("");
 				}
 				liveNodes.add(tempNode);
