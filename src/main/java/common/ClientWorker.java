@@ -30,7 +30,7 @@ public class ClientWorker extends Thread {
     }
  
 
-    public void run(Socket client) {
+    public void run() {
         try {
             //DataOutputStream out = null;
             //out = new DataOutputStream(client.getOutputStream());
