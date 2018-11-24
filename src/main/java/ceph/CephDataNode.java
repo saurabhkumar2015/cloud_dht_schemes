@@ -117,19 +117,21 @@ public class CephDataNode  implements IDataNode{
 		// TODO Auto-generated method stub
 		System.out.println("Add new node request received with nodeId " + nodeId);
 		this.cephRtTable = this.cephRtTable.addNode(nodeId);
+		showDataNodeState();
 	}
 
 	public void deleteNode(int nodeId) {
 		// On delete set the node Active status to false.
 		System.out.println("Delete node request received with nodeId " + nodeId);
 		this.cephRtTable = this.cephRtTable.deleteNode(nodeId);
-		
+		showDataNodeState();
 	}
 
 	public void loadBalance(int nodeId, double loadFraction) {
 		// First find the node and change the load on the node by loadfactor
 		System.out.println("Load balance request received at nodeId " + nodeId + " with loadFactor of " + loadFraction);
 		this.cephRtTable = cephRtTable.loadBalance(nodeId, loadFraction);
+		showDataNodeState();
 	}
     
        
