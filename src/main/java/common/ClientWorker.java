@@ -233,7 +233,7 @@ public class ClientWorker extends Thread {
                 default:
                     throw new Exception("Unsupported message type");
             }
-            client.close();
+          //  client.close();
         } catch (Exception e) {
             e.printStackTrace();
             exceptionCount++;
