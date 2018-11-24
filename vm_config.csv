@@ -10,6 +10,7 @@
 	"replicationFactor": 3,
     "cephMaxClusterSize" : 5,
 	"seed": 32,
+	"sleepTime": 50000,
 	"PlacementGroupMaxLimit":10,
 	"nodeMapLocation":"/home/vm_nodes.csv",
 	"resizeFactor":75,
