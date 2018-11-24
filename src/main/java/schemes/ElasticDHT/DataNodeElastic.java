@@ -203,7 +203,15 @@ public class DataNodeElastic implements IDataNode {
 	
 }
 	public boolean writeAllFiles(List<Payload> payloads) {
-		// TODO Auto-generated method stub
+		int lenght = payloads.size();
+		List<Integer> hashBUckets = new ArrayList<Integer>();
+		for(int i = 0;i<lenght;i++) {
+			Payload p = payloads.get(i);
+			hashBUckets.add(p.hashBucket);
+			
+		}
+		System.out.println(hashBUckets);
+				// TODO Auto-generated method stub
 		return false;
 	}
 	
