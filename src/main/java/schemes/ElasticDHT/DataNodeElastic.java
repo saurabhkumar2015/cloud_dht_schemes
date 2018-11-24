@@ -34,6 +34,7 @@ public class DataNodeElastic implements IDataNode {
 		this.nodeId = nodeId;
 		Commons.elasticERoutingTable  = new ERoutingTable();
 		elasticTable = elasticTable1.populateRoutingTable();
+		Commons.elasticERoutingTable.versionNumber = Commons.elasticERoutingTable.versionNumber + 1;
 
 	}
 	public static DataNodeElastic getInstance(int nodeId) {

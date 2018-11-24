@@ -15,7 +15,7 @@ public class GossipThread extends Thread{
     public void run() {
         while(true) {
             try {
-                Thread.sleep(250L);
+                Thread.sleep(200L);
                 SharedGossipDataMessage msg  = Commons.gossip.findSharedData(ROUTING_TABLE);
                 if(msg != null) {
                     RoutingTableWrapper r = null;

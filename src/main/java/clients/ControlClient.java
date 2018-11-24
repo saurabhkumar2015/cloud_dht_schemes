@@ -9,6 +9,7 @@ import socket.IMessageSend;
 import socket.MessageSendImpl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -38,6 +39,22 @@ public class ControlClient {
             String input = sc.next();
             List<Integer> liveNodes = routingTable.giveLiveNodes();
             int nodeId = getRandomNode(r, liveNodes);
+            if(distributed){
+                Map<Integer, List<Integer>> gossipList = ConfigLoader.config.gossipList;
+                for(int k =1 ; k <= gossipList.size();k++){
+                    List<Integer> integers = gossipList.get(k);
+                    boolean alive = false;
+                    for(int l =0; l < integers.size();l++) {
+                        Integer integer = integers.get(r.nextInt(integers.size()));
+                        if(liveNodes.contains((Integer)integer)) {
+                            nodeId = integer;
+                            alive = true;
+                            break;
+                        }
+                    }
+                    if(alive) break;
+                }
+            }
 
             switch (input.toUpperCase().trim()){
                 case "A":
