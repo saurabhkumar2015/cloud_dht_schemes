@@ -111,8 +111,12 @@ public class ControlClient {
                         messageSender.sendMessage(config.proxyIp, LOAD_BALANCE, new LoadBalance(node, factor));
                     }
                     break;
-                case "P":
-                	routingTable.printRoutingTable();
+                 case "P":
+                	System.out.println("Enter node Id");
+                	input = sc.next();
+                	
+                	Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(Integer.parseInt(input)), Constants.PRINT_REQUEST, null);
+                	
                     break;
                 case "X":
                     exit = false;
