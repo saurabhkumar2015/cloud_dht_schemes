@@ -46,7 +46,7 @@ public class ClientWorker {
                      System.out.println("DataNode versionNumber:: " + dataNodeVersionNo + " Regular Client versionNumber:: " + p.versionNumber);
                      if (dataNodeVersionNo > p.versionNumber) {
                          System.out.println("Sender's routing table needs to be updated");
-                         EpochPayload payload = new EpochPayload("fail", dataNode.getRoutingTable());
+                         EpochPayload payload = new EpochPayload("Fail due to version mismatch", dataNode.getRoutingTable());
                          oos.writeObject(payload);
                          stream = baos.toByteArray();
                          out.write(stream);
