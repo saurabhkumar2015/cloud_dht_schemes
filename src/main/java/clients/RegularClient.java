@@ -54,7 +54,7 @@ public class RegularClient {
                     Integer nodeId = routingTable.giveNodeId(fileName, replicaId);
                     while(nodeId <0) nodeId = routingTable.giveNodeId(fileName, ++replicaId);
                     if(config.verbose.equalsIgnoreCase("debug")) {
-                        System.out.println("Write "+ fileName + " to "+ nodeId + " replicaid: " + replicaId);
+                        System.out.println("Write "+ fileName + " to node "+ nodeId + " replicaid: " + replicaId);
                     }
                     Payload payload;
                     switch (config.scheme.toUpperCase().trim()) {
