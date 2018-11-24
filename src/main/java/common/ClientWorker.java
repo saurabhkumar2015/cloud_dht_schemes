@@ -2,6 +2,7 @@ package common;
 
 import config.ConfigLoader;
 import org.apache.gossip.model.SharedGossipDataMessage;
+import schemes.ElasticDHT.ERoutingTable;
 import socket.Request;
 
 import java.io.*;
@@ -29,7 +30,7 @@ public class ClientWorker extends Thread {
         distributed = "distributed".equalsIgnoreCase(ConfigLoader.config.dhtType);
     }
  
-
+    @Override
     public void run() {
         try {
             //DataOutputStream out = null;
@@ -142,7 +143,7 @@ public class ClientWorker extends Thread {
                         IRoutingTable table = dataNode.getRoutingTable().addNode(nodeId);
                         System.out.println("ADD NODE ROUTING TABLE UPDATED TO VERSION:" + table.getVersionNumber());
                         updates(nodeId, table, ADD_NODE);
-                        gossipNow(ADD_NODE, nodeId);
+                        gossipNow(ADD_NODE, nodeId, 0);
                         System.out.println("New Version  of Routing Table sent to control client");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
                     }
@@ -157,7 +158,7 @@ public class ClientWorker extends Thread {
                         IRoutingTable table = dataNode.getRoutingTable().deleteNode(nodeId1);
                         System.out.println("DELETE NODE ROUTING TABLE UPDATED TO VERSION:" + table.getVersionNumber());
                         updates(nodeId1, table, DELETE_NODE);
-                        gossipNow(DELETE_NODE,nodeId1);
+                        gossipNow(DELETE_NODE,nodeId1,0);
                         System.out.println("Sender's routing table needs to be updated");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
                     }
@@ -169,7 +170,7 @@ public class ClientWorker extends Thread {
                         IRoutingTable table  = dataNode.getRoutingTable().loadBalance(lb.nodeId, lb.loadFactor);
                         System.out.println("LOAD BALANCE ROUTING TABLE UPDATED TO VERSION:" + table.getVersionNumber());
                         updates(lb.nodeId, table, LOAD_BALANCE);
-                        gossipNow(LOAD_BALANCE, lb.nodeId);
+                        gossipNow(LOAD_BALANCE, lb.nodeId, lb.loadFactor);
                         System.out.println("New Version  of Routing Table sent to control client");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
                     }else {
@@ -209,17 +210,16 @@ public class ClientWorker extends Thread {
                case NEW_VERSION:
                 	UpdateRoutingPayload payld = (UpdateRoutingPayload) request.getPayload();
 	                System.out.println("Received update routing table request from proxy");
-	               
 	                switch (((ConfigLoader.config.scheme).toUpperCase())) {
                        case "ELASTIC":
-                    	   dataNode.setUseUpdatedRtTable(false);
+                           dataNode.setUseUpdatedRtTable(false);
                            dataNode.newUpdatedRoutingTable(payld.nodeId, payld.type, payld.newRoutingTable);
                            break;
                        case "CEPH":
 			    if(!((payld.type).equals(Constants.LOAD_BALANCE))){
                     			   dataNode.setUseUpdatedRtTable(false);
                     	   }
-                    	   
+
                            dataNode.UpdateRoutingTable(payld.newRoutingTable, payld.type);
                            break;
                        case "RING":
@@ -249,11 +249,15 @@ public class ClientWorker extends Thread {
 
         switch((ConfigLoader.config.scheme).toUpperCase()) {
             case "ELASTIC":
-                dataNode.newUpdatedRoutingTable(nodeId, type, table);
+                Commons.elasticOldERoutingTable = Commons.elasticERoutingTable;
+                Commons.elasticERoutingTable = (ERoutingTable) table;
+                break;
             case "CEPH":
                 dataNode.UpdateRoutingTable(table, type);
+                break;
             case "RING":
                 dataNode.UpdateRoutingTable(table, type);
+                break;
         }
     }
 
@@ -265,7 +269,7 @@ public class ClientWorker extends Thread {
         out.write(stream);
     }
 
-    private void gossipNow(String type, int nodeId) {
+    private void gossipNow(String type, int nodeId, double factor) {
         SharedGossipDataMessage message = new SharedGossipDataMessage();
         message.setExpireAt(System.currentTimeMillis()+120000);
         message.setTimestamp(System.currentTimeMillis());
@@ -275,6 +279,7 @@ public class ClientWorker extends Thread {
         wrapper.table = dataNode.getRoutingTable();
         wrapper.type = type;
         wrapper.nodeId = nodeId;
+        wrapper.factor = factor;
         message.setPayload(wrapper);
         Commons.gossip.gossipSharedData(message);
         System.out.println("GOSSIP MESSAGE SENT WITH NEW VERSION:" + wrapper.table.getVersionNumber());

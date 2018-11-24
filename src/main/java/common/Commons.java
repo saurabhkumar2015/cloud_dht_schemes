@@ -27,7 +27,7 @@ public class Commons {
             case "ELASTIC":
             case "elastic":
                 ERoutingTable r = new ERoutingTable();
-                r.giveInstance().giveRoutingTable();
+                ERoutingTable.giveInstance().giveRoutingTable();
                 return r;
             case "CEPH":
             case "ceph":
@@ -46,7 +46,10 @@ public class Commons {
                 return new DataNode(nodeId);
             case "ELASTIC":
             case "elastic":
-                return new DataNodeElastic(nodeId);
+                IDataNode d = new DataNodeElastic(nodeId);
+                Commons.elasticERoutingTable = ERoutingTable.giveInstance();
+                Commons.elasticOldERoutingTable = ERoutingTable.giveInstance();
+                return d;
             case "CEPH":
             case "ceph":
                 return new CephDataNode(nodeId);
@@ -67,9 +70,8 @@ public class Commons {
                 routingTable = dNode.routingTableObj;
                 break;
             case "ELASTIC":
-                ERoutingTable r = new ERoutingTable();
-                r.giveInstance().giveRoutingTable();
-                routingTable = r;
+                ERoutingTable.giveInstance().giveRoutingTable();
+                routingTable = ERoutingTable.giveInstance();
                 break;
             case "CEPH":
                 EntryPoint entryPoint = new EntryPoint();
@@ -90,10 +92,10 @@ public class Commons {
     public static OsdMap osdMap = null;
     public static HashGenerator hashGenerator = null;
     public static Random randomGen;
-    public  ElasticRoutingTableInstance[] elasticTable;
     public static ElasticRoutingTable elasticTable1 = new ElasticRoutingTable();
 
     public static ERoutingTable elasticERoutingTable = null;
+    public static ERoutingTable elasticOldERoutingTable = null;
 
     public static Payload GeneratePayload(String fileName, int replica, long versionNo)
     {

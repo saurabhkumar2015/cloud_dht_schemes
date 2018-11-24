@@ -10,14 +10,16 @@ public class Test {
 	@SuppressWarnings("static-access")
 	public static void main(String arg[]) {
 		try {
-			ConfigLoader.init("//Users//sreekrishnasridhar//cloud_dht_schemes//config.conf");
+			ConfigLoader.init("C://cloud//config.conf");
 			Commons.messageSender = new MockMessageSender();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println("Start loading routing Table");
-		ERoutingTable r = new ERoutingTable();
+		ERoutingTable r = ERoutingTable.giveInstance();
+		r.giveInstance();
+		r.printRoutingTable();
 		System.out.println("End loading routing table");
 		r.giveInstance().addNode(11);
 		r.giveInstance().addNode(12);

@@ -6,7 +6,6 @@ import org.apache.gossip.GossipMember;
 import org.apache.gossip.GossipService;
 import org.apache.gossip.GossipSettings;
 import org.apache.gossip.RemoteGossipMember;
-import sun.security.krb5.Config;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -38,7 +37,6 @@ public class DataNodeLoader {
         int port = Integer.parseInt(ipPort[1]);
         dataNode = Commons.loadDataNode(ConfigLoader.config, nodeId);
         ServerSocket server = new ServerSocket(port);
-        //ClientWorker w = new ClientWorker( dataNode);
 
         if(distributed){
             List<Integer> members = new ArrayList<>();
