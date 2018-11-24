@@ -246,16 +246,15 @@ public class CephDataNode  implements IDataNode{
 		for(DataObject obj : this.dataList)
 		{
             int noOfReplicaPresent = 0;
-            int currentreplicaValue = 1;
+            int currentreplicaValue = 0;
             while(noOfReplicaPresent != replicaFactor)
             {
-            	int destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(currentreplicaValue, obj.placementGroup);
+            	int destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(++currentreplicaValue, obj.placementGroup);
             	if(destinationNodeId != -2)
             	{
             		noOfReplicaPresent++;
             	}
-
-        		currentreplicaValue++;
+            	
         		if(currentreplicaValue > 30)
         			break;
             }
@@ -265,14 +264,14 @@ public class CephDataNode  implements IDataNode{
     			continue;
             
             // If replicationFactor value == currentReplicaValue then no file need to be written otherwise need to write file with replica equal to currentreplicaValue;
-            if(replicaFactor + 1 < currentreplicaValue )
+            if(replicaFactor  < currentreplicaValue )
             {
             	// need to add file with current replica value
             	int destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(currentreplicaValue, obj.placementGroup);
             	int thresholdCounter = 1;
             	while(destinationNodeId == -2 || thresholdCounter > 30)
             	{
-            		destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(currentreplicaValue++, obj.placementGroup);	
+            		destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(++currentreplicaValue, obj.placementGroup);	
             		thresholdCounter++;
             	}
             	if(thresholdCounter > 30)
