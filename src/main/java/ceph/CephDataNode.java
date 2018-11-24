@@ -142,6 +142,13 @@ public class CephDataNode  implements IDataNode{
     	
     	// Trigger file movement on this DataNode
     	System.out.println("File Movement has been triggered at node: " + this.NodeId);
+	try {
+			Thread.sleep(ConfigLoader.config.sleepTime);
+		} catch (NumberFormatException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    
     	if(updateType.equals(Constants.ADD_NODE) || updateType.equals(Constants.LOAD_BALANCE))
     	this.MoveFilesOnWeightChangeInOsdMap();
     	else
