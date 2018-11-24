@@ -126,27 +126,6 @@ public class OsdMap implements Serializable{
 		}
     }
     
-    public void MoveFileInClusterOnNewNodeAddition(Node newlyAddedNode)
-    {
-    	List<Integer> liveNodes = giveLiveNodes();
-    	
-    	for(int nodeId : liveNodes)
-    	{
-    		if(newlyAddedNode.nodeId != nodeId)
-    		System.out.println("Files need to moves from Data Node: " + nodeId);
-    	}
-    }
-    
-    public void MoveFileInClusterOnNodeDeleteion()
-    {
-        List<Integer> liveNodes = giveLiveNodes();
-    	
-    	for(int nodeId : liveNodes)
-    	{
-    		System.out.println("Files need to moves from Data Node: " + nodeId);
-    	}
-    }
-    
     public void ShowOsdMap()
     {
         List<Integer> liveNodes = new LinkedList<Integer>();
@@ -177,8 +156,6 @@ public class OsdMap implements Serializable{
  		   System.out.println("Node with NodeId : " + nodeId + " is deleted");
  		   this.foundNode.isActive = false;
  	   }
- 	   
- 	   this.MoveFileInClusterOnNodeDeleteion();
     }
     
     // Once we have weight distrubuted for leaf node, then populate weight from leaf to root
