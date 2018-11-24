@@ -158,7 +158,8 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
     Binary search done on routing table (Tree map)
     */
     public LinkedList<Integer> modifiedBinarySearch(int findHashVal){
-    	System.out.println("Searching Hash Val in routing table: "+findHashVal);  
+    	//System.out.println("Searching Hash Val in routing table: "+findHashVal);  
+    	System.out.println("Searching Hash Val in routing table");  
     	//System.out.println("number of nodes in ring: "+this.numNodeIds);
     	//LinkedList<Integer> listOfAllHash =  new LinkedList<Integer>();
     	LinkedList<Integer> listOfHash =  new LinkedList<Integer>();
@@ -340,7 +341,7 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
 	
 	public IRoutingTable loadBalance(int nodeIdInt, double loadFraction) {
 		String nodeId = physicalTable.get(nodeIdInt);
-		System.out.println("nodeId to be balanced: "+nodeId);
+		//System.out.println("nodeId to be balanced: "+nodeId);
 		int nodeHash = giveKeyByValue(this.routingMap, nodeIdInt);
 		LinkedList<Integer> listOfAssociatedHashes = modifiedBinarySearch(nodeHash-1);
 		/*
@@ -370,8 +371,8 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
 			routingMap.remove(nodeHash);
 			routingMap.put(newStartHash, nodeIdInt);
 	    	//What all nodes will be updates
-	    	System.out.println("Hash range "+ newStartHash +" - "+ (nodeHash-1) +" added to "+routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
-	    	/*
+			
+	    	/*System.out.println("Hash range "+ newStartHash +" - "+ (nodeHash-1) +" added to "+routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
 	    	String nodeIp = this.physicalTable.get(routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
 	    	String payload = String.valueOf(newStartHash) +"-"+String.valueOf((nodeHash-1));
 	    	Commons.messageSender.sendMessage(nodeIp, Constants.ADD_HASH, payload);
