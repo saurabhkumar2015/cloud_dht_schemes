@@ -216,7 +216,10 @@ public class ClientWorker extends Thread {
                            dataNode.newUpdatedRoutingTable(payld.nodeId, payld.type, payld.newRoutingTable);
                            break;
                        case "CEPH":
-                    	   dataNode.setUseUpdatedRtTable(false);
+			    if(!((payld.type).equals(Constants.LOAD_BALANCE))){
+                    			   dataNode.setUseUpdatedRtTable(false);
+                    	   }
+                    	   
                            dataNode.UpdateRoutingTable(payld.newRoutingTable, payld.type);
                            break;
                        case "RING":
