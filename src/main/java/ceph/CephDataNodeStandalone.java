@@ -213,7 +213,6 @@ public class CephDataNodeStandalone {
 	            		
 	                }
 	            }
-	            
 			}
 			
 		}

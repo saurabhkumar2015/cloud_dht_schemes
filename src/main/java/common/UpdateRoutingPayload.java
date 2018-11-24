@@ -10,17 +10,19 @@ public class UpdateRoutingPayload implements Serializable {
 	
 	//Type of request add/delete/load balance
 	public String type;
+	public double factor;
 	
 	//updated routing table
 	public IRoutingTable newRoutingTable;
 	
 
 	
-	public UpdateRoutingPayload(int nodeId, String type, IRoutingTable newRoutingTable) {
+	public UpdateRoutingPayload(int nodeId, String type, IRoutingTable newRoutingTable, double factor) {
 		// TODO Auto-generated constructor stub
 		this.nodeId = nodeId;
 		this.type = type;
 		this.newRoutingTable = newRoutingTable;
+		this.factor = factor;
 	
 	}
 

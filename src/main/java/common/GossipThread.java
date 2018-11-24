@@ -2,7 +2,10 @@ package common;
 
 import config.ConfigLoader;
 import org.apache.gossip.model.SharedGossipDataMessage;
-import static common.Constants.ROUTING_TABLE;
+import schemes.ElasticDHT.DataNodeElastic;
+import schemes.ElasticDHT.ERoutingTable;
+
+import static common.Constants.*;
 
 public class GossipThread extends Thread{
 
@@ -37,7 +40,19 @@ public class GossipThread extends Thread{
                         Commons.gossip.gossipSharedData(msg);
                         switch((ConfigLoader.config.scheme).toUpperCase()) {
                             case "ELASTIC":
-                                dataNode.newUpdatedRoutingTable(r.nodeId, r.type, r.table);
+                                switch (r.type.toUpperCase()) {
+                                    case ADD_NODE:
+                                        dataNode.addNode(r.nodeId);
+                                        break;
+                                    case DELETE_NODE:
+                                        dataNode.deleteNode(r.nodeId);
+                                        break;
+                                    case LOAD_BALANCE:
+                                        dataNode.loadBalance(r.nodeId, r.factor);
+                                        break;
+                                }
+                                Commons.elasticOldERoutingTable = Commons.elasticERoutingTable;
+                                Commons.elasticERoutingTable = (ERoutingTable) r.table;
                                 break;
                             case "CEPH":
                                 dataNode.UpdateRoutingTable(r.table,r.type);

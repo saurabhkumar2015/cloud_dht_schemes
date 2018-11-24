@@ -15,6 +15,9 @@ import common.Payload;
 import config.ConfigLoader;
 import config.DHTConfig;
 
+
+import static common.Commons.*;
+
 public class DataNodeElastic implements IDataNode {
 
 	private int nodeId;
@@ -24,15 +27,17 @@ public class DataNodeElastic implements IDataNode {
 	public List<Payload> listofPayloads = new ArrayList<Payload>();
     public  ElasticRoutingTableInstance[] elasticTable;
 
-	
+	public boolean fileLock = true;
+
 	public DataNodeElastic(int nodeId) {
 		this.config = ConfigLoader.config;
 		this.nodeId = nodeId;
-		Commons.elasticERoutingTable  = new ERoutingTable();
-		elasticTable = elasticTable1.populateRoutingTable();
-		Commons.elasticERoutingTable.versionNumber = Commons.elasticERoutingTable.versionNumber + 1;
-
+		elasticERoutingTable  = new ERoutingTable();
+		elasticERoutingTable.elasticTable = elasticTable1.populateRoutingTable();
+		elasticERoutingTable.versionNumber = elasticERoutingTable.versionNumber + 1;
+		elasticOldERoutingTable = elasticERoutingTable;
 	}
+
 	public static DataNodeElastic getInstance(int nodeId) {
 		if(single_instance==null) {
 			single_instance = new DataNodeElastic(nodeId);
@@ -47,27 +52,24 @@ public class DataNodeElastic implements IDataNode {
 	public boolean writeFile(String fileName, int replicaId) {
 		int hashcode = fileName.hashCode()%1024;
 		nodeId = 0;
-		for(int i = 0; i< elasticTable.length;i++) {
-			if(elasticTable[i].hashIndex==hashcode) {
-				nodeId = (Integer) elasticTable[i].nodeId.get(replicaId-1);
+		for(int i = 0; i< elasticERoutingTable.elasticTable.length;i++) {
+			if(elasticERoutingTable.elasticTable[i].hashIndex==hashcode) {
+				nodeId = (Integer) elasticERoutingTable.elasticTable[i].nodeId.get(replicaId-1);
 				break;
 			}
 		}
-		int writeNodeId = Commons.elasticERoutingTable.giveNodeId(fileName, replicaId-1);
+		int writeNodeId = elasticERoutingTable.giveNodeId(fileName, replicaId);
 		if(writeNodeId!=nodeId) {
 			return false;
 		}
-		System.out.println("File written to "+nodeId);
 		return true;
-
-
 	}
 
 
 	public void deleteFile(String fileName) {
 		int hashcode =  fileName.hashCode();
-		for(int i = 0; i<elasticTable.length; i++) {
-			if(elasticTable[i].hashIndex==hashcode) {
+		for(int i = 0; i<elasticERoutingTable.elasticTable.length; i++) {
+			if(elasticERoutingTable.elasticTable[i].hashIndex==hashcode) {
 				System.out.println("File deleted from all the replicas");
 			}
 		}
@@ -77,22 +79,20 @@ public class DataNodeElastic implements IDataNode {
 
 
 	public void addNode(int nodeId) {
-		ERoutingTable r = new ERoutingTable();
-		r.giveInstance().addNode(nodeId);
+		ERoutingTable.giveInstance().addNode(nodeId);
 		// TODO Auto-generated method stub
 
 	}
 
 	public void deleteNode(int nodeId) {
-		ERoutingTable r = new ERoutingTable();
-		r.giveInstance().deleteNode(nodeId);
+		ERoutingTable.giveInstance().deleteNode(nodeId);
 		// TODO Auto-generated method stub
 
 	}
 
 	public void loadBalance(int nodeId, double loadFraction) {
-		ERoutingTable r = new ERoutingTable();
-		r.giveInstance().loadBalance(nodeId, loadFraction);
+		ERoutingTable.giveInstance().loadBalance(nodeId, loadFraction);
+
 		// TODO Auto-generated method stub
 
 	}
@@ -102,12 +102,12 @@ public class DataNodeElastic implements IDataNode {
 	}
 
 	public IRoutingTable getRoutingTable() {
-		return Commons.elasticERoutingTable;
+		return elasticERoutingTable;
 	}
 
 	@Override
 	public String toString() {
-		return "DataNodeElastic [nodeId=" + nodeId + ", elasticTable=" + Commons.elasticERoutingTable + ", config=" + config
+		return "DataNodeElastic [nodeId=" + nodeId + ", elasticTable=" + elasticERoutingTable + ", config=" + config
 				+ ", giveRoutingTable()=" + getRoutingTable() + "]";
 	}
 	public void addHashRange(String hashRange) {
@@ -117,15 +117,17 @@ public class DataNodeElastic implements IDataNode {
 	//List of payload is specific to nodeId, get it from map and then populate it.
 
 	public void newUpdatedRoutingTable(int nodeId, String type, IRoutingTable rt) {
+		fileLock = false;
 		ElasticRoutingTableInstance [] newTable = ((ERoutingTable)rt).giveRoutingTable();
-		ElasticRoutingTableInstance [] oldTable = Commons.elasticERoutingTable.giveRoutingTable();
+		ElasticRoutingTableInstance [] oldTable = elasticERoutingTable.giveRoutingTable();
+		Commons.elasticOldERoutingTable = elasticERoutingTable;
 		List<Integer> ListofnodeIds = new ArrayList<Integer>();
 		Map<Integer, List<Payload>> nodeMap = new HashMap<Integer,List<Payload>>();
 		if(type.equals("ADD_FILES")) {
 			ListofnodeIds.clear();
 			for(int  i = 0;i<oldTable.length;i++) {
-				for(int j = 0;j<Commons.elasticERoutingTable.rFactor;j++) {
-					if(oldTable[i].nodeId.get(j)== this.nodeId && oldTable[i].nodeId.get(j)!=newTable[i].nodeId.get(j)) {
+				for(int j = 0;j<elasticERoutingTable.rFactor;j++) {
+					if(oldTable[i].nodeId.get(j)== this.nodeId && !oldTable[i].nodeId.get(j).equals(newTable[i].nodeId.get(j))) {
 						int updatedNodeId = newTable[i].nodeId.get(j);
 						Payload p = new Payload("", j, this.getRoutingTable().getVersionNumber(),this.nodeId ,i);
 						List<Payload> list = nodeMap.get(updatedNodeId);
@@ -134,7 +136,6 @@ public class DataNodeElastic implements IDataNode {
 						nodeMap.put(updatedNodeId, list);
 					}
 				}
-				
 			}
 			
 			for(Entry<Integer, List<Payload>> e : nodeMap.entrySet()) {
@@ -146,8 +147,8 @@ public class DataNodeElastic implements IDataNode {
 		if(type.equals("DELETE_FILE")) {
 			ListofnodeIds.clear();
 			for(int  i = 0;i<oldTable.length;i++) {
-				for(int j = 0;j<Commons.elasticERoutingTable.rFactor;j++) {
-					if(oldTable[i].nodeId.get(j)==this.nodeId&&oldTable[i].nodeId.get(j)!=newTable[i].nodeId.get(j)) {
+				for(int j = 0;j<elasticERoutingTable.rFactor;j++) {
+					if(oldTable[i].nodeId.get(j)==this.nodeId&& !oldTable[i].nodeId.get(j).equals(newTable[i].nodeId.get(j))) {
 						int updatedNodeId = newTable[i].nodeId.get(j);
 						Payload p = new Payload("", j, this.getRoutingTable().getVersionNumber(),this.nodeId ,i);
 						List<Payload> list = nodeMap.get(updatedNodeId);
@@ -166,14 +167,14 @@ public class DataNodeElastic implements IDataNode {
 		if(type.equals("MOVE_FILE")) {
 			ListofnodeIds.clear();
 			for(int i = 0;i<oldTable.length;i++) {
-				for(int j = 0; j<Commons.elasticERoutingTable.rFactor;j++) {
-					if(oldTable[i].nodeId.get(j)==this.nodeId&&oldTable[i].nodeId.get(j)!=newTable[i].nodeId.get(j)) {
+				for(int j = 0; j<elasticERoutingTable.rFactor;j++) {
+					if(oldTable[i].nodeId.get(j)==this.nodeId&& !oldTable[i].nodeId.get(j).equals(newTable[i].nodeId.get(j))) {
 						int oldNodeId;
 						int temp;
 						if(j==0) {
 							temp = j+1;
 						}
-						else if(j==Commons.elasticERoutingTable.rFactor-1) {
+						else if(j==elasticERoutingTable.rFactor-1) {
 							temp = j-1;
 						}
 						else {
@@ -191,10 +192,10 @@ public class DataNodeElastic implements IDataNode {
 			for(Entry<Integer, List<Payload>> e : nodeMap.entrySet()) {
 				int key = e.getKey();
 				common.Commons.messageSender.sendMessage(config.nodesMap.get(key), common.Constants.MOVE_FILE, e.getValue());
-
 			}
 		}
-
+		((ERoutingTable)this.getRoutingTable()).elasticTable = newTable;
+		fileLock = true;
 	}
 	public void UpdateRoutingTable(IRoutingTable cephrtTable, String updateType) {
 		// TODO Auto-generated method stub
@@ -216,25 +217,27 @@ public class DataNodeElastic implements IDataNode {
 	}
 	
 	
+	@Override
 	public IRoutingTable getOldRoutingTable() {
-		// TODO Auto-generated method stub
-		return null;
+
+		return Commons.elasticOldERoutingTable;
 	}
-	
+	@Override
 	public void setOldRoutingTable() {
-		// TODO Auto-generated method stub
 		
-	} 
+	}
+	@Override
 	public boolean getUseUpdatedRtTable() {
 		// TODO Auto-generated method stub
-		return false;
+		return fileLock;
 	}
+	@Override
 	public void setUseUpdatedRtTable(boolean value) {
-		// TODO Auto-generated method stub
 		
 	}
+	@Override
 	public int getNodeId() {
 		// TODO Auto-generated method stub
-		return 0;
+		return this.nodeId;
 	}
 }

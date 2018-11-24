@@ -8,10 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 
-import common.Constants;
-import common.IRoutingTable;
-import common.LoadBalance;
-import common.UpdateRoutingPayload;
+import common.*;
 import ceph.CephRoutingTable;
 import ceph.EntryPoint;
 import config.ConfigLoader;
@@ -42,10 +39,11 @@ public class ProxyServer {
                  DataNode dNode = new DataNode(ring);
                  routingTable = dNode.routingTableObj;
                  break;
-             case "ELASTIC":
-                 ERoutingTable r = new ERoutingTable();
-                 r.giveInstance().giveRoutingTable();
-                 routingTable = r;
+			 case "ELASTIC":
+                 ERoutingTable.giveInstance().giveRoutingTable();
+				 Commons.elasticERoutingTable = ERoutingTable.giveInstance();
+				 Commons.elasticOldERoutingTable = ERoutingTable.giveInstance();
+                 routingTable = Commons.elasticERoutingTable;
                  break;
              case "CEPH":
                  EntryPoint entryPoint = new EntryPoint();
@@ -60,7 +58,7 @@ public class ProxyServer {
     }
     
     
-    public static void sendUpdatedDHT(int nodeId, String type) throws Exception {
+    public static void sendUpdatedDHT(int nodeId, String type, double factor) throws Exception {
     	
             List<Integer> liveNodes = routingTable.giveLiveNodes();
             
@@ -70,7 +68,7 @@ public class ProxyServer {
             		  new Thread() {
             		      public void run() {
             		    	  
-            		    	    UpdateRoutingPayload payload = new UpdateRoutingPayload(nodeId, type, routingTable);
+            		    	    UpdateRoutingPayload payload = new UpdateRoutingPayload(nodeId, type, routingTable, factor);
             	            	sendMsg.sendMessage(config.nodesMap.get(id), Constants.NEW_VERSION, payload);
             		        
             		      }
@@ -114,7 +112,7 @@ public class ProxyServer {
 	                    IRoutingTable updated_routing_table =  routingTable.addNode(nodeId);
 	                    routingTable = updated_routing_table;
 	                    
-	                    sendUpdatedDHT(nodeId, Constants.ADD_NODE);
+	                    sendUpdatedDHT(nodeId, Constants.ADD_NODE, 0);
 	                       
 	                 }
 			    	
@@ -130,7 +128,7 @@ public class ProxyServer {
 				    		IRoutingTable updated_routing_table =  routingTable.loadBalance(nodeToBeBalanced, loadFactor);
 		                    routingTable = updated_routing_table;
 		                
-			           	    sendUpdatedDHT(nodeToBeBalanced,Constants.LOAD_BALANCE);
+			           	    sendUpdatedDHT(nodeToBeBalanced,Constants.LOAD_BALANCE, lb.loadFactor);
 		              }
 				    
 				    if((message.getType()).equals(Constants.DELETE_NODE)) {
@@ -142,7 +140,7 @@ public class ProxyServer {
 			    		IRoutingTable updated_routing_table =  routingTable.deleteNode(nodeToBeDeleted);
 	                    routingTable = updated_routing_table;
 	                
-		           	    sendUpdatedDHT(nodeToBeDeleted, Constants.DELETE_NODE);
+		           	    sendUpdatedDHT(nodeToBeDeleted, Constants.DELETE_NODE, 0);
 	               }
 		       }
 		      

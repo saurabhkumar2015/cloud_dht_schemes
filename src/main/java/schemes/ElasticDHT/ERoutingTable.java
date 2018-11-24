@@ -8,21 +8,18 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import static common.Commons.elasticERoutingTable;
+import static common.Commons.elasticOldERoutingTable;
 import static common.Commons.elasticTable1;
 import static common.Constants.*;
 
 
 public class ERoutingTable implements IRoutingTable, Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	public int bucketSize = ConfigLoader.config.bucketSize;
 	public int rFactor = ConfigLoader.config.replicationFactor;
+	public ElasticRoutingTableInstance[] elasticTable;
 	public long versionNumber;
-    public   ElasticRoutingTableInstance[] elasticTable;
-
+	
 
 	@Override
 	public String toString() {
@@ -43,12 +40,12 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 	public ERoutingTable() { }
 
 	// Make singleton Instance of routing table
-	public   ERoutingTable giveInstance() {
+	public static ERoutingTable giveInstance() {
 		if (elasticERoutingTable == null) {
 			elasticERoutingTable = new ERoutingTable();
-			elasticTable = elasticTable1.populateRoutingTable();
+			elasticERoutingTable.elasticTable = elasticTable1.populateRoutingTable();
+			elasticOldERoutingTable = elasticERoutingTable;
 		}
-
 		return elasticERoutingTable;
 	}
 
@@ -90,7 +87,7 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 		}
 		System.out.println("Node Id "+nodeId+" was deleted");
 		DataNodeElastic.getInstance(nodeId).newUpdatedRoutingTable(nodeId, MOVE_FILE, this);
-		//DataNodeElastic.getInstance(nodeId).newUpdatedRoutingTable(nodeId, ADD_FILES, this);
+		DataNodeElastic.getInstance(nodeId).newUpdatedRoutingTable(nodeId, ADD_FILES, this);
 		this.versionNumber = this.versionNumber +1 ;
 		return this;
 	}
@@ -120,7 +117,7 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 
 		for (int k = 0; k < elasticTable.length; k++) {
 			if (elasticTable[k].hashIndex == code) {
-				nodeId = elasticTable[k].nodeId.get(replicaId - 1);
+				nodeId = elasticTable[k].nodeId.get(replicaId-1);
 			}
 		}
 		return nodeId;

@@ -9,6 +9,8 @@ import java.util.Set;
 import config.ConfigLoader;
 import config.DHTConfig;
 
+import static common.Commons.elasticERoutingTable;
+
 public class ElasticRoutingTable {
 	private int rint;
 	private ArrayList<Integer> l;
@@ -52,10 +54,10 @@ public class ElasticRoutingTable {
 		
 		}
 	 //make it a list
-	
-	
-		
 
+
+
+		elasticERoutingTable.elasticTable = initialTable;
 		return initialTable;
 		
 		
