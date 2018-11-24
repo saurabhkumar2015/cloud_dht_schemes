@@ -209,12 +209,14 @@ public class ClientWorker extends Thread {
                case NEW_VERSION:
                 	UpdateRoutingPayload payld = (UpdateRoutingPayload) request.getPayload();
 	                System.out.println("Received update routing table request from proxy");
-	                dataNode.setUseUpdatedRtTable(false);
+	               
 	                switch (((ConfigLoader.config.scheme).toUpperCase())) {
                        case "ELASTIC":
+                    	   dataNode.setUseUpdatedRtTable(false);
                            dataNode.newUpdatedRoutingTable(payld.nodeId, payld.type, payld.newRoutingTable);
                            break;
                        case "CEPH":
+                    	   dataNode.setUseUpdatedRtTable(false);
                            dataNode.UpdateRoutingTable(payld.newRoutingTable, payld.type);
                            break;
                        case "RING":
