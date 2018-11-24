@@ -62,10 +62,7 @@ public class DataNodeElastic implements IDataNode {
 		if(writeNodeId!=nodeId) {
 			return false;
 		}
-		System.out.println("File written to "+nodeId);
 		return true;
-
-
 	}
 
 

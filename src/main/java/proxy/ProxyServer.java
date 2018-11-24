@@ -8,10 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 
-import common.Constants;
-import common.IRoutingTable;
-import common.LoadBalance;
-import common.UpdateRoutingPayload;
+import common.*;
 import ceph.CephRoutingTable;
 import ceph.EntryPoint;
 import config.ConfigLoader;
@@ -42,10 +39,11 @@ public class ProxyServer {
                  DataNode dNode = new DataNode(ring);
                  routingTable = dNode.routingTableObj;
                  break;
-             case "ELASTIC":
-                 ERoutingTable r = new ERoutingTable();
+			 case "ELASTIC":
                  ERoutingTable.giveInstance().giveRoutingTable();
-                 routingTable = r;
+				 Commons.elasticERoutingTable = ERoutingTable.giveInstance();
+				 Commons.elasticOldERoutingTable = ERoutingTable.giveInstance();
+                 routingTable = Commons.elasticERoutingTable;
                  break;
              case "CEPH":
                  EntryPoint entryPoint = new EntryPoint();

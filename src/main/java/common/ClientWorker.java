@@ -50,10 +50,10 @@ public class ClientWorker extends Thread {
                 	
                     Payload p = (Payload) request.getPayload();
                     System.out.println("File Write:: " + p.fileName + "Replica:" + p.replicaId);
-                     long dataNodeVersionNo = dataNode.getRoutingTable().getVersionNumber();
-                     System.out.println("DataNode versionNumber:: " + dataNodeVersionNo + " Regular Client versionNumber:: " + p.versionNumber);
+                    long dataNodeVersionNo = dataNode.getRoutingTable().getVersionNumber();
                      if (dataNodeVersionNo > p.versionNumber) {
                          System.out.println("Sender's routing table needs to be updated");
+                         System.out.println("DataNode versionNumber:: " + dataNodeVersionNo + " Regular Client versionNumber:: " + p.versionNumber);
                          EpochPayload payload = new EpochPayload("Fail due to version mismatch", dataNode.getRoutingTable());
                          oos.writeObject(payload);
                          stream = baos.toByteArray();
@@ -212,8 +212,19 @@ public class ClientWorker extends Thread {
 	                System.out.println("Received update routing table request from proxy");
 	                switch (((ConfigLoader.config.scheme).toUpperCase())) {
                        case "ELASTIC":
-                           dataNode.setUseUpdatedRtTable(false);
-                           dataNode.newUpdatedRoutingTable(payld.nodeId, payld.type, payld.newRoutingTable);
+                            switch (payld.type.toUpperCase()) {
+                                case ADD_NODE:
+                                    dataNode.addNode(payld.nodeId);
+                                    break;
+                                case DELETE_NODE:
+                                    dataNode.deleteNode(payld.nodeId);
+                                    break;
+                                case LOAD_BALANCE:
+                                    dataNode.loadBalance(payld.nodeId, payld.factor);
+                                    break;
+                            }
+                            Commons.elasticOldERoutingTable = Commons.elasticERoutingTable;
+                            Commons.elasticERoutingTable = (ERoutingTable) payld.newRoutingTable;
                            break;
                        case "CEPH":
 			    if(!((payld.type).equals(Constants.LOAD_BALANCE))){
