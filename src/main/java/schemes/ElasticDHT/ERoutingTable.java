@@ -1,6 +1,5 @@
 package schemes.ElasticDHT;
 
-import common.Commons;
 import common.IRoutingTable;
 import config.ConfigLoader;
 
@@ -9,17 +8,21 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import static common.Commons.elasticERoutingTable;
-import static common.Commons.elasticTable;
 import static common.Commons.elasticTable1;
 import static common.Constants.*;
 
 
 public class ERoutingTable implements IRoutingTable, Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public int bucketSize = ConfigLoader.config.bucketSize;
 	public int rFactor = ConfigLoader.config.replicationFactor;
 	public long versionNumber;
-	
+    public   ElasticRoutingTableInstance[] elasticTable;
+
 
 	@Override
 	public String toString() {
@@ -40,7 +43,7 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 	public ERoutingTable() { }
 
 	// Make singleton Instance of routing table
-	public static ERoutingTable giveInstance() {
+	public   ERoutingTable giveInstance() {
 		if (elasticERoutingTable == null) {
 			elasticERoutingTable = new ERoutingTable();
 			elasticTable = elasticTable1.populateRoutingTable();
@@ -87,7 +90,7 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 		}
 		System.out.println("Node Id "+nodeId+" was deleted");
 		DataNodeElastic.getInstance(nodeId).newUpdatedRoutingTable(nodeId, MOVE_FILE, this);
-		DataNodeElastic.getInstance(nodeId).newUpdatedRoutingTable(nodeId, ADD_FILES, this);
+		//DataNodeElastic.getInstance(nodeId).newUpdatedRoutingTable(nodeId, ADD_FILES, this);
 		this.versionNumber = this.versionNumber +1 ;
 		return this;
 	}
@@ -141,7 +144,7 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 		System.out.println(maxLiveNodes);
 
 		hashReplicaNodeId = createMapforNodeId(nodeId, elasticTable);
-		Set<Integer> keys = hashReplicaNodeId.keySet();
+		//Set<Integer> keys = hashReplicaNodeId.keySet();
 		int currentstrength = hashReplicaNodeId.size();
 		int newStrength = (int) (currentstrength * factor);
 		System.out.println("Current Strength = " + currentstrength + " New Strength = " + newStrength);
@@ -178,7 +181,7 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 		}
 		System.out.println("Load balanced");
 		DataNodeElastic.getInstance(nodeId).newUpdatedRoutingTable(nodeId, MOVE_FILE, this);
-		DataNodeElastic.getInstance(nodeId).newUpdatedRoutingTable(nodeId, ADD_FILES, this);
+		//DataNodeElastic.getInstance(nodeId).newUpdatedRoutingTable(nodeId, ADD_FILES, this);
 		this.versionNumber = this.versionNumber +1 ;
 		return this;
 	}

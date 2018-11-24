@@ -90,7 +90,7 @@ public class Commons {
     public static OsdMap osdMap = null;
     public static HashGenerator hashGenerator = null;
     public static Random randomGen;
-    public static ElasticRoutingTableInstance[] elasticTable;
+    public  ElasticRoutingTableInstance[] elasticTable;
     public static ElasticRoutingTable elasticTable1 = new ElasticRoutingTable();
 
     public static ERoutingTable elasticERoutingTable = null;

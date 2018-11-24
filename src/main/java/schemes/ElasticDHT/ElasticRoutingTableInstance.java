@@ -5,12 +5,14 @@ import java.util.ArrayList;
 
 public class ElasticRoutingTableInstance implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public int hashIndex;
-	@SuppressWarnings("rawtypes")
 	public ArrayList<Integer> nodeId;
 	
 	
-	@SuppressWarnings("rawtypes")
 	public ElasticRoutingTableInstance(int k, ArrayList<Integer> l) {
 		hashIndex = k;
 		nodeId = l;

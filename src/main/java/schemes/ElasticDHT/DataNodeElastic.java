@@ -1,6 +1,5 @@
 package schemes.ElasticDHT;
 
-import static common.Commons.elasticTable;
 import static common.Commons.elasticTable1;
 
 import java.util.ArrayList;
@@ -16,11 +15,6 @@ import common.Payload;
 import config.ConfigLoader;
 import config.DHTConfig;
 
-import java.util.List;
-
-import static common.Commons.elasticTable;
-import static common.Commons.elasticTable1;
-
 public class DataNodeElastic implements IDataNode {
 
 	private int nodeId;
@@ -28,6 +22,8 @@ public class DataNodeElastic implements IDataNode {
 	private DHTConfig config;
 	public static Payload [] payload;
 	public List<Payload> listofPayloads = new ArrayList<Payload>();
+    public  ElasticRoutingTableInstance[] elasticTable;
+
 	
 	public DataNodeElastic(int nodeId) {
 		this.config = ConfigLoader.config;
@@ -81,20 +77,22 @@ public class DataNodeElastic implements IDataNode {
 
 
 	public void addNode(int nodeId) {
-		ERoutingTable.giveInstance().addNode(nodeId);
+		ERoutingTable r = new ERoutingTable();
+		r.giveInstance().addNode(nodeId);
 		// TODO Auto-generated method stub
 
 	}
 
 	public void deleteNode(int nodeId) {
-		ERoutingTable.giveInstance().deleteNode(nodeId);
+		ERoutingTable r = new ERoutingTable();
+		r.giveInstance().deleteNode(nodeId);
 		// TODO Auto-generated method stub
 
 	}
 
 	public void loadBalance(int nodeId, double loadFraction) {
-		ERoutingTable.giveInstance().loadBalance(nodeId, loadFraction);
-
+		ERoutingTable r = new ERoutingTable();
+		r.giveInstance().loadBalance(nodeId, loadFraction);
 		// TODO Auto-generated method stub
 
 	}
@@ -182,7 +180,7 @@ public class DataNodeElastic implements IDataNode {
 							temp = j-1;
 						}
 						oldNodeId = oldTable[i].nodeId.get(temp);
-						Payload p = new Payload("", j, this.getRoutingTable().getVersionNumber(),newTable[i].nodeId.get(j) ,i);
+						Payload p = new Payload("", j, this.getRoutingTable().getVersionNumber(),oldTable[i].nodeId.get(temp) ,i);
 						List<Payload> list = nodeMap.get(oldTable[i].nodeId.get(temp));
 						if(list == null) list = new ArrayList<Payload>();
 						list.add(p);
@@ -210,27 +208,23 @@ public class DataNodeElastic implements IDataNode {
 	}
 	
 	
-	@Override
 	public IRoutingTable getOldRoutingTable() {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	@Override
+	
 	public void setOldRoutingTable() {
 		// TODO Auto-generated method stub
 		
-	}
-	@Override
+	} 
 	public boolean getUseUpdatedRtTable() {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	@Override
 	public void setUseUpdatedRtTable(boolean value) {
 		// TODO Auto-generated method stub
 		
 	}
-	@Override
 	public int getNodeId() {
 		// TODO Auto-generated method stub
 		return 0;
