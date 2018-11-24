@@ -12,11 +12,18 @@ public class DataNode implements IDataNode {
 	
 	public int myNodeId;
 	public RingRoutingTable routingTableObj;
+	 // use updated or old version of routing table
+    	public boolean useUpdatedRtTable;
+    
+    	// stores old version of routing table
+    	public IRoutingTable oldRtTable;
 	
 	public DataNode(int id){
 		RingDHTScheme ring = new RingDHTScheme();
 		this.routingTableObj = ring.routingTableObj;
 		this.myNodeId = id;
+		this.oldRtTable = this.routingTableObj;
+		this.useUpdatedRtTable = true;
 	}
 	public DataNode(RingDHTScheme ring) {
     	this.routingTableObj = ring.routingTableObj;
@@ -116,5 +123,32 @@ public class DataNode implements IDataNode {
 	public boolean writeAllFiles(List<Payload> payloads) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	@Override
+	public IRoutingTable getOldRoutingTable() {
+		// TODO Auto-generated method stub
+		return this.oldRtTable;
+	}
+	@Override
+	public void setOldRoutingTable() {
+		// TODO Auto-generated method stub
+		this.oldRtTable = this.routingTableObj;
+	}
+	@Override
+	public boolean getUseUpdatedRtTable() {
+		// TODO Auto-generated method stub
+		return this.useUpdatedRtTable;
+	}
+	@Override
+	public void setUseUpdatedRtTable(boolean value) {
+		// TODO Auto-generated method stub
+		this.useUpdatedRtTable = value;
+		
+	}
+	@Override
+	public int getNodeId() {
+		// TODO Auto-generated method stub
+		return this.myNodeId;
 	}
 }

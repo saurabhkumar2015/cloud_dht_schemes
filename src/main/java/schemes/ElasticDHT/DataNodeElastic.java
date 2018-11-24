@@ -208,4 +208,31 @@ public class DataNodeElastic implements IDataNode {
 		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	
+	@Override
+	public IRoutingTable getOldRoutingTable() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public void setOldRoutingTable() {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public boolean getUseUpdatedRtTable() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	@Override
+	public void setUseUpdatedRtTable(boolean value) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public int getNodeId() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

@@ -27,6 +27,12 @@ public class CephDataNode  implements IDataNode{
     public IRoutingTable cephRtTable;
     
     private static CephDataNode single_instance = null;
+	
+     // use updated or old version of routing table
+    public boolean useUpdatedRtTable;
+    
+    // stores old version of routing table
+    public IRoutingTable oldRtTable;
     
     public CephDataNode()
     {
@@ -40,6 +46,8 @@ public class CephDataNode  implements IDataNode{
     	EntryPoint entryPoint = new EntryPoint();
         entryPoint.BootStrapCeph();
     	cephRtTable = CephRoutingTable.giveInstance();
+	oldRtTable  = cephRtTable;
+    	useUpdatedRtTable = true;
     }
     
     public static CephDataNode getInstance(int nodeId) {
@@ -134,6 +142,13 @@ public class CephDataNode  implements IDataNode{
     	
     	// Trigger file movement on this DataNode
     	System.out.println("File Movement has been triggered at node: " + this.NodeId);
+	try {
+			Thread.sleep(ConfigLoader.config.sleepTime);
+		} catch (NumberFormatException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    
     	if(updateType.equals(Constants.ADD_NODE) || updateType.equals(Constants.LOAD_BALANCE))
     	this.MoveFilesOnWeightChangeInOsdMap();
     	else
@@ -284,6 +299,36 @@ public class CephDataNode  implements IDataNode{
     		Commons.messageSender.sendMessage(destinationNodeIp, Constants.ADD_FILES, filesTobeMove);
     		
     	}
+	}
+	
+	@Override
+	public IRoutingTable getOldRoutingTable() {
+		// TODO Auto-generated method stub
+		return this.oldRtTable;
+	}
+
+	@Override
+	public void setOldRoutingTable() {
+		// TODO Auto-generated method stub
+		this.oldRtTable = this.cephRtTable;
+	}
+
+	@Override
+	public boolean getUseUpdatedRtTable() {
+		// TODO Auto-generated method stub
+		return useUpdatedRtTable;
+	}
+
+	@Override
+	public void setUseUpdatedRtTable(boolean value) {
+		// TODO Auto-generated method stub
+		this.useUpdatedRtTable = value;
+	}
+
+	@Override
+	public int getNodeId() {
+		// TODO Auto-generated method stub
+		return this.NodeId;
 	}
 }
 

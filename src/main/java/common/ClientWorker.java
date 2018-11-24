@@ -10,35 +10,42 @@ import java.util.List;
 
 import static common.Constants.*;
 
-public class ClientWorker {
+public class ClientWorker extends Thread {
 
     private static IDataNode dataNode;
+    private static Socket client;
     private static int exceptionCount;
     private static boolean debug = true;
     private static boolean distributed = false;
-
-    public ClientWorker(IDataNode node) {
+    DataOutputStream out;
+    ObjectInputStream in;
+    
+    public ClientWorker(IDataNode node,Socket client,DataOutputStream out, ObjectInputStream in) {
+    	this.client = client;
+    	this.out = out;
+    	this.in = in;
         dataNode = node;
         debug = "debug".equalsIgnoreCase(ConfigLoader.config.verbose);
         distributed = "distributed".equalsIgnoreCase(ConfigLoader.config.dhtType);
     }
+ 
 
     public void run(Socket client) {
         try {
-        	DataOutputStream out = null;
-            out = new DataOutputStream(client.getOutputStream());
+            //DataOutputStream out = null;
+            //out = new DataOutputStream(client.getOutputStream());
 
             byte[] stream = null;
             // ObjectOutputStream is used to convert a Java object into OutputStream
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
 
-            ObjectInputStream in = new ObjectInputStream(client.getInputStream());
+            //ObjectInputStream in = new ObjectInputStream(client.getInputStream());
             Request request = (Request) in.readObject();
             
             switch (request.getType()) {
             
-                 case WRITE_FILE:
+                  case WRITE_FILE:
                 	
                     Payload p = (Payload) request.getPayload();
                     System.out.println("File Write:: " + p.fileName + "Replica:" + p.replicaId);
@@ -51,11 +58,30 @@ public class ClientWorker {
                          stream = baos.toByteArray();
                          out.write(stream);
                      } else {
-                         dataNode.writeFile(p.fileName, p.replicaId);
-                         EpochPayload payload = new EpochPayload("success", null);
-                         oos.writeObject(payload);
-                         stream = baos.toByteArray();
-                         out.write(stream);
+                    	 
+                    	 if(!dataNode.getUseUpdatedRtTable()) {
+                    		 int nodeId = dataNode.getOldRoutingTable().giveNodeId(p.fileName,p.replicaId);
+                    		 if(nodeId == dataNode.getNodeId()) {
+                    			 dataNode.writeFile(p.fileName, p.replicaId);
+    	                         EpochPayload payload = new EpochPayload("success", null);
+    	                         oos.writeObject(payload);
+    	                         stream = baos.toByteArray();
+    	                         out.write(stream);
+                    		 }
+                    		 else {
+                    			 EpochPayload payload = new EpochPayload("fail due to file lock", null);
+                                 oos.writeObject(payload);
+                                 stream = baos.toByteArray();
+                                 out.write(stream);
+                    		 }
+                    	 }
+                    	 else {
+	                    	 dataNode.writeFile(p.fileName, p.replicaId);
+	                         EpochPayload payload = new EpochPayload("success", null);
+	                         oos.writeObject(payload);
+	                         stream = baos.toByteArray();
+	                         out.write(stream);
+                    	 }
                      }
                     break;
                   
@@ -71,18 +97,38 @@ public class ClientWorker {
 	                      
                     	 if (dataNodeVerNo > paylds.get(0).versionNumber) {
 	                          System.out.println("Sender's routing table needs to be updated");
-	                          EpochPayload payload = new EpochPayload("fail", dataNode.getRoutingTable());
+	                          EpochPayload payload = new EpochPayload("Fail due to version mismatch", dataNode.getRoutingTable());
 	                          oos.writeObject(payload);
 	                          stream = baos.toByteArray();
 	                          out.write(stream);
 	                      } else {
 	                          dataNode.writeAllFiles(paylds);
+	                          
+	                          if(dataNode.getUseUpdatedRtTable() == false) {
+	 		  	               	 dataNode.setUseUpdatedRtTable(true);
+	 		 	               	 dataNode.setOldRoutingTable();
+	 	  	               	     List<Integer> liveNodes = dataNode.getRoutingTable().giveLiveNodes();
+	 				  	             for(int id: liveNodes) {
+	 				  	              	System.out.println("Live node "+id);
+	 				  	              	
+	 				  	              		  new Thread() {
+	 				  	              		      public void run() {
+	 				  	              		    	  
+	 				  	              		    	Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(id), Constants.TRANSFER_COMPLETE, null);
+	 				  	              		        
+	 				  	              		      }
+	 				  	              		  }.start();
+	 				  	              	
+	 				  	              }
+	   	               	     }
 	                          EpochPayload payload = new EpochPayload("success", null);
 	                          oos.writeObject(payload);
 	                          stream = baos.toByteArray();
 	                          out.write(stream);
 	                      }
-                     
+                    	
+  	               	     
+  	               	     
                      break;
                      
                 case DELETE_FILE:
@@ -153,17 +199,18 @@ public class ClientWorker {
                 	dataNode.addHashRange(hashRangeToBeAdded);
                     break;
 
-                case REMOVE_HASH:
+               case REMOVE_HASH:
                 	String hashRangeToBeDeleted = (String) request.getPayload();
                 	System.out.println("Received hash bucket delete request: ");
+                	Thread.sleep(ConfigLoader.config.sleepTime);
                 	dataNode.deleteFile(hashRangeToBeDeleted);
                     break;
 
                case NEW_VERSION:
                 	UpdateRoutingPayload payld = (UpdateRoutingPayload) request.getPayload();
 	                System.out.println("Received update routing table request from proxy");
-
-                   switch (((ConfigLoader.config.scheme).toUpperCase())) {
+	                dataNode.setUseUpdatedRtTable(false);
+	                switch (((ConfigLoader.config.scheme).toUpperCase())) {
                        case "ELASTIC":
                            dataNode.newUpdatedRoutingTable(payld.nodeId, payld.type, payld.newRoutingTable);
                            break;
@@ -174,7 +221,15 @@ public class ClientWorker {
                            dataNode.UpdateRoutingTable(payld.newRoutingTable, payld.type);
                            break;
                    }
+	     
 	                break;
+	                
+	                
+               case TRANSFER_COMPLETE:
+            	   dataNode.setUseUpdatedRtTable(true);
+               	   dataNode.setOldRoutingTable();
+               	   break;
+			    
                 default:
                     throw new Exception("Unsupported message type");
             }

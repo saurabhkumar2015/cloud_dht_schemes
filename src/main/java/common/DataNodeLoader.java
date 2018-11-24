@@ -35,7 +35,7 @@ public class DataNodeLoader {
         int port = Integer.parseInt(ipPort[1]);
         dataNode = Commons.loadDataNode(ConfigLoader.config, nodeId);
         ServerSocket server = new ServerSocket(port);
-        ClientWorker w = new ClientWorker( dataNode);
+        //ClientWorker w = new ClientWorker( dataNode);
 
         if(distributed){
             List<Integer> members = new ArrayList<>();
@@ -72,9 +72,16 @@ public class DataNodeLoader {
             Thread gsThread = new GossipThread(dataNode);
             gsThread.start();
         }
+        Socket clientSocket=null;
         while(true) {
-            Socket clientSocket = server.accept();
-            w.run(clientSocket);
+        	try {
+	            clientSocket = server.accept();
+	            Thread w = new ClientWorker( dataNode,clientSocket,new DataOutputStream(clientSocket.getOutputStream()),new ObjectInputStream(clientSocket.getInputStream()));
+	           // w.run(clientSocket);
+	            w.start();
+        	}catch(IOException e) {
+        		clientSocket.close();
+        	}
         }
     }
 
