@@ -53,13 +53,14 @@ public class MessageSendImpl implements IMessageSend {
 
 
             if(type.equals(Constants.WRITE_FILE) || type.equals(Constants.ADD_FILES)) {
+            	
 	            input = new DataInputStream(socket.getInputStream());
 	            ObjectInputStream ois = new ObjectInputStream(input);
 	            EpochPayload p = (EpochPayload) ois.readObject();
 
-	            System.out.println("received ack "+p.status);
+	            System.out.println("Received ack "+p.status);
 
-	            if((p.status).trim().equals("fail"))
+	            if((p.status).trim().equals("Fail due to version mismatch"))
 	            		RegularClient.routingTable = p.newRoutingTable;
             }
             else if(Arrays.asList(Constants.ADD_NODE, Constants.DELETE_NODE, Constants.LOAD_BALANCE ).contains(type)) {
