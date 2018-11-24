@@ -68,7 +68,7 @@ public class CephDataNode  implements IDataNode{
 		if(destinationNodeId != this.NodeId)
 			return false;
 		
-		System.out.println("Write file request received for FileName: " + fileName + " pGroup: " + placementGroupId + " replicaId: " + replicaId + " on node " + (destinationNodeId) );
+		//System.out.println("Write file request received for FileName: " + fileName + " pGroup: " + placementGroupId + " replicaId: " + replicaId + " on node " + (destinationNodeId) );
 
 		// Step 2: push the Data to the DataNode if not present in DataList
 		DataObject obj = new DataObject(placementGroupId, replicaId,fileName);
@@ -76,7 +76,6 @@ public class CephDataNode  implements IDataNode{
 		return true;
 	}
 	
-	@Override
 	public boolean writeAllFiles(List<Payload> payloads) {
 		//step 1. find the placementGroupId for file
 		Set<DataObject> pgSet = new HashSet<>();
@@ -97,7 +96,7 @@ public class CephDataNode  implements IDataNode{
 		
 		for(DataObject pload : pgSet)
 		{
-			System.out.println("write pgroup: " + pload.replicaId + " with replica: " + pload.replicaId);
+			System.out.println("write pgroup: " + pload.placementGroup + " with replica: " + pload.replicaId);
 		}
 				return true;
 	}
@@ -218,7 +217,7 @@ public class CephDataNode  implements IDataNode{
 		
 		// Send request to other data node.
 		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
-    		System.out.println("file need to move from " +  this.NodeId + " to node " + e.getKey());
+    		System.out.println("Files need to move from " +  this.NodeId + " to node " + e.getKey());
     		String destinationNodeIp = ConfigLoader.config.nodesMap.get(e.getKey());
     		List<Payload> filesTobeMove = new LinkedList<>();
     		filesTobeMove.clear();
@@ -257,17 +256,27 @@ public class CephDataNode  implements IDataNode{
             	}
 
         		currentreplicaValue++;
+        		if(currentreplicaValue > 30)
+        			break;
             }
+            
+            // no need to process this file.
+            if(currentreplicaValue > 30)
+    			continue;
             
             // If replicationFactor value == currentReplicaValue then no file need to be written otherwise need to write file with replica equal to currentreplicaValue;
             if(replicaFactor + 1 < currentreplicaValue )
             {
             	// need to add file with current replica value
             	int destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(currentreplicaValue, obj.placementGroup);
-            	while(destinationNodeId == -2)
+            	int thresholdCounter = 1;
+            	while(destinationNodeId == -2 || thresholdCounter > 30)
             	{
             		destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(currentreplicaValue++, obj.placementGroup);	
+            		thresholdCounter++;
             	}
+            	if(thresholdCounter > 30)
+            		continue;
             	if(this.NodeId != destinationNodeId )
             	{
             		List<DataObject> list = addMap.get(destinationNodeId);
@@ -279,7 +288,7 @@ public class CephDataNode  implements IDataNode{
             }
 		}
 		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
-    		System.out.println("file need to added to node " + e.getKey());
+    		System.out.println("Files need to added to node " + e.getKey());
     		String destinationNodeIp = ConfigLoader.config.nodesMap.get(e.getKey());
     		List<Payload> filesTobeMove = new LinkedList<>();
     		filesTobeMove.clear();
