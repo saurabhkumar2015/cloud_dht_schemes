@@ -81,7 +81,7 @@ public class CephDataNode  implements IDataNode{
 		Set<DataObject> pgSet = new HashSet<>();
 		for(Payload pload : payloads)
 		{
-				int placementGroupId = this.hashGenerator.givePlacementGroupIdFromFileName(pload.fileName, ConfigLoader.config.PlacementGroupMaxLimit);
+			//	int placementGroupId = this.hashGenerator.givePlacementGroupIdFromFileName(pload.fileName, ConfigLoader.config.PlacementGroupMaxLimit);
 				
 				// Find the node on which it should go.
 				int destinationNodeId = this.cephRtTable.giveNodeId(pload.fileName, pload.replicaId);
@@ -89,7 +89,7 @@ public class CephDataNode  implements IDataNode{
 				//System.out.println("Write file request received for FileName: " + pload.fileName + " pGroup: " + placementGroupId + " replicaId: " + pload.replicaId + " on node " + (destinationNodeId) );
 
 				// Step 2: push the Data to the DataNode if not present in DataList
-				DataObject obj = new DataObject(placementGroupId, pload.replicaId, pload.fileName);
+				DataObject obj = new DataObject(Integer.parseInt(pload.fileName), pload.replicaId, pload.fileName);
 				dataList.add(obj);
 				pgSet.add(obj);
 		}
@@ -225,7 +225,7 @@ public class CephDataNode  implements IDataNode{
     		for(DataObject obj : e.getValue())
     		{
     			//System.out.println(" Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
-    			filesTobeMove.add(new Payload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
+    			filesTobeMove.add(new Payload(Integer.toString(obj.placementGroup), obj.replicaId, this.cephRtTable.getVersionNumber()));
     			pgSet.add(obj);
     		}
     		
@@ -295,7 +295,7 @@ public class CephDataNode  implements IDataNode{
     		for(DataObject obj : e.getValue())
     		{
     			//System.out.println("fileName" + obj.fileName + " Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId);
-    			filesTobeMove.add(new Payload(obj.fileName, obj.replicaId, this.cephRtTable.getVersionNumber()));
+    			filesTobeMove.add(new Payload(Integer.toString(obj.placementGroup), obj.replicaId, this.cephRtTable.getVersionNumber()));
     			pgSet.add(obj);
     		}
     		// Print at console for visibility
