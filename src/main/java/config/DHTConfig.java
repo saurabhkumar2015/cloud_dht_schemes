@@ -28,6 +28,7 @@ public class DHTConfig implements Serializable{
     public Map<Integer, String> nodesMap; // Node Id --> Ip:port for a datanode
 	public int resizeFactor = 100;
     public Map<Integer, List<Integer>> gossipList;
+    public int sleepTime;
 
     @Override
     public String toString() {
@@ -47,6 +48,7 @@ public class DHTConfig implements Serializable{
                 ", nodesMap Size=" + nodesMap.size() +
                 ", nodesMap=" + nodesMap + 
                 ", resize Factor = " +resizeFactor +
+		", sleepTime=" + sleepTime +
                 "}\n\n";
     }
 }
