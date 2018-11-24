@@ -129,6 +129,11 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
     }
     
     public LinkedList<Integer> giveListOfNodes(int index, int replicationFactor){
+    	if(this.numNodeIds < replicationFactor) {
+    		System.out.println("Warning: Number of nodes in the ring is less than the replication factor");
+    		System.out.println("Replication Factor:"+replicationFactor);
+    		System.out.println("Number of nodes in the ring: "+this.numNodeIds);
+    	}
     	LinkedList<Integer> listOfHash =  new LinkedList<Integer>();
     	listOfHash.addAll(this.routingMap.keySet());
     	LinkedList<Integer> listOfNodesForGivenHash = new LinkedList<Integer>();
@@ -153,8 +158,13 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
     Binary search done on routing table (Tree map)
     */
     public LinkedList<Integer> modifiedBinarySearch(int findHashVal){
-    	System.out.println("Searching Hash Val in routing table: "+findHashVal);    	
+    	System.out.println("Searching Hash Val in routing table: "+findHashVal);  
+    	//System.out.println("number of nodes in ring: "+this.numNodeIds);
+    	//LinkedList<Integer> listOfAllHash =  new LinkedList<Integer>();
     	LinkedList<Integer> listOfHash =  new LinkedList<Integer>();
+    	/*for(int i=0;i<this.numNodeIds; i++) {
+    		listOfHash.add(listOfAllHash.get(i));
+    	}*/
     	listOfHash.addAll(this.routingMap.keySet());
     	LinkedList<Integer> listOfNodesForGivenHash = new LinkedList<Integer>();
     	LinkedList<Integer> listOfHashesForGivenHash = new LinkedList<Integer>();
