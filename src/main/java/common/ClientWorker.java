@@ -240,7 +240,10 @@ public class ClientWorker extends Thread {
 	     
 	                break;
 	                
-	                
+	        case PRINT_REQUEST:
+            	   ((CephDataNode)dataNode).showDataNodeState();
+               	   break;
+			    
                case TRANSFER_COMPLETE:
             	   dataNode.setUseUpdatedRtTable(true);
                	   dataNode.setOldRoutingTable();
