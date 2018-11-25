@@ -61,6 +61,7 @@ public class GossipThread extends Thread{
                                 dataNode.UpdateRoutingTable(r.table,r.type);
                                 break;
                         }
+                        Commons.gossip.gossipSharedData(msg);
                     }
                 }
             } catch (InterruptedException e) {
