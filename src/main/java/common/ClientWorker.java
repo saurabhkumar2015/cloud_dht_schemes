@@ -1,7 +1,11 @@
 package common;
 
+import ceph.CephDataNode;
 import config.ConfigLoader;
 import org.apache.gossip.model.SharedGossipDataMessage;
+import ring.DataNode;
+import ring.RingRoutingTable;
+import schemes.ElasticDHT.DataNodeElastic;
 import schemes.ElasticDHT.ERoutingTable;
 import socket.Request;
 
@@ -241,7 +245,17 @@ public class ClientWorker extends Thread {
 	                break;
 	                
 	        case PRINT_REQUEST:
-            	   ((CephDataNode)dataNode).showDataNodeState();
+	            switch(ConfigLoader.config.scheme.toUpperCase()) {
+                    case "CEPH":
+                        ((CephDataNode)dataNode).showDataNodeState();
+                        break;
+                    case "RING":
+                        ((DataNode)dataNode).getRoutingTable().printRoutingTable();
+                        break;
+                    case "ELASTIC":
+                        ((DataNodeElastic)dataNode).getRoutingTable().printRoutingTable();
+                        break;
+                }
                	   break;
 			    
                case TRANSFER_COMPLETE:
