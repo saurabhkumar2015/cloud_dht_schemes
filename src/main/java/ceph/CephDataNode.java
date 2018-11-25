@@ -18,7 +18,7 @@ import config.ConfigLoader;
 
 public class CephDataNode  implements IDataNode{
 
-	public ArrayList<DataObject> dataList = new ArrayList<DataObject>();
+	public Set<DataObject> dataList = new HashSet<DataObject>();
 
     public HashGenerator hashGenerator;
 
@@ -187,13 +187,8 @@ public class CephDataNode  implements IDataNode{
 	
 	public void showDataNodeState()
 	{
-		Set<DataObject> pgSet = new HashSet<>();
-		for(DataObject obj : this.dataList)
-		{
-			pgSet.add(obj);
-		}
 		System.out.println("Data Node " + this.NodeId + " contains the following PlacementGroup->");
-		for(DataObject pload : pgSet)
+		for(DataObject pload : this.dataList)
 		{
 			System.out.println("Placementgroup: " + pload.placementGroup + " with replica: " + pload.replicaId);
 		}
@@ -202,7 +197,7 @@ public class CephDataNode  implements IDataNode{
 	private void MoveFilesOnWeightChangeInOsdMap()
 	{
 		Map<Integer, List<DataObject>> addMap = new HashMap<>();
-		List<DataObject> removedFiles = new LinkedList<>();
+		HashSet<DataObject> removedFiles = new HashSet<>();
 		for(DataObject obj : this.dataList)
 		{
             int destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(obj.replicaId, obj.placementGroup);
