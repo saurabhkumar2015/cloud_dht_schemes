@@ -49,11 +49,8 @@ public class ClientWorker extends Thread {
             Request request = (Request) in.readObject();
             
             switch (request.getType()) {
-            
                   case WRITE_FILE:
-                	
                     Payload p = (Payload) request.getPayload();
-                    System.out.println("File Write:: " + p.fileName + "Replica:" + p.replicaId);
                     long dataNodeVersionNo = dataNode.getRoutingTable().getVersionNumber();
                      if (dataNodeVersionNo > p.versionNumber) {
                          System.out.println("Sender's routing table needs to be updated");
