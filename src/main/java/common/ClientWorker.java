@@ -60,31 +60,13 @@ public class ClientWorker extends Thread {
                          stream = baos.toByteArray();
                          out.write(stream);
                      } else {
-                    	 
-                    	 if(!dataNode.getUseUpdatedRtTable()) {
-                    		 int nodeId = dataNode.getOldRoutingTable().giveNodeId(p.fileName,p.replicaId);
-                    		 if(nodeId == dataNode.getNodeId()) {
-                    			 dataNode.writeFile(p.fileName, p.replicaId);
-    	                         EpochPayload payload = new EpochPayload("success", null);
-    	                         oos.writeObject(payload);
-    	                         stream = baos.toByteArray();
-    	                         out.write(stream);
-                    		 }
-                    		 else {
-                    			 EpochPayload payload = new EpochPayload("fail due to file lock", null);
-                                 oos.writeObject(payload);
-                                 stream = baos.toByteArray();
-                                 out.write(stream);
-                    		 }
-                    	 }
-                    	 else {
 	                    	 dataNode.writeFile(p.fileName, p.replicaId);
 	                         EpochPayload payload = new EpochPayload("success", null);
 	                         oos.writeObject(payload);
 	                         stream = baos.toByteArray();
 	                         out.write(stream);
                     	 }
-                     }
+                     
                     break;
                   
                  case ADD_FILES:
@@ -106,23 +88,6 @@ public class ClientWorker extends Thread {
 	                      } else {
 	                          dataNode.writeAllFiles(paylds);
 	                          
-	                          if(dataNode.getUseUpdatedRtTable() == false) {
-	 		  	               	 dataNode.setUseUpdatedRtTable(true);
-	 		 	               	 dataNode.setOldRoutingTable();
-	 	  	               	     List<Integer> liveNodes = dataNode.getRoutingTable().giveLiveNodes();
-	 				  	             for(int id: liveNodes) {
-	 				  	              	System.out.println("Live node "+id);
-	 				  	              	
-	 				  	              		  new Thread() {
-	 				  	              		      public void run() {
-	 				  	              		    	  
-	 				  	              		    	Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(id), Constants.TRANSFER_COMPLETE, null);
-	 				  	              		        
-	 				  	              		      }
-	 				  	              		  }.start();
-	 				  	              	
-	 				  	              }
-	   	               	     }
 	                          EpochPayload payload = new EpochPayload("success", null);
 	                          oos.writeObject(payload);
 	                          stream = baos.toByteArray();
@@ -204,7 +169,6 @@ public class ClientWorker extends Thread {
                case REMOVE_HASH:
                 	String hashRangeToBeDeleted = (String) request.getPayload();
                 	System.out.println("Received hash bucket delete request: ");
-                	Thread.sleep(ConfigLoader.config.sleepTime);
                 	dataNode.deleteFile(hashRangeToBeDeleted);
                     break;
 
@@ -228,10 +192,6 @@ public class ClientWorker extends Thread {
                             Commons.elasticERoutingTable = (ERoutingTable) payld.newRoutingTable;
                            break;
                        case "CEPH":
-			    if(!((payld.type).equals(Constants.LOAD_BALANCE))){
-                    			   dataNode.setUseUpdatedRtTable(false);
-                    	   }
-
                            dataNode.UpdateRoutingTable(payld.newRoutingTable, payld.type);
                            break;
                        case "RING":
@@ -254,12 +214,7 @@ public class ClientWorker extends Thread {
                         break;
                 }
                	   break;
-			    
-               case TRANSFER_COMPLETE:
-            	   dataNode.setUseUpdatedRtTable(true);
-               	   dataNode.setOldRoutingTable();
-               	   break;
-			    
+		
                 default:
                     throw new Exception("Unsupported message type");
             }

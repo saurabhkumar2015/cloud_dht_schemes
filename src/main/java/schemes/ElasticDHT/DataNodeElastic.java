@@ -35,7 +35,7 @@ public class DataNodeElastic implements IDataNode {
 		elasticERoutingTable  = new ERoutingTable();
 		elasticERoutingTable.elasticTable = elasticTable1.populateRoutingTable();
 		elasticERoutingTable.versionNumber = elasticERoutingTable.versionNumber + 1;
-		elasticOldERoutingTable = elasticERoutingTable;
+		//elasticOldERoutingTable = elasticERoutingTable;
 	}
 
 	public static DataNodeElastic getInstance(int nodeId) {
@@ -216,25 +216,8 @@ public class DataNodeElastic implements IDataNode {
 		return false;
 	}
 	
-	
-	@Override
-	public IRoutingTable getOldRoutingTable() {
 
-		return Commons.elasticOldERoutingTable;
-	}
-	@Override
-	public void setOldRoutingTable() {
-		
-	}
-	@Override
-	public boolean getUseUpdatedRtTable() {
-		// TODO Auto-generated method stub
-		return fileLock;
-	}
-	@Override
-	public void setUseUpdatedRtTable(boolean value) {
-		
-	}
+
 	@Override
 	public int getNodeId() {
 		// TODO Auto-generated method stub

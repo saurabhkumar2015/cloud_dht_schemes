@@ -32,10 +32,6 @@ public interface IDataNode {
 	public void addHashRange(String hashRange);
 	public void newUpdatedRoutingTable(int nodeId, String type, IRoutingTable rt);
 	
-	public IRoutingTable getOldRoutingTable();
-	public void setOldRoutingTable();
-	public boolean getUseUpdatedRtTable();
-	public void setUseUpdatedRtTable(boolean value);
 	public int getNodeId();
 
 	
