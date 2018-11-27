@@ -19,6 +19,8 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 	public int rFactor = ConfigLoader.config.replicationFactor;
 	public ElasticRoutingTableInstance[] elasticTable;
 	public long versionNumber;
+	int resize = config.ConfigLoader.config.resizeFactor;
+	double r = 1/resize;
 	
 
 	@Override
@@ -140,7 +142,7 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 		int maxLiveNodes = liveNodes.size();
 		System.out.println(maxLiveNodes);
 
-		hashReplicaNodeId = createMapforNodeId(nodeId, elasticTable);
+		hashReplicaNodeId = createMapforNodeId(nodeId);
 		//Set<Integer> keys = hashReplicaNodeId.keySet();
 		int currentstrength = hashReplicaNodeId.size();
 		int newStrength = (int) (currentstrength * factor);
@@ -205,11 +207,11 @@ public class ERoutingTable implements IRoutingTable, Serializable {
 
 	}
 
-	public Map<Integer, Integer> createMapforNodeId(int nodeId, ElasticRoutingTableInstance rt[]) {
+	public Map<Integer, Integer> createMapforNodeId(int nodeId) {
 		for (int i = 0; i < elasticTable.length; i++) {
 			for (int j = 0; j < rFactor; j++) {
-				if (nodeId == rt[i].nodeId.get(j)) {
-					hashReplicaNodeId.put(rt[i].hashIndex, j);
+				if (nodeId == elasticTable[i].nodeId.get(j)) {
+					hashReplicaNodeId.put(elasticTable[i].hashIndex, j);
 				}
 			}
 

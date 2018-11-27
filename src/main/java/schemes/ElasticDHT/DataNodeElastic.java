@@ -96,6 +96,7 @@ public class DataNodeElastic implements IDataNode {
 		// TODO Auto-generated method stub
 
 	}
+	
 
 	public void MoveFiles(int clusterIdofNewNode, String nodeIp, double newnodeWeight, double clusterWeight, boolean isLoadbalance) {
 

@@ -40,7 +40,7 @@ public class ConfigLoader {
         config.nodesMap = getNodeMap(config.nodeMapLocation);
         config.resizeFactor = Integer.parseInt(map.get("resizeFactor").toString());
         config.gossipList = getGossipList((Map<String, String>) map.get("gossipList"));
-        config.sleepTime = Integer.parseInt(map.get("sleepTime").toString());
+       // config.sleepTime = Integer.parseInt(map.get("sleepTime").toString());
 
         if(!config.verbose.equalsIgnoreCase("error")) {
 //            System.out.println("Config is::" + config.toString());
