@@ -62,7 +62,6 @@ public class ControlClient {
                     for (String id : ids) {
                         int i = Integer.parseInt(id.trim());
                         if(distributed) {
-                            System.out.print("Add Node "+ id +" sent to DataNode:"+nodeId+ "\n");
                             DistributedPayload p = new DistributedPayload();
                             p.nodeId = i;
                             p.version = routingTable.getVersionNumber();
@@ -72,8 +71,13 @@ public class ControlClient {
                             }
                             catch (Exception e){
                             }
+                            liveNodes = routingTable.giveLiveNodes();
+                            if(!liveNodes.contains(nodeId)) {
+                                System.out.println("ERROR:: Node id "+nodeId + "is not a live node.");
+                                continue;
+                            }
                             String node = config.nodesMap.get(nodeId);
-                            System.out.println("Send message to datanode::"+node);
+                            System.out.print("Add Node "+ id +" sent to DataNode:"+nodeId+ "\n");
                             messageSender.sendMessage(node , ADD_NODE, p);
                         }
                         else{
@@ -92,7 +96,6 @@ public class ControlClient {
                             nodeId = getRandomNode(r, liveNodes);
                         }
                         if(distributed) {
-                            System.out.print("Delete Node "+ id +" sent to DataNode:"+nodeId + "\n");
                             DistributedPayload p = new DistributedPayload();
                             p.nodeId = i;
                             p.version = routingTable.getVersionNumber();
@@ -102,6 +105,12 @@ public class ControlClient {
                             }
                             catch (Exception e){
                             }
+                            liveNodes = routingTable.giveLiveNodes();
+                            if(!liveNodes.contains(nodeId)) {
+                                System.out.println("ERROR:: Node id "+nodeId + "is not a live node.");
+                                continue;
+                            }
+                            System.out.print("Delete Node "+ id +" sent to DataNode:"+nodeId + "\n");
                             messageSender.sendMessage(config.nodesMap.get(nodeId), DELETE_NODE, p);
                         }
                         else {
@@ -126,6 +135,11 @@ public class ControlClient {
                             nodeId = sc.nextInt();
                         }
                         catch (Exception e){
+                        }
+                        liveNodes = routingTable.giveLiveNodes();
+                        if(!liveNodes.contains(nodeId)) {
+                            System.out.println("ERROR:: Node id "+nodeId + "is not a live node.");
+                            continue;
                         }
                         String sNode = config.nodesMap.get(nodeId);
                         System.out.print("Load Balance request for node id " + node+" sent to DataNode:"+nodeId+ "\n");

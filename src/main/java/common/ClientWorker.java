@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 import static common.Commons.dateFormat;
+import static common.Commons.lock;
 import static common.Constants.*;
 
 public class ClientWorker extends Thread {
@@ -107,6 +108,7 @@ public class ClientWorker extends Thread {
                     break;
                 case ADD_NODE:
                     if(distributed) {
+                        lock.lock();
                         DistributedPayload dp = (DistributedPayload) request.getPayload();
                         waitForNewVersion(dp);
                         IRoutingTable table = dataNode.getRoutingTable().addNode(dp.nodeId);
@@ -115,6 +117,7 @@ public class ClientWorker extends Thread {
                         gossipNow(ADD_NODE, dp.nodeId, 0);
                         System.out.println("New Version  of Routing Table sent to control client");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
+                        lock.unlock();
                     }
                     else{
                         Integer nodeId = (Integer) request.getPayload();
@@ -124,6 +127,7 @@ public class ClientWorker extends Thread {
                     break;
                 case DELETE_NODE:
                     if(distributed) {
+                        lock.lock();
                         DistributedPayload dp = (DistributedPayload) request.getPayload();
                         waitForNewVersion(dp);
                         IRoutingTable table = dataNode.getRoutingTable().deleteNode(dp.nodeId);
@@ -132,10 +136,12 @@ public class ClientWorker extends Thread {
                         gossipNow(DELETE_NODE,dp.nodeId,0);
                         System.out.println("Sender's routing table needs to be updated");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
+                        lock.unlock();
                     }
                     break;
                 case LOAD_BALANCE:
                     if(distributed) {
+                        lock.lock();
                         DistributedPayload dp = (DistributedPayload) request.getPayload();
                         waitForNewVersion(dp);
                         IRoutingTable table  = dataNode.getRoutingTable().loadBalance(dp.nodeId, dp.loadFactor);
@@ -144,6 +150,7 @@ public class ClientWorker extends Thread {
                         gossipNow(LOAD_BALANCE, dp.nodeId, dp.loadFactor);
                         System.out.println("New Version  of Routing Table sent to control client");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
+                        lock.unlock();
                     }else {
                         Integer nodeId1 = (Integer) request.getPayload();
                         LoadBalance lb = (LoadBalance) request.getPayload();
@@ -234,6 +241,7 @@ public class ClientWorker extends Thread {
 
     private void waitForNewVersion(DistributedPayload dp) throws InterruptedException {
         boolean lock = true;
+        Commons.lock.unlock();
         long dnVersion = dataNode.getRoutingTable().getVersionNumber();
         while(dp.version > dnVersion) {
             if(lock){
@@ -245,6 +253,7 @@ public class ClientWorker extends Thread {
             Thread.sleep(200L);
         }
         System.out.println(dateFormat.format(new Date())+": NEW VERSION OF ROUTING TABLE DETECTED:" + dnVersion);
+        Commons.lock.lock();
     }
 
     private void updates(Integer nodeId, IRoutingTable table, String type) {
@@ -274,6 +283,7 @@ public class ClientWorker extends Thread {
     private void gossipNow(String type, int nodeId, double factor) {
         SharedGossipDataMessage message = new SharedGossipDataMessage();
         message.setExpireAt(System.currentTimeMillis()+120000);
+        message.setNodeId(Integer.toString(dataNode.getNodeId()));
         message.setTimestamp(System.currentTimeMillis());
         message.setKey(Constants.ROUTING_TABLE);
         RoutingTableWrapper wrapper = new RoutingTableWrapper();

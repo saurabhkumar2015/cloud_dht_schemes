@@ -291,7 +291,7 @@ public abstract class GossipManager {
     }
 
     public void gossipSharedData(SharedGossipDataMessage message){
-        message.setNodeId(me.getId());
+        if(message.getNodeId() != null)message.setNodeId(me.getId());
         gossipCore.addSharedData(message);
     }
 

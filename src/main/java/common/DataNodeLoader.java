@@ -13,10 +13,7 @@ import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DataNodeLoader {
 
@@ -48,6 +45,7 @@ public class DataNodeLoader {
                 }
             }
             List<GossipMember> startupMembers = new ArrayList<>();
+            HashSet<Integer> set = new HashSet<>();
             for (Integer member: members) {
                 if(member != nodeId) {
                     String[] splits = ConfigLoader.config.nodesMap.get(member).split(":");
