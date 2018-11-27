@@ -1,8 +1,6 @@
 package clients;
 
-import common.Commons;
-import common.IRoutingTable;
-import common.LoadBalance;
+import common.*;
 import config.ConfigLoader;
 import config.DHTConfig;
 import socket.IMessageSend;
@@ -63,11 +61,20 @@ public class ControlClient {
                     String[] ids = input.split(",");
                     for (String id : ids) {
                         int i = Integer.parseInt(id.trim());
-                        if(distributed)
-                        {
-                            String node = config.nodesMap.get(nodeId);
+                        if(distributed) {
                             System.out.print("Add Node "+ id +" sent to DataNode:"+nodeId+ "\n");
-                            messageSender.sendMessage(node , ADD_NODE, i);
+                            DistributedPayload p = new DistributedPayload();
+                            p.nodeId = i;
+                            p.version = routingTable.getVersionNumber();
+                            System.out.println("Which datanode should i send this request to:");
+                            try{
+                                nodeId = sc.nextInt();
+                            }
+                            catch (Exception e){
+                            }
+                            String node = config.nodesMap.get(nodeId);
+                            System.out.println("Send message to datanode::"+node);
+                            messageSender.sendMessage(node , ADD_NODE, p);
                         }
                         else{
                             System.out.print("Add Node "+ id +" sent to Proxy:"+config.proxyIp);
@@ -85,9 +92,17 @@ public class ControlClient {
                             nodeId = getRandomNode(r, liveNodes);
                         }
                         if(distributed) {
-                            String node = config.nodesMap.get(nodeId);
                             System.out.print("Delete Node "+ id +" sent to DataNode:"+nodeId + "\n");
-                            messageSender.sendMessage(config.nodesMap.get(nodeId), DELETE_NODE, i);
+                            DistributedPayload p = new DistributedPayload();
+                            p.nodeId = i;
+                            p.version = routingTable.getVersionNumber();
+                            System.out.println("Which datanode should i send this request to:");
+                            try{
+                                nodeId = sc.nextInt();
+                            }
+                            catch (Exception e){
+                            }
+                            messageSender.sendMessage(config.nodesMap.get(nodeId), DELETE_NODE, p);
                         }
                         else {
                             System.out.print("Delete Node "+ id +" sent to Proxy:"+config.proxyIp);
@@ -102,9 +117,19 @@ public class ControlClient {
                     int node = Integer.parseInt(ids[0].trim());
                     double factor = Double.parseDouble(ids[1].trim());
                     if(distributed) {
+                        DistributedPayload p = new DistributedPayload();
+                        p.nodeId = node;
+                        p.version = routingTable.getVersionNumber();
+                        p.loadFactor = factor;
+                        System.out.println("Which datanode should i send this request to:");
+                        try{
+                            nodeId = sc.nextInt();
+                        }
+                        catch (Exception e){
+                        }
                         String sNode = config.nodesMap.get(nodeId);
                         System.out.print("Load Balance request for node id " + node+" sent to DataNode:"+nodeId+ "\n");
-                        messageSender.sendMessage(sNode, LOAD_BALANCE, new LoadBalance(node, factor));
+                        messageSender.sendMessage(sNode, LOAD_BALANCE, p);
                     }
                     else {
                         System.out.print("Load Balance request for node id " + node+" sent to Proxy:"+config.proxyIp);
@@ -114,9 +139,7 @@ public class ControlClient {
                  case "P":
                 	System.out.println("Enter node Id");
                 	input = sc.next();
-                	
                 	Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(Integer.parseInt(input)), Constants.PRINT_REQUEST, null);
-                	
                     break;
                 case "X":
                     exit = false;

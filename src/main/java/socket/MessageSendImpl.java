@@ -69,7 +69,7 @@ public class MessageSendImpl implements IMessageSend {
                     ObjectInputStream ois = new ObjectInputStream(input);
                     EpochPayload p = (EpochPayload) ois.readObject();
 
-                    System.out.println("received ack " + p.status);
+                    System.out.println("received new routing table version: " + p.newRoutingTable.getVersionNumber());
                     ControlClient.routingTable = p.newRoutingTable;
                 }
             }

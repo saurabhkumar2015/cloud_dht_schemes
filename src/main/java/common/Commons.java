@@ -13,6 +13,8 @@ import schemes.ElasticDHT.ElasticRoutingTableInstance;
 import socket.IMessageSend;
 import socket.MessageSendImpl;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Random;
 
 public class Commons {
@@ -96,6 +98,7 @@ public class Commons {
 
     public static ERoutingTable elasticERoutingTable = null;
     public static ERoutingTable elasticOldERoutingTable = null;
+    public static DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
 
     public static Payload GeneratePayload(String fileName, int replica, long versionNo)
     {

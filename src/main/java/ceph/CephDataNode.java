@@ -18,7 +18,7 @@ import config.ConfigLoader;
 
 public class CephDataNode  implements IDataNode{
 
-	public ArrayList<DataObject> dataList = new ArrayList<DataObject>();
+	public Set<DataObject> dataList = new HashSet<DataObject>();
 
     public HashGenerator hashGenerator;
 
@@ -27,12 +27,6 @@ public class CephDataNode  implements IDataNode{
     public IRoutingTable cephRtTable;
     
     private static CephDataNode single_instance = null;
-	
-     // use updated or old version of routing table
-    public boolean useUpdatedRtTable;
-    
-    // stores old version of routing table
-    public IRoutingTable oldRtTable;
     
     public CephDataNode()
     {
@@ -46,8 +40,6 @@ public class CephDataNode  implements IDataNode{
     	EntryPoint entryPoint = new EntryPoint();
         entryPoint.BootStrapCeph();
     	cephRtTable = CephRoutingTable.giveInstance();
-	oldRtTable  = cephRtTable;
-    	useUpdatedRtTable = true;
     }
     
     public static CephDataNode getInstance(int nodeId) {
@@ -144,17 +136,6 @@ public class CephDataNode  implements IDataNode{
     	// Trigger file movement on this DataNode
     	System.out.println("File Movement has been triggered at node: " + this.NodeId);
 	    
-	if(!updateType.equals(Constants.LOAD_BALANCE)) {
-	    	try {
-				Thread.sleep(ConfigLoader.config.sleepTime);
-			} catch (NumberFormatException | InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-    	}
-	    
-	
-	    
     	if(updateType.equals(Constants.ADD_NODE) || updateType.equals(Constants.LOAD_BALANCE))
     	this.MoveFilesOnWeightChangeInOsdMap();
     	else
@@ -187,13 +168,8 @@ public class CephDataNode  implements IDataNode{
 	
 	public void showDataNodeState()
 	{
-		Set<DataObject> pgSet = new HashSet<>();
-		for(DataObject obj : this.dataList)
-		{
-			pgSet.add(obj);
-		}
 		System.out.println("Data Node " + this.NodeId + " contains the following PlacementGroup->");
-		for(DataObject pload : pgSet)
+		for(DataObject pload : this.dataList)
 		{
 			System.out.println("Placementgroup: " + pload.placementGroup + " with replica: " + pload.replicaId);
 		}
@@ -202,7 +178,7 @@ public class CephDataNode  implements IDataNode{
 	private void MoveFilesOnWeightChangeInOsdMap()
 	{
 		Map<Integer, List<DataObject>> addMap = new HashMap<>();
-		List<DataObject> removedFiles = new LinkedList<>();
+		HashSet<DataObject> removedFiles = new HashSet<>();
 		for(DataObject obj : this.dataList)
 		{
             int destinationNodeId = ((CephRoutingTable)this.cephRtTable).mapInstance.findNodeWithRequestedReplica(obj.replicaId, obj.placementGroup);
@@ -316,29 +292,6 @@ public class CephDataNode  implements IDataNode{
     	}
 	}
 	
-	@Override
-	public IRoutingTable getOldRoutingTable() {
-		// TODO Auto-generated method stub
-		return this.oldRtTable;
-	}
-
-	@Override
-	public void setOldRoutingTable() {
-		// TODO Auto-generated method stub
-		this.oldRtTable = this.cephRtTable;
-	}
-
-	@Override
-	public boolean getUseUpdatedRtTable() {
-		// TODO Auto-generated method stub
-		return useUpdatedRtTable;
-	}
-
-	@Override
-	public void setUseUpdatedRtTable(boolean value) {
-		// TODO Auto-generated method stub
-		this.useUpdatedRtTable = value;
-	}
 
 	@Override
 	public int getNodeId() {

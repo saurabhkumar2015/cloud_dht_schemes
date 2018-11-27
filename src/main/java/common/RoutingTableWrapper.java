@@ -8,5 +8,5 @@ public class RoutingTableWrapper implements Serializable {
     public String type;
     public Integer nodeId;
     public double factor;
-
+    public Integer originatorNodeId;
 }

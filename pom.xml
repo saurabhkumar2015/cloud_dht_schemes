@@ -107,6 +107,9 @@
                                         <exlude>
                                             org/apache/gossip/GossipService.class
                                         </exlude>
+                                        <exclude>
+                                            org.apache.gossip.manager.handlers.SharedGossipDataMessageHandler.class
+                                        </exclude>
                                     </excludes>
                                 </filter>
                             </filters>

@@ -41,6 +41,8 @@ public class ConfigLoader {
         config.resizeFactor = Integer.parseInt(map.get("resizeFactor").toString());
         config.gossipList = getGossipList((Map<String, String>) map.get("gossipList"));
        // config.sleepTime = Integer.parseInt(map.get("sleepTime").toString());
+        config.sleepTime = Integer.parseInt(map.get("sleepTime").toString());
+        config.gossipSleep = Integer.parseInt(map.get("gossipSleep").toString());
 
         if(!config.verbose.equalsIgnoreCase("error")) {
 //            System.out.println("Config is::" + config.toString());
