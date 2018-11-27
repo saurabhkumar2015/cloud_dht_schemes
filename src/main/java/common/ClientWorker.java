@@ -4,15 +4,17 @@ import ceph.CephDataNode;
 import config.ConfigLoader;
 import org.apache.gossip.model.SharedGossipDataMessage;
 import ring.DataNode;
-import ring.RingRoutingTable;
+
 import schemes.ElasticDHT.DataNodeElastic;
 import schemes.ElasticDHT.ERoutingTable;
 import socket.Request;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Date;
 import java.util.List;
 
+import static common.Commons.dateFormat;
 import static common.Constants.*;
 
 public class ClientWorker extends Thread {
@@ -104,42 +106,48 @@ public class ClientWorker extends Thread {
                     dataNode.writeFile(p1.fileName, p1.replicaId);
                     break;
                 case ADD_NODE:
-                    Integer nodeId = (Integer) request.getPayload();
                     if(distributed) {
-                        IRoutingTable table = dataNode.getRoutingTable().addNode(nodeId);
+                        DistributedPayload dp = (DistributedPayload) request.getPayload();
+                        waitForNewVersion(dp);
+                        IRoutingTable table = dataNode.getRoutingTable().addNode(dp.nodeId);
                         System.out.println("ADD NODE ROUTING TABLE UPDATED TO VERSION:" + table.getVersionNumber());
-                        updates(nodeId, table, ADD_NODE);
-                        gossipNow(ADD_NODE, nodeId, 0);
+                        updates(dp.nodeId, table, ADD_NODE);
+                        gossipNow(ADD_NODE, dp.nodeId, 0);
                         System.out.println("New Version  of Routing Table sent to control client");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
                     }
                     else{
+                        Integer nodeId = (Integer) request.getPayload();
                         System.out.println("Add node " + nodeId);
                         dataNode.addNode(nodeId);
                     }
                     break;
                 case DELETE_NODE:
-                    Integer nodeId1 = (Integer) request.getPayload();
                     if(distributed) {
-                        IRoutingTable table = dataNode.getRoutingTable().deleteNode(nodeId1);
+                        DistributedPayload dp = (DistributedPayload) request.getPayload();
+                        waitForNewVersion(dp);
+                        IRoutingTable table = dataNode.getRoutingTable().deleteNode(dp.nodeId);
                         System.out.println("DELETE NODE ROUTING TABLE UPDATED TO VERSION:" + table.getVersionNumber());
-                        updates(nodeId1, table, DELETE_NODE);
-                        gossipNow(DELETE_NODE,nodeId1,0);
+                        updates(dp.nodeId, table, DELETE_NODE);
+                        gossipNow(DELETE_NODE,dp.nodeId,0);
                         System.out.println("Sender's routing table needs to be updated");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
                     }
                     break;
                 case LOAD_BALANCE:
-                    LoadBalance lb = (LoadBalance) request.getPayload();
-                    System.out.println("Load Balance    " + lb);
                     if(distributed) {
-                        IRoutingTable table  = dataNode.getRoutingTable().loadBalance(lb.nodeId, lb.loadFactor);
+                        DistributedPayload dp = (DistributedPayload) request.getPayload();
+                        waitForNewVersion(dp);
+                        IRoutingTable table  = dataNode.getRoutingTable().loadBalance(dp.nodeId, dp.loadFactor);
                         System.out.println("LOAD BALANCE ROUTING TABLE UPDATED TO VERSION:" + table.getVersionNumber());
-                        updates(lb.nodeId, table, LOAD_BALANCE);
-                        gossipNow(LOAD_BALANCE, lb.nodeId, lb.loadFactor);
+                        updates(dp.nodeId, table, LOAD_BALANCE);
+                        gossipNow(LOAD_BALANCE, dp.nodeId, dp.loadFactor);
                         System.out.println("New Version  of Routing Table sent to control client");
                         sendRoutingTable(out, baos, oos, "success", dataNode.getRoutingTable());
                     }else {
+                        Integer nodeId1 = (Integer) request.getPayload();
+                        LoadBalance lb = (LoadBalance) request.getPayload();
+                        System.out.println("Load Balance    " + lb);
                         dataNode.loadBalance(lb.nodeId, lb.loadFactor);
                     }
                     break;
@@ -157,7 +165,6 @@ public class ClientWorker extends Thread {
                 case MOVE_ON_DELETE:
                 	System.out.println("inside client worker move on delete");
                 	CephPayload payload = (CephPayload) request.getPayload();
-//                	((CephDataNode)dataNode).OnDeleteNodeMoveFile();
                 	break;
 
                 case ADD_HASH:
@@ -225,6 +232,21 @@ public class ClientWorker extends Thread {
         }
     }
 
+    private void waitForNewVersion(DistributedPayload dp) throws InterruptedException {
+        boolean lock = true;
+        long dnVersion = dataNode.getRoutingTable().getVersionNumber();
+        while(dp.version > dnVersion) {
+            if(lock){
+                System.out.println(dateFormat.format(new Date())+": WAITING FOR NEW VERSION TO ARRIVE!!! " +
+                        "CONTROL CLIENT HAS AN UPDATED VERSION:"+dp.version + " DATANODE VERSION:"+ dnVersion);
+                lock = false;
+            }
+            dnVersion = dataNode.getRoutingTable().getVersionNumber();
+            Thread.sleep(200L);
+        }
+        System.out.println(dateFormat.format(new Date())+": NEW VERSION OF ROUTING TABLE DETECTED:" + dnVersion);
+    }
+
     private void updates(Integer nodeId, IRoutingTable table, String type) {
 
         switch((ConfigLoader.config.scheme).toUpperCase()) {
@@ -254,14 +276,14 @@ public class ClientWorker extends Thread {
         message.setExpireAt(System.currentTimeMillis()+120000);
         message.setTimestamp(System.currentTimeMillis());
         message.setKey(Constants.ROUTING_TABLE);
-        message.setNodeId(Integer.toString(Commons.nodeId));
         RoutingTableWrapper wrapper = new RoutingTableWrapper();
         wrapper.table = dataNode.getRoutingTable();
         wrapper.type = type;
         wrapper.nodeId = nodeId;
         wrapper.factor = factor;
+        wrapper.originatorNodeId = dataNode.getNodeId();
         message.setPayload(wrapper);
         Commons.gossip.gossipSharedData(message);
-        System.out.println("GOSSIP MESSAGE SENT WITH NEW VERSION:" + wrapper.table.getVersionNumber());
+        System.out.println(dateFormat.format(new Date())+" GOSSIP MESSAGE SENT WITH NEW VERSION:" + wrapper.table.getVersionNumber());
     }
 }

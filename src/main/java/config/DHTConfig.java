@@ -29,6 +29,7 @@ public class DHTConfig implements Serializable{
 	public int resizeFactor = 100;
     public Map<Integer, List<Integer>> gossipList;
     public int sleepTime;
+    public int gossipSleep;
 
     @Override
     public String toString() {

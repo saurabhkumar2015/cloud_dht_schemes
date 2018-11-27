@@ -2,9 +2,10 @@ package common;
 
 import config.ConfigLoader;
 import org.apache.gossip.model.SharedGossipDataMessage;
-import schemes.ElasticDHT.DataNodeElastic;
 import schemes.ElasticDHT.ERoutingTable;
+import java.util.Date;
 
+import static common.Commons.dateFormat;
 import static common.Constants.*;
 
 public class GossipThread extends Thread{
@@ -14,11 +15,12 @@ public class GossipThread extends Thread{
         this.dataNode = dataNode;
     }
 
+
     @Override
     public void run() {
         while(true) {
             try {
-                Thread.sleep(200L);
+                Thread.sleep(200 + ConfigLoader.config.gossipSleep);
                 SharedGossipDataMessage msg  = Commons.gossip.findSharedData(ROUTING_TABLE);
                 if(msg != null) {
                     RoutingTableWrapper r = null;
@@ -35,9 +37,10 @@ public class GossipThread extends Thread{
                     }
                     long oldVersion = dataNode.getRoutingTable().getVersionNumber();
                     if (r.table.getVersionNumber() > oldVersion) {
-                        System.out.println("GOSSIP RECEIVED NEW ROUTING TABLE VERSION::" +r.table.getVersionNumber() + " OLD VERSION WAS:"+ oldVersion );
+                        Date date = new Date();
+                        System.out.println(dateFormat.format(date) + ": GOSSIP RECEIVED NEW ROUTING TABLE FROM NODE "+ msg.getNodeId()+ " ORIGINATED FROM "+ r.originatorNodeId+ " NEW VERSION::" +r.table.getVersionNumber() + " OLD VERSION WAS:"+ oldVersion );
                         msg.setTimestamp(System.currentTimeMillis());
-                        Commons.gossip.gossipSharedData(msg);
+                        msg.setNodeId(Integer.toString(dataNode.getNodeId()));
                         switch((ConfigLoader.config.scheme).toUpperCase()) {
                             case "ELASTIC":
                                 switch (r.type.toUpperCase()) {
