@@ -55,7 +55,7 @@ public class DataNodeLoader {
                 }
             }
             GossipSettings settings = new GossipSettings();
-            settings.setGossipInterval(100);
+            settings.setGossipInterval(ConfigLoader.config.gossipSleep);
             settings.setCleanupInterval(1000);
             settings.setWindowSize(100);
             settings.setPersistDataState(false);

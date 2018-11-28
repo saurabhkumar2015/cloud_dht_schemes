@@ -22,7 +22,7 @@ public class GossipThread extends Thread{
     public void run() {
         while(true) {
             try {
-                Thread.sleep(200 + ConfigLoader.config.gossipSleep);
+                Thread.sleep(200);
                 SharedGossipDataMessage msg  = Commons.gossip.findSharedData(ROUTING_TABLE);
                 if(msg != null) {
                     RoutingTableWrapper r = null;
