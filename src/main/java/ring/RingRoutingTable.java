@@ -78,12 +78,25 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
     */
     public void printRoutingTable() {
     	System.out.println("Routing Table versionNumber: "+this.versionNumber);
-        System.out.println("HashVal\tNodeId");
+        System.out.println("HashRange \t NodeId");
+        LinkedList<Integer> hashStart = new LinkedList<>();
+        LinkedList<Integer> nodeIdSet = new LinkedList<>();
         for (Map.Entry<Integer, Integer> e : this.routingMap.entrySet()) {
-            System.out.print(e.getKey());
-            System.out.print("\t");
-            System.out.println(e.getValue());
+        	hashStart.add(e.getKey());
+            //System.out.print(e.getKey());
+            //System.out.print("\t");
+            //System.out.println(e.getValue());
+            nodeIdSet.add(e.getValue());
         }
+        int index = 0;
+        for (index = 0; index < hashStart.size()-1; index++) {
+        	System.out.print(hashStart.get(index)+"-"+(hashStart.get(index+1)-1));
+        	System.out.print("\t\t");
+        	System.out.println(nodeIdSet.get(index));
+        }
+        System.out.print(hashStart.get(index)+"-"+(hashStart.get(0)-1));
+    	System.out.print("\t\t");
+    	System.out.println(nodeIdSet.get(index));
     }
 
     public void printPhysicalTable() {
