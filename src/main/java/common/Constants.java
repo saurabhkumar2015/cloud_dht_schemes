@@ -16,6 +16,7 @@ public class Constants {
     public final static String MOVE_ON_DELETE = "MOVE_ON_DELETE";
     public final static String TRANSFER_COMPLETE = "TRANSFER_COMPLETE";
     public final static String PRINT_REQUEST = "PRINT_REQUEST";
+    public final static String FILE_LIST = "FILE_LIST";
     
     //Payload Keywords here
     public final static String FILE_NAME = "FILE_NAME";
