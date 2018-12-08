@@ -52,7 +52,8 @@ public class ClientWorker extends Thread {
             Request request = (Request) in.readObject();
             
             switch (request.getType()) {
-                  case WRITE_FILE:
+                  
+                 case WRITE_FILE:
                     Payload p = (Payload) request.getPayload();
                     long dataNodeVersionNo = dataNode.getRoutingTable().getVersionNumber();
                      if (dataNodeVersionNo > p.versionNumber) {
@@ -63,12 +64,34 @@ public class ClientWorker extends Thread {
                          stream = baos.toByteArray();
                          out.write(stream);
                      } else {
-	                    	 dataNode.writeFile(p.fileName, p.replicaId);
+                    	 	
+                    	 if((ConfigLoader.config.scheme.toUpperCase()).equals("CEPH")) {
+                    	     List<Integer> list = new ArrayList<Integer>();
+                    	     list.add(((CephDataNode)dataNode).hashGenerator.givePlacementGroupIdFromFileName(p.fileName, ConfigLoader.config.PlacementGroupMaxLimit));
+                       	  	 list.add(p.replicaId);
+                       	 
+                    	     if(((CephDataNode)dataNode).fileLckMap.containsKey(list)) {
+                    	    	 EpochPayload payload = new EpochPayload("Fail due to lock", null);
+                                 oos.writeObject(payload);
+                                 stream = baos.toByteArray();
+                                 out.write(stream);
+                    	     }
+                    	     else {
+                        	     dataNode.writeFile(p.fileName, p.replicaId);
+    	                         EpochPayload payload = new EpochPayload("success", null);
+    	                         oos.writeObject(payload);
+    	                         stream = baos.toByteArray();
+    	                         out.write(stream);
+                        	   }
+                    	   }
+                    	  else {
+                    	     dataNode.writeFile(p.fileName, p.replicaId);
 	                         EpochPayload payload = new EpochPayload("success", null);
 	                         oos.writeObject(payload);
 	                         stream = baos.toByteArray();
 	                         out.write(stream);
-                    	 }
+                    	   }
+                    }
                      
                     break;
                   
@@ -80,7 +103,7 @@ public class ClientWorker extends Thread {
                      long dataNodeVerNo = dataNode.getRoutingTable().getVersionNumber();
                      if(paylds.size() == 0)
                          break;
-                     System.out.println("DataNode versionNumber:: " + dataNodeVerNo + " Sender datanode's versionNumber:: " + paylds.get(0).versionNumber);
+                     //System.out.println("DataNode versionNumber:: " + dataNodeVerNo + " Sender datanode's versionNumber:: " + paylds.get(0).versionNumber);
 	                      
                     	 if (dataNodeVerNo > paylds.get(0).versionNumber) {
 	                          System.out.println("Sender's routing table needs to be updated");
@@ -89,8 +112,20 @@ public class ClientWorker extends Thread {
 	                          stream = baos.toByteArray();
 	                          out.write(stream);
 	                      } else {
+	                    	 
 	                          dataNode.writeAllFiles(paylds);
 	                          
+	                          if((ConfigLoader.config.scheme.toUpperCase()).equals("CEPH")) {
+	                        	
+		                          for(int i=0;i<paylds.size();i++) {
+		                        	  List<Integer> list = new ArrayList<Integer>();
+		                        	  list.add(Integer.parseInt(paylds.get(i).fileName));
+		                        	  list.add(paylds.get(i).replicaId);
+		                    		  ((CephDataNode)dataNode).fileLckMap.remove(list);
+		                    		  
+		                    		 
+		                    	  }
+	                          }
 	                          EpochPayload payload = new EpochPayload("success", null);
 	                          oos.writeObject(payload);
 	                          stream = baos.toByteArray();
@@ -228,7 +263,28 @@ public class ClientWorker extends Thread {
                         break;
                 }
                	   break;
-		
+			    
+		case FILE_LIST:
+	        	System.out.println("Received file list request");
+	            switch(ConfigLoader.config.scheme.toUpperCase()) {
+                    case "CEPH":
+                    	 @SuppressWarnings("unchecked") List<Payload> payls = (List<Payload>) request.getPayload();
+                    	 for(int i=0;i<payls.size();i++) {
+                    		
+                    		List<Integer> list = new ArrayList<Integer>();
+             				list.add(Integer.parseInt(payls.get(i).fileName));
+             				list.add(payls.get(i).replicaId);
+             				((CephDataNode)dataNode).fileLckMap.put(list, true);
+                    	 }
+                        break;
+                    case "RING":
+                       
+                        break;
+                    case "ELASTIC":
+                      
+                        break;
+                }
+               	   break;
                 default:
                     throw new Exception("Unsupported message type");
             }
