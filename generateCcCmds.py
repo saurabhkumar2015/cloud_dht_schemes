@@ -1,4 +1,4 @@
-# This file generates a file with list of commands 
+# This script generates a file with list of commands 
 # to add a node or to do load balance or to delete a node
 # for a given range of node ids
 # Node id and load factors are picked randomly
@@ -56,6 +56,14 @@ while(len(nodeIdSet)<total):
 	nId = randint(startRange,endRange)
 	if nId not in nodeIdSet:
 		nodeIdSet.add(nId)
+		#Seq operations: DeleteNode/AddNode/LoadBalance
+		fd.write("D,"+str(nId)+"\n")
+		fd.write("A,"+str(nId)+"\n")
+		load = round(uniform(0.1,0.9), 2)
+		fd.write("L,"+str(nId)+","+str(load)+"\n")
+		
+		'''	
+		#This randomised method wont work if we delete the node first and load balance later
 		optionList = [1,2,3]
 		#actions are shuffled
 		shuffle(optionList)
@@ -68,7 +76,7 @@ while(len(nodeIdSet)<total):
 			elif option == 3:
 				load = round(uniform(0.1,0.9), 2)
 				fd.write("L,"+str(nId)+","+str(load)+"\n")
-				
+		'''	
 print("File "+fileGenerated+" generated successfully")
 
 fd.close()

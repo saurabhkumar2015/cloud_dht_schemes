@@ -30,7 +30,8 @@ public class DHTConfig implements Serializable{
     public Map<Integer, List<Integer>> gossipList;
     public int sleepTime;
     public int gossipSleep;
-
+    public String commmandsFileLocations = "C:\\Users\\kavit\\Documents\\GitHub\\cloud_dht_schemes\\cc_commands.txt";
+    
     @Override
     public String toString() {
         return "DHTConfig{" +

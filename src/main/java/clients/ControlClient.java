@@ -6,6 +6,7 @@ import config.DHTConfig;
 import socket.IMessageSend;
 import socket.MessageSendImpl;
 
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -23,43 +24,40 @@ public class ControlClient {
 
         ConfigLoader.init(args[0]);
         DHTConfig config = ConfigLoader.config;
-        boolean exit = true;
+        //boolean exit = true;
         boolean distributed = !"Centralized".equalsIgnoreCase(config.dhtType);
         routingTable = Commons.initRoutingTable(config);
         Random r = new Random(config.seed);
-
-        while(exit) {
-            System.out.println("Enter \"A\" to add node in DHT scheme " + config.scheme);
-            System.out.println("Enter \"D\" to remove node in DHT scheme " + config.scheme);
-            System.out.println("Enter \"L\" to load Balance for a node in DHT scheme " + config.scheme);
-            System.out.println("Enter \"P\" to print routing table " + config.scheme);
-            System.out.println("Enter \"X\" to exit");
-            String input = sc.next();
-            List<Integer> liveNodes = routingTable.giveLiveNodes();
-            int nodeId = getRandomNode(r, liveNodes);
-            if(distributed){
-                Map<Integer, List<Integer>> gossipList = ConfigLoader.config.gossipList;
-                for(int k =1 ; k <= gossipList.size();k++){
-                    List<Integer> integers = gossipList.get(k);
-                    boolean alive = false;
-                    for(int l =0; l < integers.size();l++) {
-                        Integer integer = integers.get(r.nextInt(integers.size()));
-                        if(liveNodes.contains((Integer)integer)) {
-                            nodeId = integer;
-                            alive = true;
-                            break;
-                        }
+        String commmandsFile = config.commmandsFileLocations;
+        
+        List<Integer> liveNodes = routingTable.giveLiveNodes();
+        int nodeId = getRandomNode(r, liveNodes);
+        if(distributed){
+            Map<Integer, List<Integer>> gossipList = ConfigLoader.config.gossipList;
+            for(int k =1 ; k <= gossipList.size();k++){
+                List<Integer> integers = gossipList.get(k);
+                boolean alive = false;
+                for(int l =0; l < integers.size();l++) {
+                    Integer integer = integers.get(r.nextInt(integers.size()));
+                    if(liveNodes.contains((Integer)integer)) {
+                        nodeId = integer;
+                        alive = true;
+                        break;
                     }
-                    if(alive) break;
                 }
+                if(alive) break;
             }
-
-            switch (input.toUpperCase().trim()){
-                case "A":
-                    System.out.println("Enter comma seperated nodeId to add node in DHT scheme " + config.scheme);
-                    input = sc.next();
-                    String[] ids = input.split(",");
-                    for (String id : ids) {
+        }
+        
+        try (BufferedReader br = new BufferedReader(new FileReader(commmandsFile))) {
+            String command;
+            while ((command = br.readLine()) != null) {
+            	//System.out.println("line:"+command);
+            	String[] ids = command.split(",");
+            	String keyWord = ids[0].toUpperCase().trim();
+            	if(keyWord.equals("A")){
+            		for (int index =1; index < ids.length; index++) {
+            			String id = ids[index];
                         int i = Integer.parseInt(id.trim());
                         if(distributed) {
                             DistributedPayload p = new DistributedPayload();
@@ -85,12 +83,10 @@ public class ControlClient {
                             messageSender.sendMessage(config.proxyIp, ADD_NODE, i);
                         }
                     }
-                    break;
-                case "D":
-                    System.out.println("Enter comma seperated nodeId to delete node in DHT scheme " + config.scheme);
-                    input = sc.next();
-                    ids = input.split(",");
-                    for (String id : ids) {
+            	}
+            	else if(keyWord.equals("D")){
+            		for (int index =1; index < ids.length; index++) {
+            			String id = ids[index];
                         int i = Integer.parseInt(id.trim());
                         while( i == nodeId){
                             nodeId = getRandomNode(r, liveNodes);
@@ -118,13 +114,10 @@ public class ControlClient {
                             messageSender.sendMessage(config.proxyIp, DELETE_NODE, i);
                         }
                     }
-                    break;
-                case "L":
-                    System.out.println("Enter comma seperated node id and factor. newload = oldload* factor in DHT scheme " + config.scheme);
-                    input = sc.next();
-                    ids = input.split(",");
-                    int node = Integer.parseInt(ids[0].trim());
-                    double factor = Double.parseDouble(ids[1].trim());
+            	}
+            	else if (keyWord.equals("L")){
+            		int node = Integer.parseInt(ids[1].trim());
+                    double factor = Double.parseDouble(ids[2].trim());
                     if(distributed) {
                         DistributedPayload p = new DistributedPayload();
                         p.nodeId = node;
@@ -149,14 +142,10 @@ public class ControlClient {
                         System.out.print("Load Balance request for node id " + node+" sent to Proxy:"+config.proxyIp);
                         messageSender.sendMessage(config.proxyIp, LOAD_BALANCE, new LoadBalance(node, factor));
                     }
-                    break;
-                 case "P":
-                	System.out.println("Enter node Id");
-                	input = sc.next();
-                	Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(Integer.parseInt(input)), Constants.PRINT_REQUEST, null);
-                    break;
-                case "X":
-                    exit = false;
+            	}
+            	else if (keyWord.equals("P")){
+            		Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(Integer.parseInt(ids[1])), Constants.PRINT_REQUEST, null);
+            	}
             }
         }
     }
@@ -165,3 +154,4 @@ public class ControlClient {
         return liveNodes.get(r.nextInt(liveNodes.size()));
     }
 }
+
