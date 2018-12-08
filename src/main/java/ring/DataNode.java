@@ -120,8 +120,6 @@ public class DataNode implements IDataNode {
 		return false;
 	}
 	
-
-	
 	@Override
 	public int getNodeId() {
 		// TODO Auto-generated method stub

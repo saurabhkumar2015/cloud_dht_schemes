@@ -250,7 +250,9 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
     	*/
     	++this.numNodeIds;
     	
+    	//Update the predecessor - remove this hash range from predecessor
     	String nodeIp = this.physicalTable.get(routingMap.get(listOfHashesForNewHash.get(0)));
+    	//payload consists of new node id - which will trigger node to node communication
     	String payload = String.valueOf(newHash)+"-"+String.valueOf(listOfHashesForNewHash.get(1)-1)+":"+nodeIdInt;
     	
     	int removeNodeId = routingMap.get(listOfHashesForNewHash.get(0));
@@ -258,25 +260,25 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
     		System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " removed from this Node :"+ removeNodeId);
     	else {
 			System.out.println("Hash range " + newHash + " - " + (listOfHashesForNewHash.get(1) - 1) + " removed from Node :" + removeNodeId);
-			Commons.messageSender.sendMessage(nodeIp, Constants.REMOVE_HASH, payload);
 		}
+    	//hash range will be removed from predecessor and will be added to new node
+    	Commons.messageSender.sendMessage(nodeIp, Constants.REMOVE_HASH, payload);
+    	System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " added to newly added Node :"+ nodeIdInt);
     	
+    	// predecessor hash range will be removed from last replica
     	nodeIp = this.physicalTable.get(routingMap.get(listOfHashesForNewHash.get(listOfHashesForNewHash.size()-1)));
-    	payload = String.valueOf(listOfHashesForNewHash.get(0))+"-"+String.valueOf((newHash-1))+":"+"-1";
+    	payload = String.valueOf(listOfHashesForNewHash.get(0))+"-"+String.valueOf((newHash-1))+":"+nodeIdInt;
     	int rNodeId = routingMap.get(listOfHashesForNewHash.get(listOfHashesForNewHash.size()-1));
     	if(rNodeId == Commons.nodeId)
 			System.out.println("Hash range "+ listOfHashesForNewHash.get(0)+" - "+(newHash-1)+ " removed from same Node :"+ rNodeId);
 		else {
 			System.out.println("Hash range "+ listOfHashesForNewHash.get(0)+" - "+(newHash-1)+ " removed from Node :"+ rNodeId);
-			Commons.messageSender.sendMessage(nodeIp, Constants.REMOVE_HASH, payload);
 		}
+    	//predecessor hash range will be added to new node (as replica)
+    	Commons.messageSender.sendMessage(nodeIp, Constants.REMOVE_HASH, payload);
     	
-    	nodeIp = this.physicalTable.get(nodeIdInt);
-    	payload = String.valueOf(newHash)+"-"+ (listOfHashesForNewHash.get(1)-1);
-    	System.out.println("Hash range "+ newHash +" - "+(listOfHashesForNewHash.get(1)-1)+ " added to Node :"+ nodeIdInt);
-    	//Commons.messageSender.sendMessage(nodeIp, Constants.ADD_HASH, payload);
-    
-    	
+    	System.out.println("Hash range "+ listOfHashesForNewHash.get(0)+" - "+(newHash-1)+ " added to newly added Node :"+ nodeIdInt);
+    	    	
     	//update physical table
     	//this.routingTableObj.physicalTable.put(newNodeId, nodeId);
     	
