@@ -61,9 +61,10 @@ public class MessageSendImpl implements IMessageSend {
 
 	            System.out.println("Received ack "+p.status);
 
-	            if((p.status).trim().equals("Fail due to version mismatch"))
+	            if((p.status).trim().equals("Fail due to version mismatch")){
 	            		RegularClient.routingTable = p.newRoutingTable;
 		    		RegularClientDemo.routingTable = p.newRoutingTable;
+		    }
             }
             else if(Arrays.asList(Constants.ADD_NODE, Constants.DELETE_NODE, Constants.LOAD_BALANCE ).contains(type)) {
                 if(ConfigLoader.config.dhtType.equalsIgnoreCase("distributed")) {
