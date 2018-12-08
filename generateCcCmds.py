@@ -1,6 +1,3 @@
-#Last modified  - Dec 08 2018
-#Author         - Kavitha Rajendran
-
 # This file generates a file with list of commands 
 # to add a node or to do load balance or to delete a node
 # for a given range of node ids
