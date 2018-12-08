@@ -4,6 +4,7 @@ import clients.ControlClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import clients.RegularClient;
+import clients.RegularClientDemo;
 import common.Constants;
 import common.EpochPayload;
 import config.ConfigLoader;
@@ -62,6 +63,7 @@ public class MessageSendImpl implements IMessageSend {
 
 	            if((p.status).trim().equals("Fail due to version mismatch"))
 	            		RegularClient.routingTable = p.newRoutingTable;
+		    		RegularClientDemo.routingTable = p.newRoutingTable;
             }
             else if(Arrays.asList(Constants.ADD_NODE, Constants.DELETE_NODE, Constants.LOAD_BALANCE ).contains(type)) {
                 if(ConfigLoader.config.dhtType.equalsIgnoreCase("distributed")) {
