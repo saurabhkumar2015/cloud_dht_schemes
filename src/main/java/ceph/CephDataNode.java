@@ -27,6 +27,9 @@ public class CephDataNode  implements IDataNode{
     public IRoutingTable cephRtTable;
     
     private static CephDataNode single_instance = null;
+	
+    //map to hold hash range is locked or not
+    public Map<List<Integer>,Boolean> fileLckMap;
     
     public CephDataNode()
     {
@@ -40,6 +43,7 @@ public class CephDataNode  implements IDataNode{
     	EntryPoint entryPoint = new EntryPoint();
         entryPoint.BootStrapCeph();
     	cephRtTable = CephRoutingTable.giveInstance();
+	fileLckMap= new HashMap<List<Integer>,Boolean>();
     }
     
     public static CephDataNode getInstance(int nodeId) {
@@ -195,8 +199,32 @@ public class CephDataNode  implements IDataNode{
             
 		}
 		
-		// Delete the files from current node.
-		this.dataList.removeAll(removedFiles);
+		//--------------------------------------------for locking-------------------------------------------------------------------------------------
+		// Send request to other data node.
+				for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
+		    		String destinationNodeIp = ConfigLoader.config.nodesMap.get(e.getKey());
+		    		List<Payload> filesTobeMove = new LinkedList<>();
+		    		filesTobeMove.clear();
+		    		Set<DataObject> pgSet = new HashSet<>();
+		    		for(DataObject obj : e.getValue())
+		    		{   
+		    			System.out.println(" Moving Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId+ "to Node "+e.getKey());
+		    			filesTobeMove.add(new Payload(Integer.toString(obj.placementGroup), obj.replicaId, this.cephRtTable.getVersionNumber()));
+		    			pgSet.add(obj);
+		    		}
+		    		
+		    		// send the aggregated request to the destination node. 
+		    		Commons.messageSender.sendMessage(destinationNodeIp, Constants.FILE_LIST, filesTobeMove);
+		    	}		
+				
+		try {
+			Thread.sleep(ConfigLoader.config.sleepTime);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//----------------------------------------------------for locking------------------------------------------------------------------------------------
+		
 		
 		// Send request to other data node.
 		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
@@ -219,7 +247,10 @@ public class CephDataNode  implements IDataNode{
     		}
     		// send the aggregated request to the destination node. 
     		Commons.messageSender.sendMessage(destinationNodeIp, Constants.ADD_FILES, filesTobeMove);
-    	}		
+    	}
+	
+		// Delete the files from current node.
+		this.dataList.removeAll(removedFiles);
 	}
 	
 	private void MoveFilesOnNodeDeletion()
@@ -269,6 +300,34 @@ public class CephDataNode  implements IDataNode{
                 }
             }
 		}
+		
+		//--------------------------------------------------------------for locking--------------------------------------------------------------------
+		// Send request to other data node.
+		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
+    		String destinationNodeIp = ConfigLoader.config.nodesMap.get(e.getKey());
+    		List<Payload> filesTobeMove = new LinkedList<>();
+    		filesTobeMove.clear();
+    		Set<DataObject> pgSet = new HashSet<>();
+    		for(DataObject obj : e.getValue())
+    		{
+    			System.out.println(" Move Pgroup : " + obj.placementGroup + " replica Factor: " + obj.replicaId+ "to Node "+e.getKey());
+    			filesTobeMove.add(new Payload(Integer.toString(obj.placementGroup), obj.replicaId, this.cephRtTable.getVersionNumber()));
+    			pgSet.add(obj);
+    		}
+    		
+    		// send the aggregated request to the destination node. 
+    		Commons.messageSender.sendMessage(destinationNodeIp, Constants.FILE_LIST, filesTobeMove);
+    	}		
+		
+		try {
+			Thread.sleep(ConfigLoader.config.sleepTime);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		//------------------------------------------------------------for locking------------------------------------------------------------------------
+		
 		for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
     		System.out.println("Files need to added to node " + e.getKey());
     		String destinationNodeIp = ConfigLoader.config.nodesMap.get(e.getKey());
