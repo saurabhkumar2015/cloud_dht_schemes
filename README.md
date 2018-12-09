@@ -16,7 +16,8 @@ java -cp schemes-1.0-SNAPSHOT-shaded.jar clients.ControlClient /home/config.conf
 java -cp schemes-1.0-SNAPSHOT-shaded.jar clients.RegularClient /home/config.conf /home/full2.txt
 
 4) Command to start all data nodes on machine
-java -cp schemes-1.0-SNAPSHOT-shaded.jar datanode.DataNodeStart schemes-1.0-SNAPSHOT-shaded.jar /home/comfog.conf /home/full2.txt /home/nodes.csv 192.168.0.123
+ java -cp schemes-1.0-SNAPSHOT-shaded.jar datanode.DataNodeStart /home/vm_config.csv /home/schemes-1.0-SNAPSHOT-shaded.jar /home/vm_nodes.csv 192.168.0.101
+
 
 5) Command to kill all data nodes on machine
 
