@@ -69,12 +69,12 @@ public class MessageSendImpl implements IMessageSend {
 	            ObjectInputStream ois = new ObjectInputStream(input);
 	            EpochPayload p = (EpochPayload) ois.readObject();
 	            LogObject obj = ProxyServer.map.get((p.newRoutingTable).getVersionNumber());
-	            	System.out.println("count "+obj.count+" livenodes "+obj.liveNodes);
+	            	//System.out.println("count "+obj.count+" livenodes "+obj.liveNodes);
 		            obj.count = obj.count+1;
 		            ProxyServer.map.put((p.newRoutingTable).getVersionNumber(),obj);
 		            
 		            if(obj.count == obj.liveNodes) {
-		            	System.out.println("count equalto live  "+obj.count+" livenodes "+obj.liveNodes);
+		            	//System.out.println("count equalto live  "+obj.count+" livenodes "+obj.liveNodes);
 			            BufferedWriter writer = new BufferedWriter(new FileWriter(ConfigLoader.config.logFileForCC,true));
 			            writer.write(Long.toString(end-obj.start));
 			            writer.newLine();
