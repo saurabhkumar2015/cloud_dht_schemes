@@ -30,7 +30,11 @@ public class DHTConfig implements Serializable{
     public Map<Integer, List<Integer>> gossipList;
     public int sleepTime;
     public int gossipSleep;
-    public String commmandsFileLocations = "C:\\Users\\kavit\\Documents\\GitHub\\cloud_dht_schemes\\cc_commands.txt";
+    public String commmandsFileLocations;
+    public int sleepBtwnCmds;
+    public String logFileForWrite ;
+    public String logFileForCC ;
+    public String commmandsFileLocations;
     public int sleepBtwnCmds;
     
     @Override
