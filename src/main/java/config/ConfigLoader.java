@@ -44,6 +44,7 @@ public class ConfigLoader {
         //config.sleepTime = Integer.parseInt(map.get("sleepTime").toString());
         config.gossipSleep = Integer.parseInt(map.get("gossipSleep").toString());
         config.commmandsFileLocations = map.get("commmandsFileLocations").toString();
+        config.sleepBtwnCmds =  Integer.parseInt(map.get("sleepBtwnCmds").toString());
         if(!config.verbose.equalsIgnoreCase("error")) {
 //            System.out.println("Config is::" + config.toString());
             System.out.println("DHT Config Loaded Successfully!!!!");
