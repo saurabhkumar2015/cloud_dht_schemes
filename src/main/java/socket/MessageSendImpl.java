@@ -76,7 +76,7 @@ public class MessageSendImpl implements IMessageSend {
 		            if(obj.count == obj.liveNodes) {
 		            	//System.out.println("count equalto live  "+obj.count+" livenodes "+obj.liveNodes);
 			            BufferedWriter writer = new BufferedWriter(new FileWriter(ConfigLoader.config.logFileForCC,true));
-			            writer.write(Long.toString(end-obj.start));
+			            writer.write(p.status+","+Long.toString(end-obj.start));
 			            writer.newLine();
 			            writer.close();
 			            ProxyServer.map.remove((p.newRoutingTable).getVersionNumber());
