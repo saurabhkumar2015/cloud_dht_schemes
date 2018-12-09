@@ -315,6 +315,7 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
     	LinkedList<Integer> listOfAssociatedHashes = modifiedBinarySearch(deleteHash);
     	System.out.println("To get predecessor of node getting deleted");
     	LinkedList<Integer> predecessors = modifiedBinarySearch(deleteHash-1);
+    	LinkedList<Integer> successors = modifiedBinarySearch(listOfAssociatedHashes.get(1));
     	/*
     	//System.out.println("\n");
     	//Print List of nodes associated with given hash value
@@ -325,25 +326,31 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
     	System.out.println("\n");
     	System.out.println("Deleting node: "+nodeIdInt);
     	
-    	//predecessor to take care of deleted node's hash range
-    	int predNodeId = routingMap.get(predecessors.get(0));
-    	String predIp = this.physicalTable.get(predNodeId);
-    	String payload = String.valueOf((deleteHash))+"-" + String.valueOf((listOfAssociatedHashes.get(1))-1);
-    	System.out.println("Hash range "+ payload +" added to predecessor: "+ predNodeId);
-    	Commons.messageSender.sendMessage(predIp, Constants.ADD_HASH, payload);
-    	
     	//predecessor's hash range to be added in the last replica node
-    	int nid = routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1));
+    	int nid = this.routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1));
     	String nodeIp = this.physicalTable.get(nid);
-    	payload = String.valueOf(predecessors.get(0)) +"-"+String.valueOf((deleteHash-1));
-    	System.out.println("Hash range "+ payload +" added to last replica: "+ nid);
+    	String payload = String.valueOf(predecessors.get(0)) +"-"+String.valueOf((deleteHash-1));
+    	System.out.println("Predecessor's Hash range "+ payload +" added to deleted Nodes's last replica: "+ nid);
     	Commons.messageSender.sendMessage(nodeIp, Constants.ADD_HASH, payload);
+    	
+    	//successor to take care of deleted node's hash range - so update last replica of successor
+    	int succLastRepNodeId = routingMap.get(successors.get(successors.size()-1));
+    	String succLastRepNodeIp = this.physicalTable.get(succLastRepNodeId);
+    	payload = String.valueOf((deleteHash))+"-" + String.valueOf((listOfAssociatedHashes.get(1))-1);
+    	System.out.println("Deleted Node's Hash range "+ payload +" added to successor's last replica : "+ succLastRepNodeId);
+    	Commons.messageSender.sendMessage(succLastRepNodeIp, Constants.ADD_HASH, payload);
     	
     	//update routing map
     	this.routingMap.remove(deleteHash);
     	this.versionNumber++;
     	this.numNodeIds--;
     	System.out.println("\n");
+    	//Starting range of deleted node's successor will be changed
+    	int succHash = listOfAssociatedHashes.get(1);
+    	int succNid = this.routingMap.get(succHash);
+    	this.routingMap.remove(succHash);
+    	this.routingMap.put(deleteHash, succNid);
+    	
     	//System.out.println("Routing Table versionNumber: "+this.versionNumber);
     	//Print updated Routing Table
     	System.out.println("New Routing Map after new node added");
