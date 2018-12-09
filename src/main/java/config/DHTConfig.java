@@ -34,8 +34,7 @@ public class DHTConfig implements Serializable{
     public int sleepBtwnCmds;
     public String logFileForWrite ;
     public String logFileForCC ;
-    public String commmandsFileLocations;
-    public int sleepBtwnCmds;
+   
     
     @Override
     public String toString() {
