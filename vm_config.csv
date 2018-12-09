@@ -1,18 +1,19 @@
 {
 	"version": 0,
 	"nodeIdStart": 1,
-	"nodeIdEnd": 10 ,
+	"nodeIdEnd": 3 ,
     "proxyIp": "192.168.0.100:5000",
 	"bucketSize": 1024,
 	"verbose": "info",
 	"dhtType": "centralized",
-	"scheme": "ring",
+	"scheme": "ceph",
 	"replicationFactor": 3,
     "cephMaxClusterSize" : 5,
 	"seed": 32,
-	"sleepTime": 50000,
-	"PlacementGroupMaxLimit":10,
-	"nodeMapLocation":"/home/vm_nodes.csv",
+	"sleepTime": 0,
+        "gossipSleep": 0,
+	"PlacementGroupMaxLimit":50,
+	"nodeMapLocation":"C:\\Users\\lenovo\\gitCloud\\cloud_dht_schemes\\vm_nodes.csv",
 	"resizeFactor":75,
 	"gossipList":{
     		"1": "1,2,3,4,5,6,7,8",
@@ -22,5 +23,9 @@
     		"5": "17,18,19,20,21,22,23,24",
     		"6": "21,22,23,24,25,26,27,28",
     		"7": "25,26,27,28,29,30,31,32"
-    }
+    },
+    "logFileForWrite":"C:\\Users\\lenovo\\gitCloud\\cloud_dht_schemes\\log.txt",
+    "logFileForCC":"C:\\Users\\lenovo\\gitCloud\\cloud_dht_schemes\\log1.txt",
+    "commmandsFileLocations": "C:\\Users\\lenovo\\gitCloud\\cloud_dht_schemes\\cc_commands.txt",
+    "sleepBtwnCmds":0
 }
