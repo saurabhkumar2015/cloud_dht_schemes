@@ -199,6 +199,8 @@ public class CephDataNode  implements IDataNode{
             
 		}
 		
+		// Delete the files from current node.
+		this.dataList.removeAll(removedFiles);
 		//--------------------------------------------for locking-------------------------------------------------------------------------------------
 		// Send request to other data node.
 				for (Entry<Integer, List<DataObject>> e: addMap.entrySet()) {
@@ -249,8 +251,6 @@ public class CephDataNode  implements IDataNode{
     		Commons.messageSender.sendMessage(destinationNodeIp, Constants.ADD_FILES, filesTobeMove);
     	}
 	
-		// Delete the files from current node.
-		this.dataList.removeAll(removedFiles);
 	}
 	
 	private void MoveFilesOnNodeDeletion()
