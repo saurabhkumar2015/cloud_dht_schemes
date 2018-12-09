@@ -53,12 +53,12 @@ public class ProxyWorker{
             ProxyServer.map.put(routingTable.getVersionNumber(),obj);
             List<Thread> thrd = new ArrayList<Thread>();
             for(int id: liveNodes) {
-            	System.out.println("Live node "+id);
+            	//System.out.println("Live node "+id);
             	
             		Thread t = new Thread() {
             		      public void run() {
             		    	    UpdateRoutingPayload payload = new UpdateRoutingPayload(nodeId, type, routingTable, factor);
-            		    	    System.out.println(config.nodesMap.get(id));
+            		    	   // System.out.println(config.nodesMap.get(id));
             	            	sendMsg.sendMessage(config.nodesMap.get(id), Constants.NEW_VERSION, payload);
             	            	
             		      }
