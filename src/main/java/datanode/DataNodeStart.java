@@ -25,7 +25,7 @@ public class DataNodeStart {
 		     String line;
 		     
 		     //Fetching current Host Address
-		     String currentHostAddress = args[4];
+		     String currentHostAddress = args[3];
 
 		     while ((line = br.readLine()) != null) {
 		    	  String[] arr = line.split(",");
@@ -38,9 +38,10 @@ public class DataNodeStart {
 		  		      command.add("common.DataNodeLoader");
 		  		      command.add(args[0]);
 		  		      command.add(arr[0]);
-					  command.add(" > /home/logs/"+nodeId+".log");
-		    		  ProcessBuilder builder = new ProcessBuilder(command);		    
+		    		  ProcessBuilder builder = new ProcessBuilder(command);
+					  System.out.println("Node id started : "+ builder.command());
 		    		  Process process = builder.start();
+					  System.out.println("Node id started : "+ arr[0]+ command.toString() + process.isAlive());
 		    	  }
 		     }
 		}
