@@ -248,7 +248,7 @@ public class ClientWorker extends Thread {
                            dataNode.UpdateRoutingTable(payld.newRoutingTable, payld.type);
                            break;
                    }
-	    	    EpochPayload load = new EpochPayload("success", payld.newRoutingTable);
+	    	    EpochPayload load = new EpochPayload(payld.type, payld.newRoutingTable);
                     oos.writeObject(load);
                     stream = baos.toByteArray();
                     out.write(stream);
