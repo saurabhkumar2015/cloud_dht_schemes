@@ -248,7 +248,10 @@ public class ClientWorker extends Thread {
                            dataNode.UpdateRoutingTable(payld.newRoutingTable, payld.type);
                            break;
                    }
-	     
+	    	    EpochPayload load = new EpochPayload("success", payld.newRoutingTable);
+                    oos.writeObject(load);
+                    stream = baos.toByteArray();
+                    out.write(stream);
 	                break;
 	                
 	        case PRINT_REQUEST:
@@ -266,7 +269,7 @@ public class ClientWorker extends Thread {
                	   break;
 			    
 		case FILE_LIST:
-	        	System.out.println("Received file list request");
+	        //System.out.println("Received file list request");
 	            switch(ConfigLoader.config.scheme.toUpperCase()) {
                     case "CEPH":
                     	 @SuppressWarnings("unchecked") List<Payload> payls = (List<Payload>) request.getPayload();
