@@ -31,6 +31,7 @@ public class DHTConfig implements Serializable{
     public int sleepTime;
     public int gossipSleep;
     public String commmandsFileLocations = "C:\\Users\\kavit\\Documents\\GitHub\\cloud_dht_schemes\\cc_commands.txt";
+    public int sleepBtwnCmds;
     
     @Override
     public String toString() {

@@ -29,7 +29,7 @@ public class ControlClient {
         routingTable = Commons.initRoutingTable(config);
         Random r = new Random(config.seed);
         String commmandsFile = config.commmandsFileLocations;
-        
+        int sleepBtwnCmds = config.sleepBtwnCmds;
         List<Integer> liveNodes = routingTable.giveLiveNodes();
         int nodeId = getRandomNode(r, liveNodes);
         if(distributed){
@@ -75,11 +75,11 @@ public class ControlClient {
                                 continue;
                             }
                             String node = config.nodesMap.get(nodeId);
-                            System.out.print("Add Node "+ id +" sent to DataNode:"+nodeId+ "\n");
+                            System.out.println("Add Node "+ id +" sent to DataNode:"+nodeId+ "\n");
                             messageSender.sendMessage(node , ADD_NODE, p);
                         }
                         else{
-                            System.out.print("Add Node "+ id +" sent to Proxy:"+config.proxyIp);
+                            System.out.println("Add Node "+ id +" sent to Proxy:"+config.proxyIp);
                             messageSender.sendMessage(config.proxyIp, ADD_NODE, i);
                         }
                     }
@@ -106,11 +106,11 @@ public class ControlClient {
                                 System.out.println("ERROR:: Node id "+nodeId + "is not a live node.");
                                 continue;
                             }
-                            System.out.print("Delete Node "+ id +" sent to DataNode:"+nodeId + "\n");
+                            System.out.println("Delete Node "+ id +" sent to DataNode:"+nodeId + "\n");
                             messageSender.sendMessage(config.nodesMap.get(nodeId), DELETE_NODE, p);
                         }
                         else {
-                            System.out.print("Delete Node "+ id +" sent to Proxy:"+config.proxyIp);
+                            System.out.println("Delete Node "+ id +" sent to Proxy:"+config.proxyIp);
                             messageSender.sendMessage(config.proxyIp, DELETE_NODE, i);
                         }
                     }
@@ -135,16 +135,24 @@ public class ControlClient {
                             continue;
                         }
                         String sNode = config.nodesMap.get(nodeId);
-                        System.out.print("Load Balance request for node id " + node+" sent to DataNode:"+nodeId+ "\n");
+                        System.out.println("Load Balance request for node id " + node+" sent to DataNode:"+nodeId+ "\n");
                         messageSender.sendMessage(sNode, LOAD_BALANCE, p);
                     }
                     else {
-                        System.out.print("Load Balance request for node id " + node+" sent to Proxy:"+config.proxyIp);
+                        System.out.println("Load Balance request for node id " + node+" sent to Proxy:"+config.proxyIp);
                         messageSender.sendMessage(config.proxyIp, LOAD_BALANCE, new LoadBalance(node, factor));
                     }
             	}
             	else if (keyWord.equals("P")){
             		Commons.messageSender.sendMessage(ConfigLoader.config.nodesMap.get(Integer.parseInt(ids[1])), Constants.PRINT_REQUEST, null);
+            	}
+            	try
+            	{
+            	    Thread.sleep(sleepBtwnCmds);
+            	}
+            	catch(InterruptedException ex)
+            	{
+            	    Thread.currentThread().interrupt();
             	}
             }
         }
