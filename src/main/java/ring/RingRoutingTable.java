@@ -68,6 +68,10 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
     	int endNodeId = config.nodeIdEnd;
     	for(int s = startNodeId; s<=endNodeId; s++) {
     		int hashVal = randomHashGenerator();
+    		//to prevent hash value being overwritten
+    		while(this.routingMap.containsKey(hashVal)) {
+    			hashVal = randomHashGenerator();
+    		}
     		this.routingMap.put(hashVal, s);
     	}
     	this.versionNumber++;
@@ -365,117 +369,58 @@ public class RingRoutingTable implements IRoutingTable,Serializable {
 		String nodeId = physicalTable.get(nodeIdInt);
 		//System.out.println("nodeId to be balanced: "+nodeId);
 		int nodeHash = giveKeyByValue(this.routingMap, nodeIdInt);
-		LinkedList<Integer> listOfAssociatedHashes = modifiedBinarySearch(nodeHash-1);
-		/*
-		//Print List of nodes associated with given hash value
-    	System.out.println("List of nodes under consideration now:");
-    	for (int i=0; i<listOfAssociatedHashes.size();i++) {
-    		System.out.println("NodeId: "+routingMap.get(listOfAssociatedHashes.get(i))+" hashStartValue: "+listOfAssociatedHashes.get(i));
-    	}
-    	*/
-		if(loadFraction>1.0 && loadFraction<2.0) {
-			System.out.println("\n");
-			System.out.println("Moving node's start hash range to left side - increasing the load");
-			int predecessorHashVal = listOfAssociatedHashes.get(0);
-			int myHashVal = listOfAssociatedHashes.get(1);
-			int initialTotalHashRang = 0;
-			if (myHashVal < predecessorHashVal){
-				initialTotalHashRang = (this.MAX_HASH - predecessorHashVal)+myHashVal;
-			}
-			else {
-				initialTotalHashRang = listOfAssociatedHashes.get(1)-listOfAssociatedHashes.get(0);
-			}
-	    	System.out.println("Total number of hashes handled so far, by predecessor: "+initialTotalHashRang);
-			int numOfHashesToBeAdded = (int) Math.ceil(initialTotalHashRang*(loadFraction-1.0));
-			int newStartHash = listOfAssociatedHashes.get(1)-numOfHashesToBeAdded;
-			System.out.println("newStartHash Value will be: "+newStartHash);
-			//update routing table
-			routingMap.remove(nodeHash);
-			routingMap.put(newStartHash, nodeIdInt);
-	    	//What all nodes will be updates
-			
-	    	/*System.out.println("Hash range "+ newStartHash +" - "+ (nodeHash-1) +" added to "+routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
-	    	String nodeIp = this.physicalTable.get(routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
-	    	String payload = String.valueOf(newStartHash) +"-"+String.valueOf((nodeHash-1));
-	    	Commons.messageSender.sendMessage(nodeIp, Constants.ADD_HASH, payload);
-	    	*/
-	    	//This hash range should be removed from predecessor:
-	    	String nodeIp = this.physicalTable.get(this.routingMap.get(predecessorHashVal));
-	    	String payload = String.valueOf(newStartHash) +"-"+String.valueOf((nodeHash-1))+":-1";
-	    	System.out.println("Hash range "+ String.valueOf(newStartHash) +"-"+String.valueOf((nodeHash-1)) +" deleted from predecessor : "+this.routingMap.get(predecessorHashVal));
-	    	Commons.messageSender.sendMessage(nodeIp, Constants.REMOVE_HASH, payload);
-	    	
-	    	this.versionNumber++;
-			System.out.println("\n");
-			System.out.println("Routing Table versionNumber: "+this.versionNumber);
-	    	//Print updated Routing Table
-	    	System.out.println("New Routing Map after new node added");
-	    	printRoutingTable();
-	    	System.out.println("\n");
-		}
-		else if(loadFraction<1.0) {
-			System.out.println("\n");
-			System.out.println("Moving node's start hash range to right side - decreaseing the load");
-			int initialTotalHashRang = 0;
-			LinkedList<Integer> listOfAssociatedHashesForSucc = modifiedBinarySearch(nodeHash);
-			int succHashVal;
-			int myHashVal;
-			succHashVal = listOfAssociatedHashesForSucc.get(1);
-			myHashVal = listOfAssociatedHashesForSucc.get(0);
-			/*
-			if(this.replicationFactor > 2) {
-				succHashVal = listOfAssociatedHashesForSucc.get(2);
-				myHashVal = listOfAssociatedHashesForSucc.get(1);
-			}
-			else {
-				succHashVal = listOfAssociatedHashes.get(2);
-				myHashVal = listOfAssociatedHashes.get(1);
-			}*/
-			if (myHashVal > succHashVal){
-				initialTotalHashRang = (this.MAX_HASH - myHashVal)+ succHashVal;
-			}
-			else {
-				initialTotalHashRang = listOfAssociatedHashesForSucc.get(1)-listOfAssociatedHashesForSucc.get(0);
-			}
-	    	System.out.println("Total number of hashes handled so far, by this node is: "+initialTotalHashRang);
-			int numOfHashesToBeRemoved = (int) Math.ceil(initialTotalHashRang*(1.0-loadFraction));
-			int newStartHash = listOfAssociatedHashes.get(1)+numOfHashesToBeRemoved;
-			System.out.println("newStartHash Value will be: "+newStartHash);
-			//update routing table
-			routingMap.remove(nodeHash);
-			routingMap.put(newStartHash, nodeIdInt);
-			
-			//Predecessor to take care of this hash range
-	    	System.out.println("Hash range "+ nodeHash + " - "+ (newStartHash-1) +" added to predecessor node: "+routingMap.get(listOfAssociatedHashes.get(0)));
-	    	String nodeIp = this.physicalTable.get(routingMap.get(listOfAssociatedHashes.get(0)));
-	    	String payload = String.valueOf(nodeHash) +"-"+String.valueOf((newStartHash-1));
-	    	Commons.messageSender.sendMessage(nodeIp, Constants.ADD_HASH, payload);
-	    	/*
-	    	//What all nodes will be updates
-	    	System.out.println("Hash range "+ nodeHash + " - "+ (newStartHash-1) +" added to NodeId "+routingMap.get(listOfAssociatedHashes.get(0)));
-	    	
-	    	String nodeIp = this.physicalTable.get(routingMap.get(listOfAssociatedHashes.get(0)));
-	    	String payload = String.valueOf(nodeHash) +"-"+String.valueOf((newStartHash-1));
-	    	Commons.messageSender.sendMessage(nodeIp, Constants.ADD_HASH, payload);
-	    	
-	    	System.out.println("Hash range "+ nodeHash + " - "+ (newStartHash-1) +" removed from NodeId "+routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
-	    	nodeIp = this.physicalTable.get(routingMap.get(listOfAssociatedHashes.get(listOfAssociatedHashes.size()-1)));
-	    	payload = String.valueOf(nodeHash) +"-"+String.valueOf((newStartHash-1));
-	    	Commons.messageSender.sendMessage(nodeIp, Constants.REMOVE_HASH, payload);
-	    	*/
-	    	this.versionNumber++;
-			System.out.println("\n");
-			System.out.println("Routing Table versionNumber: "+this.versionNumber);
-	    	//Print updated Routing Table
-	    	System.out.println("New Routing Map after new node added");
-	    	printRoutingTable();
-	    	System.out.println("\n");
-		}
+		LinkedList<Integer> listOfAssociatedHashes = modifiedBinarySearch(nodeHash);
+		System.out.println("\n");
 		
-		else {
-			System.out.println("\n");
-			System.out.println("No change in the load");
+		int initialTotalHashRang = 0;
+		int succHashVal = listOfAssociatedHashes.get(1);
+		int myHashVal = listOfAssociatedHashes.get(0);
+		LinkedList<Integer> listOfAssociatedHashesForSucc = modifiedBinarySearch(succHashVal);
+		
+		if (myHashVal > succHashVal){
+			initialTotalHashRang = (this.MAX_HASH - myHashVal)+ succHashVal;
 		}
+		else {
+			initialTotalHashRang = listOfAssociatedHashes.get(1)-listOfAssociatedHashes.get(0);
+		}
+    	System.out.println("Total number of hashes handled so far, by this node is: "+initialTotalHashRang);
+		int numOfHashesToBeRemoved = (int) Math.ceil(initialTotalHashRang*(1.0-loadFraction));
+		int newStartHashForSucc = listOfAssociatedHashes.get(1)-numOfHashesToBeRemoved; //check for boundary
+		if (newStartHashForSucc<0) {
+			newStartHashForSucc = this.MAX_HASH+ newStartHashForSucc;
+		}
+		System.out.println("newStartHash Value for successor will be: "+newStartHashForSucc);
+		int oldStartHashForSucc = listOfAssociatedHashes.get(1);
+		int succNodeId = this.routingMap.get(oldStartHashForSucc);
+		int newEndRangeForThisNode = listOfAssociatedHashes.get(1)-numOfHashesToBeRemoved;
+		if(newEndRangeForThisNode<0) {
+			newEndRangeForThisNode = this.MAX_HASH+ newEndRangeForThisNode;
+		}
+		String hashRangeToBeRemoved = String.valueOf(newEndRangeForThisNode+1)+"-"+String.valueOf(listOfAssociatedHashes.get(1)-1);
+		String hashRangeToBeRemovedPayload = String.valueOf(newEndRangeForThisNode+1)+"-"+String.valueOf(listOfAssociatedHashes.get(1)-1)+":-1";
+		String hashRangeToBeAddedToLastRepPayload = String.valueOf(newEndRangeForThisNode+1)+"-"+String.valueOf(listOfAssociatedHashes.get(1)-1);
+		//update routing table for successors
+		routingMap.remove(oldStartHashForSucc);
+		routingMap.put(newStartHashForSucc, succNodeId);
+		
+		//message exchange
+		System.out.println("Hash range "+ hashRangeToBeRemoved +" removed from node "+nodeIdInt);
+    	Commons.messageSender.sendMessage(nodeId, Constants.REMOVE_HASH, hashRangeToBeRemovedPayload);
+    	
+    	//update last replica of the succ
+    	int lastRepHash = listOfAssociatedHashesForSucc.get(listOfAssociatedHashesForSucc.size()-1);
+    	int lastRepNodeId = this.routingMap.get(lastRepHash);
+    	String lastRepNodeIp = this.physicalTable.get(lastRepNodeId);
+    	Commons.messageSender.sendMessage(lastRepNodeIp, Constants.ADD_HASH, hashRangeToBeAddedToLastRepPayload);
+    	
+    	//increament routing table version
+		this.versionNumber++;
+		System.out.println("\n");
+		System.out.println("Routing Table versionNumber: "+this.versionNumber);
+    	//Print updated Routing Table
+    	System.out.println("New Routing Map after new node added");
+    	printRoutingTable();
+    	System.out.println("\n");
 		return this;
 	}
 
