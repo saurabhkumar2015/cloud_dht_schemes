@@ -1,10 +1,12 @@
-CLOUD DISTRIBUTED SCHEMES
+## CLOUD DISTRIBUTED SCHEMES
+
 DHT schemes: Ring, Elastic, Ceph
 DHT architecture type: Centralized, Distributed
 
 
 Doc link: https://docs.google.com/document/d/1zJuuDiHpp24EAniAqsfeKmsXrEXuPTuteHOf3zakkEc/edit
 
+## Commands to start data nodes and clients
 
 1) Command to start datanode
 java -cp schemes-1.0-SNAPSHOT-shaded.jar common.DataNodeLoader /home/config.conf 1
